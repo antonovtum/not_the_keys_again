@@ -1,0 +1,9 @@
+void sound_init(void);
+void stop_sfx(void);
+void play_jump_sfx(void);
+void stop_jump_sfx(void);
+void play_bump_sfx(void);
+void play_break_sfx(void);
+void play_hurt_sfx(void);
+void stop_hurt_sfx(void);
+void play_boing_sfx(void);

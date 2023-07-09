@@ -1,0 +1,280 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 1.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    .__.$$$.                                                    =  002710 L
+    .__.ABS.                                                    =  000000 G
+    .__.CPU.                                                    =  000000 L
+    .__.H$L.                                                    =  000000 L
+  0 A$ending$102                                                   000023 GR
+  0 A$ending$103                                                   000025 GR
+  0 A$ending$104                                                   000027 GR
+  0 A$ending$108                                                   000029 GR
+  0 A$ending$109                                                   00002A GR
+  0 A$ending$110                                                   00002C GR
+  0 A$ending$115                                                   00002D GR
+  0 A$ending$116                                                   00002F GR
+  0 A$ending$117                                                   000030 GR
+  0 A$ending$121                                                   000031 GR
+  0 A$ending$122                                                   000033 GR
+  0 A$ending$123                                                   000035 GR
+  0 A$ending$127                                                   000037 GR
+  0 A$ending$128                                                   000038 GR
+  0 A$ending$136                                                   00003A GR
+  0 A$ending$161                                                   000045 GR
+  0 A$ending$162                                                   000048 GR
+  0 A$ending$170                                                   00004A GR
+  0 A$ending$180                                                   00004B GR
+  0 A$ending$184                                                   00004C GR
+  0 A$ending$185                                                   00004F GR
+  0 A$ending$186                                                   000051 GR
+  0 A$ending$190                                                   000054 GR
+  0 A$ending$191                                                   000057 GR
+  0 A$ending$195                                                   000059 GR
+  0 A$ending$196                                                   00005C GR
+  0 A$ending$200                                                   00005E GR
+  0 A$ending$201                                                   000061 GR
+  0 A$ending$205                                                   000063 GR
+  0 A$ending$206                                                   000066 GR
+  0 A$ending$207                                                   000067 GR
+  0 A$ending$208                                                   00006A GR
+  0 A$ending$209                                                   00006B GR
+  0 A$ending$210                                                   00006C GR
+  0 A$ending$211                                                   00006D GR
+  0 A$ending$212                                                   00006E GR
+  0 A$ending$213                                                   000071 GR
+  0 A$ending$217                                                   000073 GR
+  0 A$ending$218                                                   000076 GR
+  0 A$ending$219                                                   000077 GR
+  0 A$ending$220                                                   000078 GR
+  0 A$ending$221                                                   00007B GR
+  0 A$ending$224                                                   00007C GR
+  0 A$ending$225                                                   00007F GR
+  0 A$ending$228                                                   000080 GR
+  0 A$ending$229                                                   000081 GR
+  0 A$ending$230                                                   000083 GR
+  0 A$ending$231                                                   000084 GR
+  0 A$ending$232                                                   000085 GR
+  0 A$ending$233                                                   000086 GR
+  0 A$ending$234                                                   000087 GR
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 2.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+  0 A$ending$235                                                   00008A GR
+  0 A$ending$236                                                   00008C GR
+  0 A$ending$240                                                   00008D GR
+  0 A$ending$241                                                   000090 GR
+  0 A$ending$243                                                   000092 GR
+  0 A$ending$244                                                   000093 GR
+  0 A$ending$245                                                   000096 GR
+  0 A$ending$246                                                   000097 GR
+  0 A$ending$247                                                   000098 GR
+  0 A$ending$248                                                   000099 GR
+  0 A$ending$249                                                   00009B GR
+  0 A$ending$250                                                   00009C GR
+  0 A$ending$251                                                   00009D GR
+  0 A$ending$252                                                   00009F GR
+  0 A$ending$253                                                   0000A0 GR
+  0 A$ending$254                                                   0000A1 GR
+  0 A$ending$255                                                   0000A2 GR
+  0 A$ending$256                                                   0000A4 GR
+  0 A$ending$257                                                   0000A7 GR
+  0 A$ending$258                                                   0000A9 GR
+  0 A$ending$262                                                   0000AB GR
+  0 A$ending$263                                                   0000AD GR
+  0 A$ending$264                                                   0000AE GR
+  0 A$ending$265                                                   0000B0 GR
+  0 A$ending$269                                                   0000B1 GR
+  0 A$ending$270                                                   0000B4 GR
+  0 A$ending$271                                                   0000B5 GR
+  0 A$ending$276                                                   0000B7 GR
+  0 A$ending$277                                                   0000B8 GR
+  0 A$ending$278                                                   0000BA GR
+  0 A$ending$279                                                   0000BB GR
+  0 A$ending$280                                                   0000BC GR
+  0 A$ending$281                                                   0000BF GR
+  0 A$ending$282                                                   0000C0 GR
+  0 A$ending$283                                                   0000C2 GR
+  0 A$ending$284                                                   0000C3 GR
+  0 A$ending$285                                                   0000C5 GR
+  0 A$ending$286                                                   0000C6 GR
+  0 A$ending$287                                                   0000C7 GR
+  0 A$ending$288                                                   0000CA GR
+  0 A$ending$292                                                   0000CC GR
+  0 A$ending$293                                                   0000CF GR
+  0 A$ending$294                                                   0000D0 GR
+  0 A$ending$295                                                   0000D2 GR
+  0 A$ending$298                                                   0000D4 GR
+  0 A$ending$299                                                   0000D5 GR
+  0 A$ending$300                                                   0000D6 GR
+  0 A$ending$303                                                   0000D8 GR
+  0 A$ending$304                                                   0000D9 GR
+  0 A$ending$305                                                   0000DA GR
+  0 A$ending$306                                                   0000DB GR
+  0 A$ending$307                                                   0000DC GR
+  0 A$ending$308                                                   0000DF GR
+  0 A$ending$310                                                   0000E1 GR
+  0 A$ending$311                                                   0000E3 GR
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 3.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+  0 A$ending$312                                                   0000E5 GR
+  0 A$ending$313                                                   0000E7 GR
+  0 A$ending$317                                                   0000E9 GR
+  0 A$ending$318                                                   0000EB GR
+  0 A$ending$319                                                   0000ED GR
+  0 A$ending$323                                                   0000EF GR
+  0 A$ending$327                                                   0000F0 GR
+  0 A$ending$328                                                   0000F2 GR
+  0 A$ending$332                                                   0000F4 GR
+  0 A$ending$333                                                   0000F5 GR
+  0 A$ending$337                                                   0000F7 GR
+  0 A$ending$338                                                   0000FA GR
+  0 A$ending$339                                                   0000FB GR
+  0 A$ending$340                                                   0000FE GR
+  0 A$ending$341                                                   0000FF GR
+  0 A$ending$345                                                   000100 GR
+  0 A$ending$346                                                   000102 GR
+  0 A$ending$347                                                   000103 GR
+  0 A$ending$348                                                   000104 GR
+  0 A$ending$349                                                   000107 GR
+  0 A$ending$354                                                   000108 GR
+  0 A$ending$359                                                   000109 GR
+  0 A$ending$372                                                   00010A GR
+  0 A$ending$376                                                   00010D GR
+  0 A$ending$377                                                   000110 GR
+  0 A$ending$378                                                   000112 GR
+  0 A$ending$379                                                   000113 GR
+  0 A$ending$382                                                   000115 GR
+  0 A$ending$383                                                   000118 GR
+  0 A$ending$385                                                   000119 GR
+  0 A$ending$386                                                   00011B GR
+  0 A$ending$387                                                   00011D GR
+  0 A$ending$388                                                   00011E GR
+  0 A$ending$392                                                   000120 GR
+  0 A$ending$393                                                   000121 GR
+  0 A$ending$397                                                   000122 GR
+  0 A$ending$398                                                   000125 GR
+  0 A$ending$406                                                   000126 GR
+  0 A$ending$76                                                    000000 GR
+  0 A$ending$77                                                    000003 GR
+  0 A$ending$78                                                    000004 GR
+  0 A$ending$79                                                    000006 GR
+  0 A$ending$80                                                    000009 GR
+  0 A$ending$81                                                    00000A GR
+  0 A$ending$82                                                    00000C GR
+  0 A$ending$83                                                    00000D GR
+  0 A$ending$84                                                    00000F GR
+  0 A$ending$85                                                    000010 GR
+  0 A$ending$86                                                    000012 GR
+  0 A$ending$87                                                    000015 GR
+  0 A$ending$89                                                    000017 GR
+  0 A$ending$90                                                    00001A GR
+  0 A$ending$91                                                    00001C GR
+  0 A$ending$96                                                    00001D GR
+  0 A$ending$97                                                    000020 GR
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 4.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+  0 A$ending$98                                                    000021 GR
+  0 C$ending.c$27$0_0$126                                       =  000000 GR
+  0 C$ending.c$28$1_0$126                                       =  000000 GR
+  0 C$ending.c$29$1_0$126                                       =  00001D GR
+  0 C$ending.c$30$2_0$127                                       =  000023 GR
+  0 C$ending.c$31$2_0$127                                       =  000029 GR
+  0 C$ending.c$33$1_0$126                                       =  00002D GR
+  0 C$ending.c$34$2_0$128                                       =  000031 GR
+  0 C$ending.c$35$2_0$128                                       =  000037 GR
+  0 C$ending.c$37$1_0$126                                       =  00003A GR
+  0 C$ending.c$39$1_0$130                                       =  000045 GR
+  0 C$ending.c$40$1_0$130                                       =  000045 GR
+  0 C$ending.c$41$1_0$130                                       =  00004A GR
+  0 C$ending.c$43$1_0$132                                       =  00004B GR
+  0 C$ending.c$45$1_0$132                                       =  00004C GR
+  0 C$ending.c$47$1_0$132                                       =  000054 GR
+  0 C$ending.c$48$1_0$132                                       =  000059 GR
+  0 C$ending.c$49$1_0$132                                       =  00005E GR
+  0 C$ending.c$51$1_0$132                                       =  000063 GR
+  0 C$ending.c$52$1_0$132                                       =  000073 GR
+  0 C$ending.c$53$2_0$133                                       =  0000B1 GR
+  0 C$ending.c$54$3_0$134                                       =  0000AB GR
+  0 C$ending.c$56$1_0$132                                       =  0000B7 GR
+  0 C$ending.c$57$1_0$132                                       =  0000CC GR
+  0 C$ending.c$60$1_0$132                                       =  0000E9 GR
+  0 C$ending.c$63$2_0$135                                       =  0000F0 GR
+  0 C$ending.c$64$2_0$135                                       =  0000F4 GR
+  0 C$ending.c$65$2_0$135                                       =  0000F7 GR
+  0 C$ending.c$66$1_0$132                                       =  0000EF GR
+  0 C$ending.c$67$1_0$132                                       =  000100 GR
+  0 C$ending.c$68$1_0$132                                       =  000109 GR
+  0 C$ending.c$70$1_0$140                                       =  00010A GR
+  0 C$ending.c$71$1_0$140                                       =  00010A GR
+  0 C$ending.c$73$1_0$140                                       =  00010D GR
+  0 C$ending.c$76$1_0$140                                       =  000120 GR
+  0 C$ending.c$77$1_0$140                                       =  000122 GR
+  0 C$ending.c$80$1_0$140                                       =  000126 GR
+  1 Fending$counter$0_0$0                                       =  000000 GR
+  1 Fending$i$0_0$0                                             =  000008 GR
+  1 Fending$is_ended$0_0$0                                      =  000001 GR
+  0 Fending$prepare_ending_frame$0$0                            =  00004B GR
+  0 Fending$scanline_interrupt_script$0$0                       =  000000 GR
+  1 Fending$score_text$0_0$0                                    =  000003 GR
+  1 Fending$win_height$0_0$0                                    =  000002 GR
+  0 Fending$win_position_table$0_0$0                            =  00003B GR
+  0 G$compute_ending_frame$0$0                                  =  00010A GR
+  0 G$ending_init$0$0                                           =  000045 GR
+  0 XFending$prepare_ending_frame$0$0                           =  000109 GR
+  0 XFending$scanline_interrupt_script$0$0                      =  00003A GR
+  0 XG$compute_ending_frame$0$0                                 =  000126 GR
+  0 XG$ending_init$0$0                                          =  00004A GR
+    _LCDC_REG                                                      ****** GX
+    _LYC_REG                                                       ****** GX
+    _STAT_REG                                                      ****** GX
+    _WX_REG                                                        ****** GX
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 5.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    _WY_REG                                                        ****** GX
+    _add_LCD                                                       ****** GX
+  0 _compute_ending_frame                                          00010A GR
+  1 _counter                                                       000000 R
+  0 _ending_init                                                   000045 GR
+    _hud_map                                                       ****** GX
+  1 _i                                                             000008 R
+  1 _is_ended                                                      000001 R
+    _itoa                                                          ****** GX
+  0 _prepare_ending_frame                                          00004B R
+  0 _scanline_interrupt_script                                     000000 R
+    _score                                                         ****** GX
+  1 _score_text                                                    000003 R
+    _set_interrupts                                                ****** GX
+    _set_win_tile_xy                                               ****** GX
+    _set_win_tiles                                                 ****** GX
+  1 _win_height                                                    000002 R
+  0 _win_position_table                                            00003B R
+
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 6.
+Hexadecimal [24-Bits]
+
+Area Table
+
+   0 _CODE                                      size    127   flags    0
+   1 _DATA                                      size      9   flags    0
+   2 _INITIALIZED                               size      0   flags    0
+   3 _DABS                                      size      0   flags    8
+   4 _HOME                                      size      0   flags    0
+   5 _GSINIT                                    size      0   flags    0
+   6 _GSFINAL                                   size      0   flags    0
+   7 _INITIALIZER                               size      0   flags    0
+   8 _CABS                                      size      0   flags    8
+

@@ -1,0 +1,356 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.1.6 #12539 (MINGW32)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module sound
+                                      6 	.optsdcc -mgbz80
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _sound_init
+                                     12 	.globl _stop_sfx
+                                     13 	.globl _play_jump_sfx
+                                     14 	.globl _stop_jump_sfx
+                                     15 	.globl _play_bump_sfx
+                                     16 	.globl _play_break_sfx
+                                     17 	.globl _play_hurt_sfx
+                                     18 	.globl _stop_hurt_sfx
+                                     19 	.globl _play_boing_sfx
+                                     20 ;--------------------------------------------------------
+                                     21 ; special function registers
+                                     22 ;--------------------------------------------------------
+                                     23 ;--------------------------------------------------------
+                                     24 ; ram data
+                                     25 ;--------------------------------------------------------
+                                     26 	.area _DATA
+                                     27 ;--------------------------------------------------------
+                                     28 ; ram data
+                                     29 ;--------------------------------------------------------
+                                     30 	.area _INITIALIZED
+                                     31 ;--------------------------------------------------------
+                                     32 ; absolute external ram data
+                                     33 ;--------------------------------------------------------
+                                     34 	.area _DABS (ABS)
+                                     35 ;--------------------------------------------------------
+                                     36 ; global & static initialisations
+                                     37 ;--------------------------------------------------------
+                                     38 	.area _HOME
+                                     39 	.area _GSINIT
+                                     40 	.area _GSFINAL
+                                     41 	.area _GSINIT
+                                     42 ;--------------------------------------------------------
+                                     43 ; Home
+                                     44 ;--------------------------------------------------------
+                                     45 	.area _HOME
+                                     46 	.area _HOME
+                                     47 ;--------------------------------------------------------
+                                     48 ; code
+                                     49 ;--------------------------------------------------------
+                                     50 	.area _CODE
+                           000000    51 	G$sound_init$0$0	= .
+                                     52 	.globl	G$sound_init$0$0
+                           000000    53 	C$sound.c$20$0_0$117	= .
+                                     54 	.globl	C$sound.c$20$0_0$117
+                                     55 ;src/sound.c:20: void sound_init(void){
+                                     56 ;	---------------------------------
+                                     57 ; Function sound_init
+                                     58 ; ---------------------------------
+      000000                         59 _sound_init::
+                           000000    60 	C$sound.c$21$1_0$117	= .
+                                     61 	.globl	C$sound.c$21$1_0$117
+                                     62 ;src/sound.c:21: NR52_REG = 0x80;
+      000000 3E 80                   63 	ld	a, #0x80
+      000002 E0r00                   64 	ldh	(_NR52_REG + 0), a
+                           000004    65 	C$sound.c$22$1_0$117	= .
+                                     66 	.globl	C$sound.c$22$1_0$117
+                                     67 ;src/sound.c:22: NR50_REG = 0x77;
+      000004 3E 77                   68 	ld	a, #0x77
+      000006 E0r00                   69 	ldh	(_NR50_REG + 0), a
+                           000008    70 	C$sound.c$23$1_0$117	= .
+                                     71 	.globl	C$sound.c$23$1_0$117
+                                     72 ;src/sound.c:23: NR51_REG = 0xFF;
+      000008 3E FF                   73 	ld	a, #0xff
+      00000A E0r00                   74 	ldh	(_NR51_REG + 0), a
+                           00000C    75 	C$sound.c$24$1_0$117	= .
+                                     76 	.globl	C$sound.c$24$1_0$117
+                                     77 ;src/sound.c:24: }
+                           00000C    78 	C$sound.c$24$1_0$117	= .
+                                     79 	.globl	C$sound.c$24$1_0$117
+                           00000C    80 	XG$sound_init$0$0	= .
+                                     81 	.globl	XG$sound_init$0$0
+      00000C C9                      82 	ret
+                           00000D    83 	G$stop_sfx$0$0	= .
+                                     84 	.globl	G$stop_sfx$0$0
+                           00000D    85 	C$sound.c$25$1_0$119	= .
+                                     86 	.globl	C$sound.c$25$1_0$119
+                                     87 ;src/sound.c:25: void stop_sfx(void){
+                                     88 ;	---------------------------------
+                                     89 ; Function stop_sfx
+                                     90 ; ---------------------------------
+      00000D                         91 _stop_sfx::
+                           00000D    92 	C$sound.c$26$1_0$119	= .
+                                     93 	.globl	C$sound.c$26$1_0$119
+                                     94 ;src/sound.c:26: NR51_REG = 0xEE;
+      00000D 3E EE                   95 	ld	a, #0xee
+      00000F E0r00                   96 	ldh	(_NR51_REG + 0), a
+                           000011    97 	C$sound.c$27$1_0$119	= .
+                                     98 	.globl	C$sound.c$27$1_0$119
+                                     99 ;src/sound.c:27: }
+                           000011   100 	C$sound.c$27$1_0$119	= .
+                                    101 	.globl	C$sound.c$27$1_0$119
+                           000011   102 	XG$stop_sfx$0$0	= .
+                                    103 	.globl	XG$stop_sfx$0$0
+      000011 C9                     104 	ret
+                           000012   105 	G$play_jump_sfx$0$0	= .
+                                    106 	.globl	G$play_jump_sfx$0$0
+                           000012   107 	C$sound.c$29$1_0$121	= .
+                                    108 	.globl	C$sound.c$29$1_0$121
+                                    109 ;src/sound.c:29: void play_jump_sfx(void){
+                                    110 ;	---------------------------------
+                                    111 ; Function play_jump_sfx
+                                    112 ; ---------------------------------
+      000012                        113 _play_jump_sfx::
+                           000012   114 	C$sound.c$30$1_0$121	= .
+                                    115 	.globl	C$sound.c$30$1_0$121
+                                    116 ;src/sound.c:30: NR10_REG = 0x37;
+      000012 3E 37                  117 	ld	a, #0x37
+      000014 E0r00                  118 	ldh	(_NR10_REG + 0), a
+                           000016   119 	C$sound.c$31$1_0$121	= .
+                                    120 	.globl	C$sound.c$31$1_0$121
+                                    121 ;src/sound.c:31: NR11_REG = 0xC2;
+      000016 3E C2                  122 	ld	a, #0xc2
+      000018 E0r00                  123 	ldh	(_NR11_REG + 0), a
+                           00001A   124 	C$sound.c$32$1_0$121	= .
+                                    125 	.globl	C$sound.c$32$1_0$121
+                                    126 ;src/sound.c:32: NR12_REG = 0xB2;
+      00001A 3E B2                  127 	ld	a, #0xb2
+      00001C E0r00                  128 	ldh	(_NR12_REG + 0), a
+                           00001E   129 	C$sound.c$33$1_0$121	= .
+                                    130 	.globl	C$sound.c$33$1_0$121
+                                    131 ;src/sound.c:33: NR13_REG = 0x68;
+      00001E 3E 68                  132 	ld	a, #0x68
+      000020 E0r00                  133 	ldh	(_NR13_REG + 0), a
+                           000022   134 	C$sound.c$34$1_0$121	= .
+                                    135 	.globl	C$sound.c$34$1_0$121
+                                    136 ;src/sound.c:34: NR14_REG = 0x86;
+      000022 3E 86                  137 	ld	a, #0x86
+      000024 E0r00                  138 	ldh	(_NR14_REG + 0), a
+                           000026   139 	C$sound.c$35$1_0$121	= .
+                                    140 	.globl	C$sound.c$35$1_0$121
+                                    141 ;src/sound.c:35: }
+                           000026   142 	C$sound.c$35$1_0$121	= .
+                                    143 	.globl	C$sound.c$35$1_0$121
+                           000026   144 	XG$play_jump_sfx$0$0	= .
+                                    145 	.globl	XG$play_jump_sfx$0$0
+      000026 C9                     146 	ret
+                           000027   147 	G$stop_jump_sfx$0$0	= .
+                                    148 	.globl	G$stop_jump_sfx$0$0
+                           000027   149 	C$sound.c$37$1_0$123	= .
+                                    150 	.globl	C$sound.c$37$1_0$123
+                                    151 ;src/sound.c:37: void stop_jump_sfx(void){
+                                    152 ;	---------------------------------
+                                    153 ; Function stop_jump_sfx
+                                    154 ; ---------------------------------
+      000027                        155 _stop_jump_sfx::
+                           000027   156 	C$sound.c$38$1_0$123	= .
+                                    157 	.globl	C$sound.c$38$1_0$123
+                                    158 ;src/sound.c:38: NR12_REG = 0xB1;
+      000027 3E B1                  159 	ld	a, #0xb1
+      000029 E0r00                  160 	ldh	(_NR12_REG + 0), a
+                           00002B   161 	C$sound.c$39$1_0$123	= .
+                                    162 	.globl	C$sound.c$39$1_0$123
+                                    163 ;src/sound.c:39: }
+                           00002B   164 	C$sound.c$39$1_0$123	= .
+                                    165 	.globl	C$sound.c$39$1_0$123
+                           00002B   166 	XG$stop_jump_sfx$0$0	= .
+                                    167 	.globl	XG$stop_jump_sfx$0$0
+      00002B C9                     168 	ret
+                           00002C   169 	G$play_bump_sfx$0$0	= .
+                                    170 	.globl	G$play_bump_sfx$0$0
+                           00002C   171 	C$sound.c$41$1_0$125	= .
+                                    172 	.globl	C$sound.c$41$1_0$125
+                                    173 ;src/sound.c:41: void play_bump_sfx(void){
+                                    174 ;	---------------------------------
+                                    175 ; Function play_bump_sfx
+                                    176 ; ---------------------------------
+      00002C                        177 _play_bump_sfx::
+                           00002C   178 	C$sound.c$42$1_0$125	= .
+                                    179 	.globl	C$sound.c$42$1_0$125
+                                    180 ;src/sound.c:42: NR10_REG = 0x1A;
+      00002C 3E 1A                  181 	ld	a, #0x1a
+      00002E E0r00                  182 	ldh	(_NR10_REG + 0), a
+                           000030   183 	C$sound.c$43$1_0$125	= .
+                                    184 	.globl	C$sound.c$43$1_0$125
+                                    185 ;src/sound.c:43: NR11_REG = 0x82;
+      000030 3E 82                  186 	ld	a, #0x82
+      000032 E0r00                  187 	ldh	(_NR11_REG + 0), a
+                           000034   188 	C$sound.c$44$1_0$125	= .
+                                    189 	.globl	C$sound.c$44$1_0$125
+                                    190 ;src/sound.c:44: NR12_REG = 0x81;
+      000034 3E 81                  191 	ld	a, #0x81
+      000036 E0r00                  192 	ldh	(_NR12_REG + 0), a
+                           000038   193 	C$sound.c$45$1_0$125	= .
+                                    194 	.globl	C$sound.c$45$1_0$125
+                                    195 ;src/sound.c:45: NR13_REG = 0x68;
+      000038 3E 68                  196 	ld	a, #0x68
+      00003A E0r00                  197 	ldh	(_NR13_REG + 0), a
+                           00003C   198 	C$sound.c$46$1_0$125	= .
+                                    199 	.globl	C$sound.c$46$1_0$125
+                                    200 ;src/sound.c:46: NR14_REG = 0x86;
+      00003C 3E 86                  201 	ld	a, #0x86
+      00003E E0r00                  202 	ldh	(_NR14_REG + 0), a
+                           000040   203 	C$sound.c$47$1_0$125	= .
+                                    204 	.globl	C$sound.c$47$1_0$125
+                                    205 ;src/sound.c:47: }
+                           000040   206 	C$sound.c$47$1_0$125	= .
+                                    207 	.globl	C$sound.c$47$1_0$125
+                           000040   208 	XG$play_bump_sfx$0$0	= .
+                                    209 	.globl	XG$play_bump_sfx$0$0
+      000040 C9                     210 	ret
+                           000041   211 	G$play_break_sfx$0$0	= .
+                                    212 	.globl	G$play_break_sfx$0$0
+                           000041   213 	C$sound.c$49$1_0$127	= .
+                                    214 	.globl	C$sound.c$49$1_0$127
+                                    215 ;src/sound.c:49: void play_break_sfx(void){
+                                    216 ;	---------------------------------
+                                    217 ; Function play_break_sfx
+                                    218 ; ---------------------------------
+      000041                        219 _play_break_sfx::
+                           000041   220 	C$sound.c$50$1_0$127	= .
+                                    221 	.globl	C$sound.c$50$1_0$127
+                                    222 ;src/sound.c:50: NR41_REG = 0x19;
+      000041 3E 19                  223 	ld	a, #0x19
+      000043 E0r00                  224 	ldh	(_NR41_REG + 0), a
+                           000045   225 	C$sound.c$51$1_0$127	= .
+                                    226 	.globl	C$sound.c$51$1_0$127
+                                    227 ;src/sound.c:51: NR42_REG = 0xA1;
+      000045 3E A1                  228 	ld	a, #0xa1
+      000047 E0r00                  229 	ldh	(_NR42_REG + 0), a
+                           000049   230 	C$sound.c$52$1_0$127	= .
+                                    231 	.globl	C$sound.c$52$1_0$127
+                                    232 ;src/sound.c:52: NR43_REG = 0x7B;
+      000049 3E 7B                  233 	ld	a, #0x7b
+      00004B E0r00                  234 	ldh	(_NR43_REG + 0), a
+                           00004D   235 	C$sound.c$53$1_0$127	= .
+                                    236 	.globl	C$sound.c$53$1_0$127
+                                    237 ;src/sound.c:53: NR44_REG = 0x80;
+      00004D 3E 80                  238 	ld	a, #0x80
+      00004F E0r00                  239 	ldh	(_NR44_REG + 0), a
+                           000051   240 	C$sound.c$54$1_0$127	= .
+                                    241 	.globl	C$sound.c$54$1_0$127
+                                    242 ;src/sound.c:54: }
+                           000051   243 	C$sound.c$54$1_0$127	= .
+                                    244 	.globl	C$sound.c$54$1_0$127
+                           000051   245 	XG$play_break_sfx$0$0	= .
+                                    246 	.globl	XG$play_break_sfx$0$0
+      000051 C9                     247 	ret
+                           000052   248 	G$play_hurt_sfx$0$0	= .
+                                    249 	.globl	G$play_hurt_sfx$0$0
+                           000052   250 	C$sound.c$56$1_0$129	= .
+                                    251 	.globl	C$sound.c$56$1_0$129
+                                    252 ;src/sound.c:56: void play_hurt_sfx(void){
+                                    253 ;	---------------------------------
+                                    254 ; Function play_hurt_sfx
+                                    255 ; ---------------------------------
+      000052                        256 _play_hurt_sfx::
+                           000052   257 	C$sound.c$57$1_0$129	= .
+                                    258 	.globl	C$sound.c$57$1_0$129
+                                    259 ;src/sound.c:57: NR10_REG = 0x1F;
+      000052 3E 1F                  260 	ld	a, #0x1f
+      000054 E0r00                  261 	ldh	(_NR10_REG + 0), a
+                           000056   262 	C$sound.c$58$1_0$129	= .
+                                    263 	.globl	C$sound.c$58$1_0$129
+                                    264 ;src/sound.c:58: NR11_REG = 0x02;
+      000056 3E 02                  265 	ld	a, #0x02
+      000058 E0r00                  266 	ldh	(_NR11_REG + 0), a
+                           00005A   267 	C$sound.c$59$1_0$129	= .
+                                    268 	.globl	C$sound.c$59$1_0$129
+                                    269 ;src/sound.c:59: NR12_REG = 0xF9;
+      00005A 3E F9                  270 	ld	a, #0xf9
+      00005C E0r00                  271 	ldh	(_NR12_REG + 0), a
+                           00005E   272 	C$sound.c$60$1_0$129	= .
+                                    273 	.globl	C$sound.c$60$1_0$129
+                                    274 ;src/sound.c:60: NR13_REG = 0x4A;
+      00005E 3E 4A                  275 	ld	a, #0x4a
+      000060 E0r00                  276 	ldh	(_NR13_REG + 0), a
+                           000062   277 	C$sound.c$61$1_0$129	= .
+                                    278 	.globl	C$sound.c$61$1_0$129
+                                    279 ;src/sound.c:61: NR14_REG = 0x86;
+      000062 3E 86                  280 	ld	a, #0x86
+      000064 E0r00                  281 	ldh	(_NR14_REG + 0), a
+                           000066   282 	C$sound.c$62$1_0$129	= .
+                                    283 	.globl	C$sound.c$62$1_0$129
+                                    284 ;src/sound.c:62: }
+                           000066   285 	C$sound.c$62$1_0$129	= .
+                                    286 	.globl	C$sound.c$62$1_0$129
+                           000066   287 	XG$play_hurt_sfx$0$0	= .
+                                    288 	.globl	XG$play_hurt_sfx$0$0
+      000066 C9                     289 	ret
+                           000067   290 	G$stop_hurt_sfx$0$0	= .
+                                    291 	.globl	G$stop_hurt_sfx$0$0
+                           000067   292 	C$sound.c$64$1_0$131	= .
+                                    293 	.globl	C$sound.c$64$1_0$131
+                                    294 ;src/sound.c:64: void stop_hurt_sfx(void){
+                                    295 ;	---------------------------------
+                                    296 ; Function stop_hurt_sfx
+                                    297 ; ---------------------------------
+      000067                        298 _stop_hurt_sfx::
+                           000067   299 	C$sound.c$65$1_0$131	= .
+                                    300 	.globl	C$sound.c$65$1_0$131
+                                    301 ;src/sound.c:65: NR12_REG = 0x01;
+      000067 3E 01                  302 	ld	a, #0x01
+      000069 E0r00                  303 	ldh	(_NR12_REG + 0), a
+                           00006B   304 	C$sound.c$66$1_0$131	= .
+                                    305 	.globl	C$sound.c$66$1_0$131
+                                    306 ;src/sound.c:66: }
+                           00006B   307 	C$sound.c$66$1_0$131	= .
+                                    308 	.globl	C$sound.c$66$1_0$131
+                           00006B   309 	XG$stop_hurt_sfx$0$0	= .
+                                    310 	.globl	XG$stop_hurt_sfx$0$0
+      00006B C9                     311 	ret
+                           00006C   312 	G$play_boing_sfx$0$0	= .
+                                    313 	.globl	G$play_boing_sfx$0$0
+                           00006C   314 	C$sound.c$68$1_0$133	= .
+                                    315 	.globl	C$sound.c$68$1_0$133
+                                    316 ;src/sound.c:68: void play_boing_sfx(void){
+                                    317 ;	---------------------------------
+                                    318 ; Function play_boing_sfx
+                                    319 ; ---------------------------------
+      00006C                        320 _play_boing_sfx::
+                           00006C   321 	C$sound.c$69$1_0$133	= .
+                                    322 	.globl	C$sound.c$69$1_0$133
+                                    323 ;src/sound.c:69: NR10_REG = 0x37;
+      00006C 3E 37                  324 	ld	a, #0x37
+      00006E E0r00                  325 	ldh	(_NR10_REG + 0), a
+                           000070   326 	C$sound.c$70$1_0$133	= .
+                                    327 	.globl	C$sound.c$70$1_0$133
+                                    328 ;src/sound.c:70: NR11_REG = 0xC2;
+      000070 3E C2                  329 	ld	a, #0xc2
+      000072 E0r00                  330 	ldh	(_NR11_REG + 0), a
+                           000074   331 	C$sound.c$71$1_0$133	= .
+                                    332 	.globl	C$sound.c$71$1_0$133
+                                    333 ;src/sound.c:71: NR12_REG = 0xB2;
+      000074 3E B2                  334 	ld	a, #0xb2
+      000076 E0r00                  335 	ldh	(_NR12_REG + 0), a
+                           000078   336 	C$sound.c$72$1_0$133	= .
+                                    337 	.globl	C$sound.c$72$1_0$133
+                                    338 ;src/sound.c:72: NR13_REG = 0x00;
+      000078 AF                     339 	xor	a, a
+      000079 E0r00                  340 	ldh	(_NR13_REG + 0), a
+                           00007B   341 	C$sound.c$73$1_0$133	= .
+                                    342 	.globl	C$sound.c$73$1_0$133
+                                    343 ;src/sound.c:73: NR14_REG = 0x84;
+      00007B 3E 84                  344 	ld	a, #0x84
+      00007D E0r00                  345 	ldh	(_NR14_REG + 0), a
+                           00007F   346 	C$sound.c$74$1_0$133	= .
+                                    347 	.globl	C$sound.c$74$1_0$133
+                                    348 ;src/sound.c:74: }
+                           00007F   349 	C$sound.c$74$1_0$133	= .
+                                    350 	.globl	C$sound.c$74$1_0$133
+                           00007F   351 	XG$play_boing_sfx$0$0	= .
+                                    352 	.globl	XG$play_boing_sfx$0$0
+      00007F C9                     353 	ret
+                                    354 	.area _CODE
+                                    355 	.area _INITIALIZER
+                                    356 	.area _CABS (ABS)
