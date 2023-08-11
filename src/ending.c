@@ -38,7 +38,10 @@ void VBL_isr() {
     LYC_REG = max_scan; 
 }
 void LCD_isr() {
-    if (LY_REG < 144) HIDE_WIN;
+    if (LY_REG < 144) {
+        HIDE_WIN;
+        WX_REG = 160; //THIS IS TO COVER A BUG ON THE DMG!!! REMOVE IT FOR THE GBC VERSION
+    }
 }
 
 void ending_init(void){
@@ -126,5 +129,5 @@ void compute_ending_frame(void){
     }     
     subpix_speed = (IS_FORCE_ADDED) ? subpix_speed + force : subpix_speed - force;
     win_height = WIN_DIRECTION ? win_height + ((uint16_t)(subpix_speed) << 2) : win_height - ((uint16_t)(subpix_speed) << 2);
-    max_scan = WIN_PIXEL + 23U;
+    max_scan = WIN_PIXEL + 24U; //REMOVE THE 1PX PADDING FOR THE CGB VERSION (23U)
 }
