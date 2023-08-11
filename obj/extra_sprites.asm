@@ -22,7 +22,7 @@
 	.area _INITIALIZED
 G$extra_sprites$0_0$0==.
 _extra_sprites::
-	.ds 96
+	.ds 128
 ;--------------------------------------------------------
 ; absolute external ram data
 ;--------------------------------------------------------
@@ -143,4 +143,36 @@ __xinit__extra_sprites:
 	.db #0x1c	; 28
 	.db #0x00	; 0
 	.db #0x00	; 0
+	.db #0x3c	; 60
+	.db #0x3c	; 60
+	.db #0x42	; 66	'B'
+	.db #0x7e	; 126
+	.db #0x89	; 137
+	.db #0xf3	; 243
+	.db #0x85	; 133
+	.db #0xfb	; 251
+	.db #0x81	; 129
+	.db #0xff	; 255
+	.db #0x42	; 66	'B'
+	.db #0x7e	; 126
+	.db #0x24	; 36
+	.db #0x3c	; 60
+	.db #0x18	; 24
+	.db #0x18	; 24
+	.db #0x08	; 8
+	.db #0x08	; 8
+	.db #0x08	; 8
+	.db #0x08	; 8
+	.db #0x08	; 8
+	.db #0x08	; 8
+	.db #0x10	; 16
+	.db #0x10	; 16
+	.db #0x10	; 16
+	.db #0x10	; 16
+	.db #0x10	; 16
+	.db #0x10	; 16
+	.db #0x08	; 8
+	.db #0x08	; 8
+	.db #0x08	; 8
+	.db #0x08	; 8
 	.area _CABS (ABS)

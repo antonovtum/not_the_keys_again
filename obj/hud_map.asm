@@ -43,6 +43,7 @@
 	.area _CODE
 G$hud_map$0_0$0 == .
 _hud_map:
+	.db #0x7f	; 127
 	.db #0x7b	; 123
 	.db #0x7b	; 123
 	.db #0x7b	; 123
@@ -61,8 +62,8 @@ _hud_map:
 	.db #0x7b	; 123
 	.db #0x7b	; 123
 	.db #0x7b	; 123
-	.db #0x7b	; 123
-	.db #0x7b	; 123
+	.db #0x32	; 50	'2'
+	.db #0x81	; 129
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0x00	; 0
@@ -81,8 +82,8 @@ _hud_map:
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0x00	; 0
-	.db #0x00	; 0
-	.db #0x00	; 0
+	.db #0x80	; 128
+	.db #0x04	; 4
 	.db #0x7c	; 124
 	.db #0x7c	; 124
 	.db #0x7c	; 124
@@ -101,7 +102,6 @@ _hud_map:
 	.db #0x7c	; 124
 	.db #0x7c	; 124
 	.db #0x7c	; 124
-	.db #0x7c	; 124
-	.db #0x7c	; 124
+	.db #0x07	; 7
 	.area _INITIALIZER
 	.area _CABS (ABS)

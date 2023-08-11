@@ -5,14 +5,14 @@ O -mgbz80
 S .__.ABS. Def000000
 A _CODE size 0 flags 0 addr 0
 A _DATA size 0 flags 0 addr 0
-A _INITIALIZED size 60 flags 0 addr 0
+A _INITIALIZED size 80 flags 0 addr 0
 S _extra_sprites Def000000
 S G$extra_sprites$0_0$0 Def000000
 A _DABS size 0 flags 8 addr 0
 A _HOME size 0 flags 0 addr 0
 A _GSINIT size 0 flags 0 addr 0
 A _GSFINAL size 0 flags 0 addr 0
-A _INITIALIZER size 60 flags 0 addr 0
+A _INITIALIZER size 80 flags 0 addr 0
 S Fextra_sprites$__xinit_extra_sprites$0_0$0 Def000000
 A _CABS size 0 flags 8 addr 0
 T 00 00 00
@@ -35,5 +35,9 @@ T 41 00 00 60 00 76 00 3E 00 1C 00 60 00 76 00 3E
 R 00 00 07 00
 T 4E 00 00 00 1C 00 18 20 18 60 1C 00 FE 00 FE 00
 R 00 00 07 00
-T 5B 00 00 3E 00 1C 00 00
+T 5B 00 00 3E 00 1C 00 00 3C 3C 42 7E 89 F3 85 FB
+R 00 00 07 00
+T 68 00 00 81 FF 42 7E 24 3C 18 18 08 08 08 08 08
+R 00 00 07 00
+T 75 00 00 08 10 10 10 10 10 10 08 08 08 08
 R 00 00 07 00

@@ -11,6 +11,11 @@
 uint8_t i; //iterator
 static char score_text[5];
 
+#define IS_ANIMATION_STARTED (ending_flags & 0x04)
+#define WIN_DIRECTION (ending_flags & 0x02)
+#define IS_ANIMATION_FINISHED (ending_flags & 0x01)
+#define IS_FORCE_ADDED (ending_flags & 0x08)
+
 void init_gfx(void);
 void show_window(void);
 void reset_game(void);
@@ -50,10 +55,11 @@ void reset_game(void){
     if(!player_dead_flag) return;
     compute_ending_frame();
     //show_window();
-    if(!(joypad() & J_A && a_not_pressed)) return;
-    fadeout();
-    init_gfx();
-    fadein();
+    if(joypad() & J_A && a_not_pressed && IS_ANIMATION_FINISHED){
+        fadeout();
+        init_gfx();
+        fadein();
+    }
 }
 
 /*
@@ -91,18 +97,22 @@ void fadeout(void){
         {
         case 0:
             BGP_REG = 0xE4;
+            OBP0_REG = 0xE4;
             break;
 
         case 1:
             BGP_REG = 0xF9;
+            OBP0_REG = 0xF9;
             break;
 
         case 2:
             BGP_REG = 0xFE;
+            OBP0_REG = 0xFE;
             break;
 
         case 3:
             BGP_REG = 0xFF;
+            OBP0_REG = 0xFF;
             break;
 
         default:
@@ -118,14 +128,17 @@ void fadein(void){
         {
         case 0:
             BGP_REG = 0xFE;
+            OBP0_REG = 0xFE;
             break;
 
         case 1:
             BGP_REG = 0xF9;
+            OBP0_REG = 0xF9;
             break;
 
         case 2:
             BGP_REG = 0xE4;
+            OBP0_REG = 0xE4;
             break;
         default:
             break;

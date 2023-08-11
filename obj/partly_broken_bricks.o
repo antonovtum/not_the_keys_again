@@ -5,14 +5,14 @@ O -mgbz80
 S .__.ABS. Def000000
 A _CODE size 0 flags 0 addr 0
 A _DATA size 0 flags 0 addr 0
-A _INITIALIZED size 20 flags 0 addr 0
+A _INITIALIZED size 50 flags 0 addr 0
 S _partly_broken_bricks Def000000
 S G$partly_broken_bricks$0_0$0 Def000000
 A _DABS size 0 flags 8 addr 0
 A _HOME size 0 flags 0 addr 0
 A _GSINIT size 0 flags 0 addr 0
 A _GSFINAL size 0 flags 0 addr 0
-A _INITIALIZER size 20 flags 0 addr 0
+A _INITIALIZER size 50 flags 0 addr 0
 S Fpartly_broken_bricks$__xinit_partly_broken_bricks$0_0$0 Def000000
 A _CABS size 0 flags 8 addr 0
 T 00 00 00
@@ -25,5 +25,13 @@ T 00 00 00 00 00 FF FF 5B E4 DD 32 BB FF 48 FF FF
 R 00 00 07 00
 T 0D 00 00 FF FF FF FF FF BD 6E CB 34 14 FF FB 44
 R 00 00 07 00
-T 1A 00 00 64 FF 89 FF FF FF
+T 1A 00 00 64 FF 89 FF FF FF 82 81 42 41 22 21 12
+R 00 00 07 00
+T 27 00 00 11 12 11 22 21 42 41 82 81 42 82 44 84
+R 00 00 07 00
+T 34 00 00 48 88 50 90 48 88 FC FC 42 82 7F FF 42
+R 00 00 07 00
+T 41 00 00 41 22 21 12 11 0A 09 12 11 3F 3F 42 41
+R 00 00 07 00
+T 4E 00 00 FE FF
 R 00 00 07 00

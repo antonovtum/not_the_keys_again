@@ -169,6 +169,8 @@ void compute_player_frame(void)
     else{
         retrieve_input();
 
+        if(player_dead_flag) return;
+
         calculate_physics();
     }
     
@@ -280,8 +282,12 @@ static void render_player(void){
     //current_state = 4;
     if(!player_dead_flag && (uint8_t)(player_y - camera_y) > 160U) {
         player_dead_flag = true;
+        game_ended_flag = true;
         calculate_final_score();
         stop_sfx();
+
+        //stop player execution
+        hide_sprites_range(0, 20);
         return;
     }
     if(current_state == PLAYER_STATE_HURT && (frame_counter & 0x02)){

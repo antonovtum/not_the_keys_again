@@ -35,6 +35,7 @@ typedef struct Window_component_struct{
 extern rect rect_list[4][8]; //[F][0x0000 0WWX] F=floor WW=Window X= (top = 1 / bot = 0)
 extern uint8_t camera_y;
 extern bool game_started_flag;
+extern bool game_ended_flag;
 extern uint8_t r;
 extern bool rand_init;
 

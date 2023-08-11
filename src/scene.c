@@ -18,9 +18,7 @@
 #define base_floor_map_height 8
 
 //TEMP
-static uint8_t joy;
 static uint8_t i; //iterator
-static uint8_t floor_info[4];
 bool rand_init;
 UBYTE r;
 //static window_component_struct current_top_info;
@@ -33,6 +31,7 @@ uint8_t camera_y, old_camera_y;
 UBYTE camera_y_clamped, old_camera_y_clamped;
 static uint8_t frames_to_move, current_cam_frame, accelerate_cam_flag; 
 bool game_started_flag;
+bool game_ended_flag;
 
 rect rect_list[4][8];
 window_status map_components[4][4];
@@ -117,7 +116,7 @@ void scene_init(void){
     // Load Background tiles and then map (160 x 144)
     set_bkg_data(0, 112U, hub_data);
     set_bkg_data(112U, 13, numbers);
-    set_bkg_data(0x7D, 2, partly_broken_bricks);
+    set_bkg_data(0x7D, 5, partly_broken_bricks);
     set_bkg_tiles(map_pos_x, 20U, 20u, 30u, hub_map);
     camera_y = 0;
     old_camera_y = 0;
@@ -125,6 +124,7 @@ void scene_init(void){
     current_cam_frame = 0;
     accelerate_cam_flag = 0;
     game_started_flag = false;
+    game_ended_flag = false;
     move_bkg(map_pos_x << 3, camera_y);
     is_generated = false;
 
@@ -199,7 +199,7 @@ void scene_init(void){
     malloc_i = 0;
 
     //extra effects
-    set_sprite_data(29, 6, extra_sprites);
+    set_sprite_data(29, 8, extra_sprites);
     clothes_position[0] = 56;
     clothes_position[1] = 136;
     clothes_position[2] = 136;
@@ -339,7 +339,7 @@ void gen_new_floor(void){
     {
         //optimize this cuz it needs a tweak
         //instantiate_colliders();
-        collider = top_info[(UINT8)(window_components_on_current_floor[i] >> 4)].collider;
+        collider = top_info[(uint8_t)(window_components_on_current_floor[i] >> 4)].collider;
         collider.x += (3 + (i<<2)) << 3;
         collider.y += (1 + y_draw) << 3;
         rect_list[camera_y_clamped][0x07 & (i<<1 | 0x01)] = collider;
@@ -364,6 +364,7 @@ void gen_new_floor(void){
 }
 
 void add_clothes_to_rag(window_status* temp_window){
+    if(game_ended_flag) return;
     uint8_t temp_rand = rand();
     uint8_t particle_x = ((3 + (i<<2)) << 3) + 8u;
     uint8_t particle_y = (((camera_y_clamped << 3) + 5) << 3) + 17u;
@@ -512,7 +513,7 @@ void fill_memory(void){
     }
     //populate a window's graphics in memory buffer
     memcpy_rect((malloc_i << 2) + 16, base, 4, 12);
-    memcpy_rect(malloc_i << 2, top_info[(UINT8)(window_components_on_current_floor[malloc_i] >> 4)].map, 4, (top_info[(UINT8)(window_components_on_current_floor[malloc_i] >> 4)].h)<<2);
+    memcpy_rect(malloc_i << 2, top_info[(uint8_t)(window_components_on_current_floor[malloc_i] >> 4)].map, 4, (top_info[(uint8_t)(window_components_on_current_floor[malloc_i] >> 4)].h)<<2);
     memcpy_rect((malloc_i << 2) + ((bot_info[window_components_on_current_floor[malloc_i] & 0x0F].y_offset - 1)<<4), bot_info[window_components_on_current_floor[malloc_i] & 0x0F].map, 4, (bot_info[window_components_on_current_floor[malloc_i] & 0x0F].h)<<2);
     
     malloc_i++;

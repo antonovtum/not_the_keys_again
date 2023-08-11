@@ -137,11 +137,13 @@ S:G$map_components$0_0$0({32}DA4d,DA4d,STWindow_status:S),E,0,0
 S:G$rect_list$0_0$0({160}DA4d,DA8d,STRectangle:S),E,0,0
 S:G$camera_y$0_0$0({1}SC:U),E,0,0
 S:G$game_started_flag$0_0$0({1}:S),E,0,0
+S:G$game_ended_flag$0_0$0({1}:S),E,0,0
 S:G$r$0_0$0({1}SC:U),E,0,0
 S:G$rand_init$0_0$0({1}:S),E,0,0
 S:G$clothes_position$0_0$0({4}DA4d,SC:U),E,0,0
 S:G$clothes_speed$0_0$0({1}SC:U),E,0,0
 S:G$deactivate_weeds_flag$0_0$0({1}SC:U),E,0,0
+S:G$ending_flags$0_0$0({1}SC:U),E,0,0
 S:G$i$0_0$0({1}SC:U),E,0,0
 S:Fmain$score_text$0_0$0({5}DA5d,SC:S),E,0,0
 S:G$P1_REG$0_0$0({1}SC:U),I,0,0

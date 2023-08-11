@@ -22,7 +22,7 @@
 	.area _INITIALIZED
 G$partly_broken_bricks$0_0$0==.
 _partly_broken_bricks::
-	.ds 32
+	.ds 80
 ;--------------------------------------------------------
 ; absolute external ram data
 ;--------------------------------------------------------
@@ -78,5 +78,53 @@ __xinit__partly_broken_bricks:
 	.db #0x89	; 137
 	.db #0xff	; 255
 	.db #0xff	; 255
+	.db #0xff	; 255
+	.db #0x82	; 130
+	.db #0x81	; 129
+	.db #0x42	; 66	'B'
+	.db #0x41	; 65	'A'
+	.db #0x22	; 34
+	.db #0x21	; 33
+	.db #0x12	; 18
+	.db #0x11	; 17
+	.db #0x12	; 18
+	.db #0x11	; 17
+	.db #0x22	; 34
+	.db #0x21	; 33
+	.db #0x42	; 66	'B'
+	.db #0x41	; 65	'A'
+	.db #0x82	; 130
+	.db #0x81	; 129
+	.db #0x42	; 66	'B'
+	.db #0x82	; 130
+	.db #0x44	; 68	'D'
+	.db #0x84	; 132
+	.db #0x48	; 72	'H'
+	.db #0x88	; 136
+	.db #0x50	; 80	'P'
+	.db #0x90	; 144
+	.db #0x48	; 72	'H'
+	.db #0x88	; 136
+	.db #0xfc	; 252
+	.db #0xfc	; 252
+	.db #0x42	; 66	'B'
+	.db #0x82	; 130
+	.db #0x7f	; 127
+	.db #0xff	; 255
+	.db #0x42	; 66	'B'
+	.db #0x41	; 65	'A'
+	.db #0x22	; 34
+	.db #0x21	; 33
+	.db #0x12	; 18
+	.db #0x11	; 17
+	.db #0x0a	; 10
+	.db #0x09	; 9
+	.db #0x12	; 18
+	.db #0x11	; 17
+	.db #0x3f	; 63
+	.db #0x3f	; 63
+	.db #0x42	; 66	'B'
+	.db #0x41	; 65	'A'
+	.db #0xfe	; 254
 	.db #0xff	; 255
 	.area _CABS (ABS)

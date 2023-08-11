@@ -18,6 +18,7 @@
 	.globl _clothes_position
 	.globl _map_components
 	.globl _rect_list
+	.globl _game_ended_flag
 	.globl _game_started_flag
 	.globl _old_camera_y_clamped
 	.globl _camera_y_clamped
@@ -55,15 +56,9 @@
 ; ram data
 ;--------------------------------------------------------
 	.area _DATA
-Fscene$joy$0_0$0==.
-_joy:
-	.ds 1
 Fscene$i$0_0$0==.
 _i:
 	.ds 1
-Fscene$floor_info$0_0$0==.
-_floor_info:
-	.ds 4
 G$rand_init$0_0$0==.
 _rand_init::
 	.ds 1
@@ -96,6 +91,9 @@ _accelerate_cam_flag:
 	.ds 1
 G$game_started_flag$0_0$0==.
 _game_started_flag::
+	.ds 1
+G$game_ended_flag$0_0$0==.
+_game_ended_flag::
 	.ds 1
 G$rect_list$0_0$0==.
 _rect_list::
@@ -130,8 +128,8 @@ _weeds_frame_counter:
 Fscene$is_generated$0_0$0==.
 _is_generated:
 	.ds 1
-Lscene.memcpy_rect$cur_row$1_0$266==.
-_memcpy_rect_cur_row_65536_266:
+Lscene.memcpy_rect$cur_row$1_0$267==.
+_memcpy_rect_cur_row_65536_267:
 	.ds 1
 ;--------------------------------------------------------
 ; ram data
@@ -159,44 +157,44 @@ _memcpy_rect_cur_row_65536_266:
 	.area _CODE
 	G$scene_init$0$0	= .
 	.globl	G$scene_init$0$0
-	C$scene.c$116$0_0$130	= .
-	.globl	C$scene.c$116$0_0$130
-;src/scene.c:116: void scene_init(void){
+	C$scene.c$115$0_0$130	= .
+	.globl	C$scene.c$115$0_0$130
+;src/scene.c:115: void scene_init(void){
 ;	---------------------------------
 ; Function scene_init
 ; ---------------------------------
 _scene_init::
 	add	sp, #-47
-	C$scene.c$118$1_0$130	= .
-	.globl	C$scene.c$118$1_0$130
-;src/scene.c:118: set_bkg_data(0, 112U, hub_data);
+	C$scene.c$117$1_0$130	= .
+	.globl	C$scene.c$117$1_0$130
+;src/scene.c:117: set_bkg_data(0, 112U, hub_data);
 	ld	de, #_hub_data
 	push	de
 	ld	hl, #0x7000
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-	C$scene.c$119$1_0$130	= .
-	.globl	C$scene.c$119$1_0$130
-;src/scene.c:119: set_bkg_data(112U, 13, numbers);
+	C$scene.c$118$1_0$130	= .
+	.globl	C$scene.c$118$1_0$130
+;src/scene.c:118: set_bkg_data(112U, 13, numbers);
 	ld	de, #_numbers
 	push	de
 	ld	hl, #0xd70
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-	C$scene.c$120$1_0$130	= .
-	.globl	C$scene.c$120$1_0$130
-;src/scene.c:120: set_bkg_data(0x7D, 2, partly_broken_bricks);
+	C$scene.c$119$1_0$130	= .
+	.globl	C$scene.c$119$1_0$130
+;src/scene.c:119: set_bkg_data(0x7D, 5, partly_broken_bricks);
 	ld	de, #_partly_broken_bricks
 	push	de
-	ld	hl, #0x27d
+	ld	hl, #0x57d
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-	C$scene.c$121$1_0$130	= .
-	.globl	C$scene.c$121$1_0$130
-;src/scene.c:121: set_bkg_tiles(map_pos_x, 20U, 20u, 30u, hub_map);
+	C$scene.c$120$1_0$130	= .
+	.globl	C$scene.c$120$1_0$130
+;src/scene.c:120: set_bkg_tiles(map_pos_x, 20U, 20u, 30u, hub_map);
 	ld	de, #_hub_map
 	push	de
 	ld	hl, #0x1e14
@@ -205,35 +203,40 @@ _scene_init::
 	push	hl
 	call	_set_bkg_tiles
 	add	sp, #6
+	C$scene.c$121$1_0$130	= .
+	.globl	C$scene.c$121$1_0$130
+;src/scene.c:121: camera_y = 0;
+	ld	hl, #_camera_y
+	ld	(hl), #0x00
 	C$scene.c$122$1_0$130	= .
 	.globl	C$scene.c$122$1_0$130
-;src/scene.c:122: camera_y = 0;
-	ld	hl, #_camera_y
+;src/scene.c:122: old_camera_y = 0;
+	ld	hl, #_old_camera_y
 	ld	(hl), #0x00
 	C$scene.c$123$1_0$130	= .
 	.globl	C$scene.c$123$1_0$130
-;src/scene.c:123: old_camera_y = 0;
-	ld	hl, #_old_camera_y
-	ld	(hl), #0x00
-	C$scene.c$124$1_0$130	= .
-	.globl	C$scene.c$124$1_0$130
-;src/scene.c:124: frames_to_move = 40;
+;src/scene.c:123: frames_to_move = 40;
 	ld	hl, #_frames_to_move
 	ld	(hl), #0x28
+	C$scene.c$124$1_0$130	= .
+	.globl	C$scene.c$124$1_0$130
+;src/scene.c:124: current_cam_frame = 0;
+	ld	hl, #_current_cam_frame
+	ld	(hl), #0x00
 	C$scene.c$125$1_0$130	= .
 	.globl	C$scene.c$125$1_0$130
-;src/scene.c:125: current_cam_frame = 0;
-	ld	hl, #_current_cam_frame
+;src/scene.c:125: accelerate_cam_flag = 0;
+	ld	hl, #_accelerate_cam_flag
 	ld	(hl), #0x00
 	C$scene.c$126$1_0$130	= .
 	.globl	C$scene.c$126$1_0$130
-;src/scene.c:126: accelerate_cam_flag = 0;
-	ld	hl, #_accelerate_cam_flag
+;src/scene.c:126: game_started_flag = false;
+	ld	hl, #_game_started_flag
 	ld	(hl), #0x00
 	C$scene.c$127$1_0$130	= .
 	.globl	C$scene.c$127$1_0$130
-;src/scene.c:127: game_started_flag = false;
-	ld	hl, #_game_started_flag
+;src/scene.c:127: game_ended_flag = false;
+	ld	hl, #_game_ended_flag
 	ld	(hl), #0x00
 ;C:/gbdk/include/gb/gb.h:1080: SCX_REG=x, SCY_REG=y;
 	ld	a, #0x08
@@ -1201,10 +1204,10 @@ _scene_init::
 	ld	(hl), #0x00
 	C$scene.c$202$1_2$132	= .
 	.globl	C$scene.c$202$1_2$132
-;src/scene.c:202: set_sprite_data(29, 6, extra_sprites);
+;src/scene.c:202: set_sprite_data(29, 8, extra_sprites);
 	ld	de, #_extra_sprites
 	push	de
-	ld	hl, #0x61d
+	ld	hl, #0x81d
 	push	hl
 	call	_set_sprite_data
 	add	sp, #4
@@ -2129,7 +2132,7 @@ _gen_new_floor::
 00113$:
 	C$scene.c$342$3_2$213	= .
 	.globl	C$scene.c$342$3_2$213
-;src/scene.c:342: collider = top_info[(UINT8)(window_components_on_current_floor[i] >> 4)].collider;
+;src/scene.c:342: collider = top_info[(uint8_t)(window_components_on_current_floor[i] >> 4)].collider;
 	ld	a, #<(_window_components_on_current_floor)
 	ld	hl, #_i
 	add	a, (hl)
@@ -2545,16 +2548,22 @@ _gen_new_floor::
 ; Function add_clothes_to_rag
 ; ---------------------------------
 _add_clothes_to_rag::
-	add	sp, #-5
+	add	sp, #-10
 	C$scene.c$367$1_0$216	= .
 	.globl	C$scene.c$367$1_0$216
-;src/scene.c:367: uint8_t temp_rand = rand();
+;src/scene.c:367: if(game_ended_flag) return;
+	ld	hl, #_game_ended_flag
+	bit	0, (hl)
+	jp	NZ,00123$
+	C$scene.c$368$1_1$217	= .
+	.globl	C$scene.c$368$1_1$217
+;src/scene.c:368: uint8_t temp_rand = rand();
 	call	_rand
-	ldhl	sp,	#0
+	ldhl	sp,	#7
 	ld	(hl), e
-	C$scene.c$368$1_0$216	= .
-	.globl	C$scene.c$368$1_0$216
-;src/scene.c:368: uint8_t particle_x = ((3 + (i<<2)) << 3) + 8u;
+	C$scene.c$369$1_1$217	= .
+	.globl	C$scene.c$369$1_1$217
+;src/scene.c:369: uint8_t particle_x = ((3 + (i<<2)) << 3) + 8u;
 	ld	a, (#_i)
 	add	a, a
 	add	a, a
@@ -2563,11 +2572,11 @@ _add_clothes_to_rag::
 	add	a, a
 	add	a, a
 	add	a, #0x08
-	ldhl	sp,	#1
+	ldhl	sp,	#6
 	ld	(hl), a
-	C$scene.c$369$1_0$216	= .
-	.globl	C$scene.c$369$1_0$216
-;src/scene.c:369: uint8_t particle_y = (((camera_y_clamped << 3) + 5) << 3) + 17u;
+	C$scene.c$370$1_1$217	= .
+	.globl	C$scene.c$370$1_1$217
+;src/scene.c:370: uint8_t particle_y = (((camera_y_clamped << 3) + 5) << 3) + 17u;
 	ld	a, (#_camera_y_clamped)
 	add	a, a
 	add	a, a
@@ -2577,283 +2586,155 @@ _add_clothes_to_rag::
 	add	a, a
 	add	a, a
 	add	a, #0x11
-	ldhl	sp,	#2
-	C$scene.c$371$1_0$216	= .
-	.globl	C$scene.c$371$1_0$216
-;src/scene.c:371: uint8_t rack_status = 0x00;
-	C$scene.c$372$1_0$216	= .
-	.globl	C$scene.c$372$1_0$216
-;src/scene.c:372: if((temp_rand >> 1) & 0x01){
+	ldhl	sp,	#0
+	ld	(hl), a
+	C$scene.c$372$1_1$217	= .
+	.globl	C$scene.c$372$1_1$217
+;src/scene.c:372: uint8_t rack_status = 0x00;
+	ldhl	sp,	#9
+	C$scene.c$373$1_1$217	= .
+	.globl	C$scene.c$373$1_1$217
+;src/scene.c:373: if((temp_rand >> 1) & 0x01){
+	xor	a, a
 	ld	(hl-), a
 	dec	hl
-	ld	e, #0x00
-	ld	a, (hl)
+	ld	a, (hl+)
 	rrca
-	and	a,#0x01
-	jp	Z, 00105$
-	C$scene.c$374$3_0$218	= .
-	.globl	C$scene.c$374$3_0$218
-;src/scene.c:374: for(object_sprite = 0; object_sprite < 4; object_sprite++){
-	ldhl	sp,	#3
+	and	a, #0x01
+	ld	(hl), a
+	ld	a, (hl)
+	or	a, a
+	jp	Z, 00107$
+	C$scene.c$375$3_1$219	= .
+	.globl	C$scene.c$375$3_1$219
+;src/scene.c:375: for(object_sprite = 0; object_sprite < 4; object_sprite++){
 	ld	(hl), #0x00
-	ld	c, #0x00
-00117$:
-	C$scene.c$375$4_0$219	= .
-	.globl	C$scene.c$375$4_0$219
-;src/scene.c:375: if((deactivate_weeds_flag >> (object_sprite << 1)) & 0x03){
-	ld	a, c
+	ldhl	sp,	#5
+	ld	(hl), #0x00
+00119$:
+	C$scene.c$376$4_1$220	= .
+	.globl	C$scene.c$376$4_1$220
+;src/scene.c:376: if((deactivate_weeds_flag >> (object_sprite << 1)) & 0x03){
+	ldhl	sp,	#5
+	ld	a, (hl)
 	add	a, a
 	push	af
 	ld	hl, #_deactivate_weeds_flag
-	ld	b, (hl)
+	ld	c, (hl)
 	pop	af
 	inc	a
-	jr	00159$
-00158$:
-	srl	b
-00159$:
-	dec	a
-	jr	NZ, 00158$
-	ld	a, b
-	and	a, #0x03
-	jr	Z, 00118$
-	C$scene.c$377$5_0$220	= .
-	.globl	C$scene.c$377$5_0$220
-;src/scene.c:377: deactivate_weeds_flag ^= 0b00000001 << (object_sprite << 1);
-	ldhl	sp,	#3
-	ld	e, (hl)
-	ld	a, e
-	add	a, a
-	ld	b, a
-	ld	a, #0x01
-	inc	b
-	jr	00162$
-00161$:
-	add	a, a
-00162$:
-	dec	b
-	jr	NZ,00161$
-	ld	hl, #_deactivate_weeds_flag
-	xor	a, (hl)
-	ld	(hl), a
-;src/scene.c:378: set_sprite_tile(16 + object_sprite, possible_clothes[(temp_rand & 0x01)]);
-	ldhl	sp,	#0
-	ld	a, (hl)
-	and	a, #0x01
-	ld	c, a
-	ld	b, #0x00
-	ld	hl, #_possible_clothes
-	add	hl, bc
-	ld	c, (hl)
-	ld	a, e
-	add	a, #0x10
-	ldhl	sp,	#4
-	ld	(hl), a
-;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
-	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	add	hl, hl
-	add	hl, hl
-	ld	de, #_shadow_OAM
-	add	hl, de
-	inc	hl
-	inc	hl
-	ld	(hl), c
-	C$scene.c$379$5_0$220	= .
-	.globl	C$scene.c$379$5_0$220
-;src/scene.c:379: clothes_position[object_sprite] = particle_y;
-	ld	bc, #_clothes_position+0
-	ldhl	sp,	#3
-	ld	l, (hl)
-	ld	h, #0x00
-	add	hl, bc
-	ld	c, l
-	ld	b, h
-	ldhl	sp,	#2
-	ld	a, (hl)
-	ld	(bc), a
-;src/scene.c:380: move_sprite(16 + object_sprite, particle_x, particle_y - camera_y);
-	ld	a, (hl)
-	ld	hl, #_camera_y
-	sub	a, (hl)
-	ld	c, a
-	ldhl	sp,	#4
-;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
-	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	add	hl, hl
-	add	hl, hl
-	ld	de, #_shadow_OAM
-	add	hl, de
-;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
-	ld	a, c
-	ld	(hl+), a
-	ld	c, l
-	ld	b, h
-	ldhl	sp,	#1
-	ld	a, (hl)
-	ld	(bc), a
-	C$scene.c$381$5_0$220	= .
-	.globl	C$scene.c$381$5_0$220
-;src/scene.c:381: clothes_speed &= ~(0b00000011 << (i<<1));
-	ld	a, (#_i)
-	add	a, a
-	ld	b, a
-	ld	a, #0x03
-	inc	b
-	jr	00164$
-00163$:
-	add	a, a
-00164$:
-	dec	b
-	jr	NZ,00163$
-	cpl
-	ld	hl, #_clothes_speed
-	and	a, (hl)
-	ld	(hl), a
-	C$scene.c$384$5_0$220	= .
-	.globl	C$scene.c$384$5_0$220
-;src/scene.c:384: rack_status |= object_sprite;
-	ldhl	sp,	#3
-	ld	e, (hl)
-	set	3, e
-	C$scene.c$385$5_0$220	= .
-	.globl	C$scene.c$385$5_0$220
-;src/scene.c:385: break;
-	jr	00105$
-00118$:
-	C$scene.c$374$3_0$218	= .
-	.globl	C$scene.c$374$3_0$218
-;src/scene.c:374: for(object_sprite = 0; object_sprite < 4; object_sprite++){
-	inc	c
-	ldhl	sp,	#3
-	ld	(hl), c
-	ld	a, c
-	sub	a, #0x04
-	jp	C, 00117$
-00105$:
-	C$scene.c$390$1_0$216	= .
-	.globl	C$scene.c$390$1_0$216
-;src/scene.c:390: particle_x += 8;
-	ldhl	sp,	#1
-	ld	a, (hl+)
-	inc	hl
-	add	a, #0x08
-	ld	(hl), a
-	C$scene.c$391$1_0$216	= .
-	.globl	C$scene.c$391$1_0$216
-;src/scene.c:391: if((temp_rand >> 3) & 0x01){
-	ldhl	sp,	#0
-	ld	a, (hl)
-	rrca
-	rrca
-	rrca
-	and	a,#0x01
-	jp	Z, 00112$
-	C$scene.c$393$3_0$222	= .
-	.globl	C$scene.c$393$3_0$222
-;src/scene.c:393: for(object_sprite = 0; object_sprite < 4; object_sprite++){
-	ldhl	sp,	#4
-	ld	(hl), #0x00
-	ld	c, #0x00
-00119$:
-	C$scene.c$394$4_0$223	= .
-	.globl	C$scene.c$394$4_0$223
-;src/scene.c:394: if((deactivate_weeds_flag >> (object_sprite << 1)) & 0x03){
-	ld	a, c
-	add	a, a
-	ld	d, a
-	ld	hl, #_deactivate_weeds_flag
-	ld	b, (hl)
-	inc	d
 	jr	00166$
 00165$:
-	srl	b
+	srl	c
 00166$:
-	dec	d
+	dec	a
 	jr	NZ, 00165$
-	ld	a, b
+	ld	a, c
 	and	a, #0x03
 	jp	Z,00120$
-	C$scene.c$396$5_0$224	= .
-	.globl	C$scene.c$396$5_0$224
-;src/scene.c:396: deactivate_weeds_flag ^= 0b00000001 << (object_sprite << 1);
-	ldhl	sp,	#4
-	ld	d, (hl)
-	ld	a, d
+	C$scene.c$378$5_1$221	= .
+	.globl	C$scene.c$378$5_1$221
+;src/scene.c:378: deactivate_weeds_flag ^= 0b00000001 << (object_sprite << 1);
+	ldhl	sp,	#8
+	ld	a, (hl+)
+	ld	(hl), a
+	ld	a, (hl)
 	add	a, a
-	ld	b, a
-	ld	a, #0x01
-	inc	b
+	ldhl	sp,	#5
+	ld	(hl), a
+	ld	a, (hl)
+	push	af
+	ld	(hl), #0x01
+	pop	af
+	inc	a
 	jr	00169$
 00168$:
-	add	a, a
+	ldhl	sp,	#5
+	sla	(hl)
 00169$:
-	dec	b
+	dec	a
 	jr	NZ,00168$
-	ld	hl, #_deactivate_weeds_flag
+	ld	a, (#_deactivate_weeds_flag)
+	ldhl	sp,	#5
 	xor	a, (hl)
-	ld	(hl), a
-;src/scene.c:397: set_sprite_tile(16 + object_sprite, possible_clothes[((temp_rand>>2) & 0x01)]);
-	ldhl	sp,	#0
+	ld	(#_deactivate_weeds_flag),a
+;src/scene.c:379: set_sprite_tile(16 + object_sprite, possible_clothes[(temp_rand & 0x01)]);
+	ldhl	sp,	#7
 	ld	a, (hl)
-	rrca
-	rrca
+	ldhl	sp,	#2
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl-), a
+	ld	a, (hl+)
+	inc	hl
 	and	a, #0x01
-	ld	c, a
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
 	ld	hl, #_possible_clothes
-	ld	b, #0x00
-	add	hl, bc
-	ld	c, (hl)
-	ld	a, d
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#3
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#2
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	a, (hl+)
+	inc	hl
+	ld	d, a
+	ld	a, (de)
+	ld	(hl), a
+	ldhl	sp,	#9
+	ld	a, (hl)
 	add	a, #0x10
-	ldhl	sp,	#1
+	ldhl	sp,	#5
+	ld	(hl), a
+	ld	a, (hl)
+	ldhl	sp,	#9
 	ld	(hl), a
 ;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
 	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
 	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
 	add	hl, hl
 	add	hl, hl
-	push	de
 	ld	de, #_shadow_OAM
 	add	hl, de
 	inc	hl
 	inc	hl
-	pop	de
-	ld	(hl), c
-	C$scene.c$398$5_0$224	= .
-	.globl	C$scene.c$398$5_0$224
-;src/scene.c:398: clothes_position[object_sprite] = particle_y;
-	ld	bc, #_clothes_position+0
+	ld	c, l
+	ld	b, h
 	ldhl	sp,	#4
+	ld	a, (hl)
+	ld	(bc), a
+	C$scene.c$380$5_1$221	= .
+	.globl	C$scene.c$380$5_1$221
+;src/scene.c:380: clothes_position[object_sprite] = particle_y;
+	ld	bc, #_clothes_position+0
+	ldhl	sp,	#8
 	ld	l, (hl)
 	ld	h, #0x00
 	add	hl, bc
 	ld	c, l
 	ld	b, h
-	ldhl	sp,	#2
+	ldhl	sp,	#0
 	ld	a, (hl)
 	ld	(bc), a
-;src/scene.c:399: move_sprite(16 + object_sprite, particle_x, particle_y - camera_y);
+;src/scene.c:381: move_sprite(16 + object_sprite, particle_x, particle_y - camera_y);
 	ld	a, (hl)
 	ld	hl, #_camera_y
 	sub	a, (hl)
-	ld	d, a
-	ldhl	sp,	#1
+	ld	c, a
+	ldhl	sp,	#5
 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	l, (hl)
+	ld	de, #_shadow_OAM+0
 ;	spillPairReg hl
 ;	spillPairReg hl
 	ld	h, #0x00
@@ -2861,19 +2742,18 @@ _add_clothes_to_rag::
 ;	spillPairReg hl
 	add	hl, hl
 	add	hl, hl
-	ld	bc, #_shadow_OAM
-	add	hl, bc
+	add	hl, de
 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
-	ld	a, d
+	ld	a, c
 	ld	(hl+), a
 	ld	c, l
 	ld	b, h
-	ldhl	sp,	#3
+	ldhl	sp,	#6
 	ld	a, (hl)
 	ld	(bc), a
-	C$scene.c$400$5_0$224	= .
-	.globl	C$scene.c$400$5_0$224
-;src/scene.c:400: clothes_speed &= ~(0b00000011 << (i<<1));
+	C$scene.c$382$5_1$221	= .
+	.globl	C$scene.c$382$5_1$221
+;src/scene.c:382: clothes_speed &= ~(0b00000011 << (i<<1));
 	ld	a, (#_i)
 	add	a, a
 	ld	b, a
@@ -2889,70 +2769,370 @@ _add_clothes_to_rag::
 	ld	hl, #_clothes_speed
 	and	a, (hl)
 	ld	(hl), a
-	C$scene.c$402$5_0$224	= .
-	.globl	C$scene.c$402$5_0$224
-;src/scene.c:402: rack_status |= 0b00000100;
-	set	2, e
-	C$scene.c$403$5_0$224	= .
-	.globl	C$scene.c$403$5_0$224
-;src/scene.c:403: if((rack_status & 0b00001000) == 0x00){
-	bit	3, e
-	jr	NZ, 00112$
-	C$scene.c$404$6_0$225	= .
-	.globl	C$scene.c$404$6_0$225
-;src/scene.c:404: rack_status |= object_sprite;
-	ld	a, e
-	ldhl	sp,	#4
-	or	a, (hl)
-	ld	e, a
-	C$scene.c$406$5_0$224	= .
-	.globl	C$scene.c$406$5_0$224
-;src/scene.c:406: break;
-	jr	00112$
+	C$scene.c$385$5_1$221	= .
+	.globl	C$scene.c$385$5_1$221
+;src/scene.c:385: rack_status |= object_sprite;
+	ldhl	sp,	#8
+	ld	a, (hl+)
+	or	a, #0x08
+	ld	(hl), a
+	C$scene.c$386$5_1$221	= .
+	.globl	C$scene.c$386$5_1$221
+;src/scene.c:386: break;
+	jr	00107$
 00120$:
-	C$scene.c$393$3_0$222	= .
-	.globl	C$scene.c$393$3_0$222
-;src/scene.c:393: for(object_sprite = 0; object_sprite < 4; object_sprite++){
-	inc	c
-	ldhl	sp,	#4
-	ld	(hl), c
-	ld	a, c
+	C$scene.c$375$3_1$219	= .
+	.globl	C$scene.c$375$3_1$219
+;src/scene.c:375: for(object_sprite = 0; object_sprite < 4; object_sprite++){
+	ldhl	sp,	#5
+	inc	(hl)
+	ld	a, (hl)
+	ldhl	sp,	#8
+	ld	(hl), a
+	ldhl	sp,	#5
+	ld	a, (hl)
 	sub	a, #0x04
 	jp	C, 00119$
-00112$:
-	C$scene.c$419$1_0$216	= .
-	.globl	C$scene.c$419$1_0$216
-;src/scene.c:419: temp_window->status = (temp_window->status & 0xF0) | rack_status; 
+00107$:
+	C$scene.c$391$1_1$217	= .
+	.globl	C$scene.c$391$1_1$217
+;src/scene.c:391: particle_x += 8;
+	ldhl	sp,	#6
+	ld	a, (hl)
+	add	a, #0x08
+	ldhl	sp,	#1
+	ld	(hl), a
+	C$scene.c$392$1_1$217	= .
+	.globl	C$scene.c$392$1_1$217
+;src/scene.c:392: if((temp_rand >> 3) & 0x01){
 	ldhl	sp,	#7
+	ld	a, (hl+)
+	rrca
+	rrca
+	rrca
+	and	a, #0x01
+	ld	(hl), a
+	ld	a, (hl)
+	or	a, a
+	jp	Z, 00114$
+	C$scene.c$394$3_1$223	= .
+	.globl	C$scene.c$394$3_1$223
+;src/scene.c:394: for(object_sprite = 0; object_sprite < 4; object_sprite++){
+	ldhl	sp,	#2
+	ld	(hl), #0x00
+	ldhl	sp,	#8
+	ld	(hl), #0x00
+00121$:
+	C$scene.c$395$4_1$224	= .
+	.globl	C$scene.c$395$4_1$224
+;src/scene.c:395: if((deactivate_weeds_flag >> (object_sprite << 1)) & 0x03){
+	ldhl	sp,	#8
+	ld	a, (hl)
+	add	a, a
+	ld	c, a
+	ld	hl, #_deactivate_weeds_flag
+	ld	b, (hl)
+	inc	c
+	jr	00173$
+00172$:
+	srl	b
+00173$:
+	dec	c
+	jr	NZ, 00172$
+	ld	a, b
+	and	a, #0x03
+	jp	Z,00122$
+	C$scene.c$397$5_1$225	= .
+	.globl	C$scene.c$397$5_1$225
+;src/scene.c:397: deactivate_weeds_flag ^= 0b00000001 << (object_sprite << 1);
+	ldhl	sp,	#2
+	ld	a, (hl)
+	ldhl	sp,	#8
+	ld	(hl), a
+	ld	a, (hl)
+	add	a, a
+	ld	b, a
+	ld	a, #0x01
+	inc	b
+	jr	00176$
+00175$:
+	add	a, a
+00176$:
+	dec	b
+	jr	NZ,00175$
+	ld	hl, #_deactivate_weeds_flag
+	xor	a, (hl)
+	ld	(hl), a
+;src/scene.c:398: set_sprite_tile(16 + object_sprite, possible_clothes[((temp_rand>>2) & 0x01)]);
+	ldhl	sp,	#7
+	ld	a, (hl)
+	rrca
+	rrca
+	and	a, #0x01
+	ld	e, a
+	ld	d, #0x00
+	ld	hl, #_possible_clothes
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#8
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#7
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, (de)
+	ldhl	sp,	#3
+	ld	(hl), a
+	ldhl	sp,	#8
+	ld	a, (hl)
+	add	a, #0x10
+	ldhl	sp,	#4
+	ld	(hl), a
+	ld	c, (hl)
+;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+	ldhl	sp,	#7
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), #0x00
+	ld	a, #0x02
+00177$:
+	ldhl	sp,	#7
+	sla	(hl)
+	inc	hl
+	rl	(hl)
+	dec	a
+	jr	NZ, 00177$
+	dec	hl
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	hl, #_shadow_OAM
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#7
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#6
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	hl, #0x0002
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#9
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#8
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ldhl	sp,	#3
+	C$scene.c$399$5_1$225	= .
+	.globl	C$scene.c$399$5_1$225
+;src/scene.c:399: clothes_position[object_sprite] = particle_y;
+	ld	a, (hl-)
+	ld	(de), a
+	ld	de, #_clothes_position
+	ld	l, (hl)
+	ld	h, #0x00
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#9
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#8
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ldhl	sp,	#0
+	ld	a, (hl)
+	ld	(de), a
+;src/scene.c:400: move_sprite(16 + object_sprite, particle_x, particle_y - camera_y);
+	ld	a, (hl)
+	ld	hl, #_camera_y
+	sub	a, (hl)
+	ldhl	sp,	#8
+	ld	(hl), a
+	ldhl	sp,	#4
+	ld	a, (hl)
+	ldhl	sp,	#7
+	ld	(hl), a
+;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+	ld	a, (hl-)
+	ld	(hl+), a
+	ld	(hl), #0x00
+	ld	a, #0x02
+00178$:
+	ldhl	sp,	#6
+	sla	(hl)
+	inc	hl
+	rl	(hl)
+	dec	a
+	jr	NZ, 00178$
+	dec	hl
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	hl, #_shadow_OAM
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#6
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#5
+	ld	(hl-), a
+	ld	a, (hl+)
+	inc	hl
+	ld	(hl-), a
+	ld	a, (hl+)
+	inc	hl
+;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	a, (hl+)
+	ld	d, a
+	ld	a, (hl-)
+	dec	hl
+	ld	(de), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	l, e
+	ld	h, d
+	inc	hl
+	push	hl
+	ld	a, l
+	ldhl	sp,	#6
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#5
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ldhl	sp,	#1
+	ld	a, (hl)
+	ld	(de), a
+	C$scene.c$401$5_1$225	= .
+	.globl	C$scene.c$401$5_1$225
+;src/scene.c:401: clothes_speed &= ~(0b00000011 << (i<<1));
+	ld	a, (#_i)
+	ldhl	sp,	#8
+	ld	(hl), a
+	sla	(hl)
+	ld	a, (hl)
+	push	af
+	ld	(hl), #0x03
+	pop	af
+	inc	a
+	jr	00180$
+00179$:
+	ldhl	sp,	#8
+	sla	(hl)
+00180$:
+	dec	a
+	jr	NZ,00179$
+	ldhl	sp,	#8
+	ld	a, (hl)
+	cpl
+	ld	(hl), a
+	ld	a, (#_clothes_speed)
+	ldhl	sp,	#8
+	and	a, (hl)
+	ld	(#_clothes_speed),a
+	C$scene.c$403$5_1$225	= .
+	.globl	C$scene.c$403$5_1$225
+;src/scene.c:403: rack_status |= 0b00000100;
+	ldhl	sp,	#9
+	ld	a, (hl)
+	or	a, #0x04
+	ld	(hl), a
+	C$scene.c$404$5_1$225	= .
+	.globl	C$scene.c$404$5_1$225
+;src/scene.c:404: if((rack_status & 0b00001000) == 0x00){
+	push	hl
+	bit	3, (hl)
+	pop	hl
+	jr	NZ, 00114$
+	C$scene.c$405$6_1$226	= .
+	.globl	C$scene.c$405$6_1$226
+;src/scene.c:405: rack_status |= object_sprite;
+	ldhl	sp,	#9
+	ld	a, (hl)
+	ldhl	sp,	#2
+	or	a, (hl)
+	ldhl	sp,	#9
+	ld	(hl), a
+	C$scene.c$407$5_1$225	= .
+	.globl	C$scene.c$407$5_1$225
+;src/scene.c:407: break;
+	jr	00114$
+00122$:
+	C$scene.c$394$3_1$223	= .
+	.globl	C$scene.c$394$3_1$223
+;src/scene.c:394: for(object_sprite = 0; object_sprite < 4; object_sprite++){
+	ldhl	sp,	#8
+	inc	(hl)
+	ld	a, (hl)
+	ldhl	sp,	#2
+	ld	(hl), a
+	ldhl	sp,	#8
+	ld	a, (hl)
+	sub	a, #0x04
+	jp	C, 00121$
+00114$:
+	C$scene.c$420$1_1$217	= .
+	.globl	C$scene.c$420$1_1$217
+;src/scene.c:420: temp_window->status = (temp_window->status & 0xF0) | rack_status; 
+	ldhl	sp,	#12
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
 	inc	bc
 	ld	a, (bc)
 	and	a, #0xf0
-	or	a, e
+	ldhl	sp,	#9
+	or	a, (hl)
 	ld	(bc), a
-	C$scene.c$420$1_0$216	= .
-	.globl	C$scene.c$420$1_0$216
-;src/scene.c:420: }
-	add	sp, #5
-	C$scene.c$420$1_0$216	= .
-	.globl	C$scene.c$420$1_0$216
+00123$:
+	C$scene.c$421$1_1$216	= .
+	.globl	C$scene.c$421$1_1$216
+;src/scene.c:421: }
+	add	sp, #10
+	C$scene.c$421$1_1$216	= .
+	.globl	C$scene.c$421$1_1$216
 	XG$add_clothes_to_rag$0$0	= .
 	.globl	XG$add_clothes_to_rag$0$0
 	ret
 	G$next_map_gen_step$0$0	= .
 	.globl	G$next_map_gen_step$0$0
-	C$scene.c$422$1_0$239	= .
-	.globl	C$scene.c$422$1_0$239
-;src/scene.c:422: void next_map_gen_step(void){
+	C$scene.c$423$1_1$240	= .
+	.globl	C$scene.c$423$1_1$240
+;src/scene.c:423: void next_map_gen_step(void){
 ;	---------------------------------
 ; Function next_map_gen_step
 ; ---------------------------------
 _next_map_gen_step::
-	C$scene.c$429$1_0$239	= .
-	.globl	C$scene.c$429$1_0$239
-;src/scene.c:429: if((walker_byte & 0x40) != 0x40){
+	C$scene.c$430$1_0$240	= .
+	.globl	C$scene.c$430$1_0$240
+;src/scene.c:430: if((walker_byte & 0x40) != 0x40){
 	ld	hl, #_walker_byte
 	ld	c, (hl)
 	ld	b, #0x00
@@ -2963,13 +3143,13 @@ _next_map_gen_step::
 	ld	a, e
 	sub	a, #0x40
 	or	a, d
-	C$scene.c$431$2_0$240	= .
-	.globl	C$scene.c$431$2_0$240
-;src/scene.c:431: update_walker();
+	C$scene.c$432$2_0$241	= .
+	.globl	C$scene.c$432$2_0$241
+;src/scene.c:432: update_walker();
 	jp	NZ,_update_walker
-	C$scene.c$432$1_0$239	= .
-	.globl	C$scene.c$432$1_0$239
-;src/scene.c:432: } else if((walker_byte & 0x4F) != 0x4F){
+	C$scene.c$433$1_0$240	= .
+	.globl	C$scene.c$433$1_0$240
+;src/scene.c:433: } else if((walker_byte & 0x4F) != 0x4F){
 	ld	a, c
 	and	a, #0x4f
 	ld	c, a
@@ -2977,44 +3157,44 @@ _next_map_gen_step::
 	ld	a, c
 	sub	a, #0x4f
 	or	a, b
-	C$scene.c$434$2_0$241	= .
-	.globl	C$scene.c$434$2_0$241
-;src/scene.c:434: fill_window();
+	C$scene.c$435$2_0$242	= .
+	.globl	C$scene.c$435$2_0$242
+;src/scene.c:435: fill_window();
 	jp	NZ,_fill_window
-	C$scene.c$437$2_0$242	= .
-	.globl	C$scene.c$437$2_0$242
-;src/scene.c:437: mend_incorrect_windows();
+	C$scene.c$438$2_0$243	= .
+	.globl	C$scene.c$438$2_0$243
+;src/scene.c:438: mend_incorrect_windows();
 	call	_mend_incorrect_windows
-	C$scene.c$439$2_0$242	= .
-	.globl	C$scene.c$439$2_0$242
-;src/scene.c:439: fill_memory();
-	C$scene.c$441$1_0$239	= .
-	.globl	C$scene.c$441$1_0$239
-;src/scene.c:441: }
-	C$scene.c$441$1_0$239	= .
-	.globl	C$scene.c$441$1_0$239
+	C$scene.c$440$2_0$243	= .
+	.globl	C$scene.c$440$2_0$243
+;src/scene.c:440: fill_memory();
+	C$scene.c$442$1_0$240	= .
+	.globl	C$scene.c$442$1_0$240
+;src/scene.c:442: }
+	C$scene.c$442$1_0$240	= .
+	.globl	C$scene.c$442$1_0$240
 	XG$next_map_gen_step$0$0	= .
 	.globl	XG$next_map_gen_step$0$0
 	jp	_fill_memory
 	G$update_walker$0$0	= .
 	.globl	G$update_walker$0$0
-	C$scene.c$443$1_0$244	= .
-	.globl	C$scene.c$443$1_0$244
-;src/scene.c:443: void update_walker(void){
+	C$scene.c$444$1_0$245	= .
+	.globl	C$scene.c$444$1_0$245
+;src/scene.c:444: void update_walker(void){
 ;	---------------------------------
 ; Function update_walker
 ; ---------------------------------
 _update_walker::
 	add	sp, #-4
-	C$scene.c$445$1_0$244	= .
-	.globl	C$scene.c$445$1_0$244
-;src/scene.c:445: if(!(walker_byte & 0x0F)){
+	C$scene.c$446$1_0$245	= .
+	.globl	C$scene.c$446$1_0$245
+;src/scene.c:446: if(!(walker_byte & 0x0F)){
 	ld	a, (#_walker_byte)
 	and	a, #0x0f
 	jr	NZ, 00118$
-	C$scene.c$446$2_0$245	= .
-	.globl	C$scene.c$446$2_0$245
-;src/scene.c:446: walker_byte |= (0x01 << (CURRENT_WINDOW & 0x03));
+	C$scene.c$447$2_0$246	= .
+	.globl	C$scene.c$447$2_0$246
+;src/scene.c:447: walker_byte |= (0x01 << (CURRENT_WINDOW & 0x03));
 	ld	hl, #_walker_byte
 	ld	a, (hl)
 	swap	a
@@ -3029,9 +3209,9 @@ _update_walker::
 	dec	b
 	jr	NZ,00159$
 	or	a, (hl)
-	C$scene.c$447$2_0$245	= .
-	.globl	C$scene.c$447$2_0$245
-;src/scene.c:447: window_components_on_current_floor[CURRENT_WINDOW & 0x03] = (traversable_bots[rand() & 0x03]) | ((bulky_tops[rand() & 0x03]) << 4);
+	C$scene.c$448$2_0$246	= .
+	.globl	C$scene.c$448$2_0$246
+;src/scene.c:448: window_components_on_current_floor[CURRENT_WINDOW & 0x03] = (traversable_bots[rand() & 0x03]) | ((bulky_tops[rand() & 0x03]) << 4);
 	ld	(hl), a
 	swap	a
 	and	a, #0x3
@@ -3078,9 +3258,9 @@ _update_walker::
 	ld	(bc), a
 	jp	00120$
 00118$:
-	C$scene.c$451$1_0$244	= .
-	.globl	C$scene.c$451$1_0$244
-;src/scene.c:451: else if(((CURRENT_WINDOW & 0x01) && ((VISITED_WINDOWS & 0x05) == 0x05)) || (!(CURRENT_WINDOW & 0x01) && ((VISITED_WINDOWS & 0x0A) == 0x0A))){
+	C$scene.c$452$1_0$245	= .
+	.globl	C$scene.c$452$1_0$245
+;src/scene.c:452: else if(((CURRENT_WINDOW & 0x01) && ((VISITED_WINDOWS & 0x05) == 0x05)) || (!(CURRENT_WINDOW & 0x01) && ((VISITED_WINDOWS & 0x0A) == 0x0A))){
 	ld	hl, #_walker_byte
 	ld	a, (hl)
 	swap	a
@@ -3111,15 +3291,15 @@ _update_walker::
 	or	a, b
 	jr	NZ, 00112$
 00111$:
-	C$scene.c$452$2_0$246	= .
-	.globl	C$scene.c$452$2_0$246
-;src/scene.c:452: walker_byte |= 0x40;
+	C$scene.c$453$2_0$247	= .
+	.globl	C$scene.c$453$2_0$247
+;src/scene.c:453: walker_byte |= 0x40;
 	ld	hl, #_walker_byte
 	ld	a, (hl)
 	or	a, #0x40
-	C$scene.c$453$2_0$246	= .
-	.globl	C$scene.c$453$2_0$246
-;src/scene.c:453: window_components_on_current_floor[CURRENT_WINDOW & 0x03] = (window_components_on_current_floor[CURRENT_WINDOW & 0x03] & 0x0F) | (uint8_t)((traversable_tops[(rand() & 0x03)]) << 4);   
+	C$scene.c$454$2_0$247	= .
+	.globl	C$scene.c$454$2_0$247
+;src/scene.c:454: window_components_on_current_floor[CURRENT_WINDOW & 0x03] = (window_components_on_current_floor[CURRENT_WINDOW & 0x03] & 0x0F) | (uint8_t)((traversable_tops[(rand() & 0x03)]) << 4);   
 	ld	(hl), a
 	swap	a
 	and	a, #0x3
@@ -3150,22 +3330,22 @@ _update_walker::
 	ld	(bc), a
 	jp	00120$
 00112$:
-	C$scene.c$457$1_0$244	= .
-	.globl	C$scene.c$457$1_0$244
-;src/scene.c:457: else if(TURNING_PROB < (UBYTE)rand()){
+	C$scene.c$458$1_0$245	= .
+	.globl	C$scene.c$458$1_0$245
+;src/scene.c:458: else if(TURNING_PROB < (UBYTE)rand()){
 	call	_rand
 	ld	a, #0xaf
 	sub	a, e
 	jr	NC, 00109$
-	C$scene.c$459$2_0$247	= .
-	.globl	C$scene.c$459$2_0$247
-;src/scene.c:459: walker_byte |= 0x40;
+	C$scene.c$460$2_0$248	= .
+	.globl	C$scene.c$460$2_0$248
+;src/scene.c:460: walker_byte |= 0x40;
 	ld	hl, #_walker_byte
 	ld	a, (hl)
 	or	a, #0x40
-	C$scene.c$460$2_0$247	= .
-	.globl	C$scene.c$460$2_0$247
-;src/scene.c:460: window_components_on_current_floor[CURRENT_WINDOW & 0x03] = (window_components_on_current_floor[CURRENT_WINDOW & 0x03] & 0x0F) | (uint8_t)((traversable_tops[(rand() & 0x03)]) << 4);
+	C$scene.c$461$2_0$248	= .
+	.globl	C$scene.c$461$2_0$248
+;src/scene.c:461: window_components_on_current_floor[CURRENT_WINDOW & 0x03] = (window_components_on_current_floor[CURRENT_WINDOW & 0x03] & 0x0F) | (uint8_t)((traversable_tops[(rand() & 0x03)]) << 4);
 	ld	(hl), a
 	swap	a
 	and	a, #0x3
@@ -3196,29 +3376,29 @@ _update_walker::
 	ld	(bc), a
 	jp	00120$
 00109$:
-	C$scene.c$464$2_0$248	= .
-	.globl	C$scene.c$464$2_0$248
-;src/scene.c:464: if((rand() & 0x01) && !((VISITED_WINDOWS >> ((CURRENT_WINDOW + 1) & 0x03)) & 0x01)) { //if we want to go right and right is empty
+	C$scene.c$465$2_0$249	= .
+	.globl	C$scene.c$465$2_0$249
+;src/scene.c:465: if((rand() & 0x01) && !((VISITED_WINDOWS >> ((CURRENT_WINDOW + 1) & 0x03)) & 0x01)) { //if we want to go right and right is empty
 	call	_rand
-	C$scene.c$445$1_0$244	= .
-	.globl	C$scene.c$445$1_0$244
-;src/scene.c:445: if(!(walker_byte & 0x0F)){
-	C$scene.c$446$1_0$244	= .
-	.globl	C$scene.c$446$1_0$244
-;src/scene.c:446: walker_byte |= (0x01 << (CURRENT_WINDOW & 0x03));
+	C$scene.c$446$1_0$245	= .
+	.globl	C$scene.c$446$1_0$245
+;src/scene.c:446: if(!(walker_byte & 0x0F)){
+	C$scene.c$447$1_0$245	= .
+	.globl	C$scene.c$447$1_0$245
+;src/scene.c:447: walker_byte |= (0x01 << (CURRENT_WINDOW & 0x03));
 	ld	a, (#_walker_byte)
 	ld	c,a
 	swap	a
 	and	a, #0x0f
 	ldhl	sp,	#0
 	ld	(hl), a
-	C$scene.c$469$1_0$244	= .
-	.globl	C$scene.c$469$1_0$244
-;src/scene.c:469: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW - 1) & 0x03) << 4);
+	C$scene.c$470$1_0$245	= .
+	.globl	C$scene.c$470$1_0$245
+;src/scene.c:470: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW - 1) & 0x03) << 4);
 	ld	a, (hl+)
-	C$scene.c$466$1_0$244	= .
-	.globl	C$scene.c$466$1_0$244
-;src/scene.c:466: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW + 1) & 0x03) << 4);
+	C$scene.c$467$1_0$245	= .
+	.globl	C$scene.c$467$1_0$245
+;src/scene.c:467: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW + 1) & 0x03) << 4);
 	ld	(hl+), a
 	ld	a, c
 	and	a, #0xcf
@@ -3230,9 +3410,9 @@ _update_walker::
 	or	a, (hl)
 	inc	hl
 	ld	(hl), a
-	C$scene.c$464$2_0$248	= .
-	.globl	C$scene.c$464$2_0$248
-;src/scene.c:464: if((rand() & 0x01) && !((VISITED_WINDOWS >> ((CURRENT_WINDOW + 1) & 0x03)) & 0x01)) { //if we want to go right and right is empty
+	C$scene.c$465$2_0$249	= .
+	.globl	C$scene.c$465$2_0$249
+;src/scene.c:465: if((rand() & 0x01) && !((VISITED_WINDOWS >> ((CURRENT_WINDOW + 1) & 0x03)) & 0x01)) { //if we want to go right and right is empty
 	bit	0, e
 	jr	Z, 00105$
 	ldhl	sp,	#0
@@ -3251,17 +3431,17 @@ _update_walker::
 	jr	NZ, 00165$
 	bit	0, b
 	jr	NZ, 00105$
-	C$scene.c$466$3_0$249	= .
-	.globl	C$scene.c$466$3_0$249
-;src/scene.c:466: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW + 1) & 0x03) << 4);
+	C$scene.c$467$3_0$250	= .
+	.globl	C$scene.c$467$3_0$250
+;src/scene.c:467: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW + 1) & 0x03) << 4);
 	ldhl	sp,	#3
 	ld	a, (hl)
 	ld	(#_walker_byte),a
 	jr	00106$
 00105$:
-	C$scene.c$467$2_0$248	= .
-	.globl	C$scene.c$467$2_0$248
-;src/scene.c:467: } else if (!((VISITED_WINDOWS >> ((CURRENT_WINDOW - 1) & 0x03)) & 0x01)){ //if left is empty
+	C$scene.c$468$2_0$249	= .
+	.globl	C$scene.c$468$2_0$249
+;src/scene.c:468: } else if (!((VISITED_WINDOWS >> ((CURRENT_WINDOW - 1) & 0x03)) & 0x01)){ //if left is empty
 	ldhl	sp,	#0
 	ld	a, (hl)
 	dec	a
@@ -3278,9 +3458,9 @@ _update_walker::
 	jr	NZ, 00169$
 	bit	0, b
 	jr	NZ, 00102$
-	C$scene.c$469$3_0$250	= .
-	.globl	C$scene.c$469$3_0$250
-;src/scene.c:469: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW - 1) & 0x03) << 4);
+	C$scene.c$470$3_0$251	= .
+	.globl	C$scene.c$470$3_0$251
+;src/scene.c:470: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW - 1) & 0x03) << 4);
 	ldhl	sp,	#1
 	ld	a, (hl+)
 	inc	hl
@@ -3295,16 +3475,16 @@ _update_walker::
 	ld	(#_walker_byte),a
 	jr	00106$
 00102$:
-	C$scene.c$472$3_0$251	= .
-	.globl	C$scene.c$472$3_0$251
-;src/scene.c:472: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW + 1) & 0x03) << 4);
+	C$scene.c$473$3_0$252	= .
+	.globl	C$scene.c$473$3_0$252
+;src/scene.c:473: walker_byte = (walker_byte & 0xCF) | (((CURRENT_WINDOW + 1) & 0x03) << 4);
 	ldhl	sp,	#3
 	ld	a, (hl)
 	ld	(#_walker_byte),a
 00106$:
-	C$scene.c$474$2_0$248	= .
-	.globl	C$scene.c$474$2_0$248
-;src/scene.c:474: walker_byte |= (0x01 << CURRENT_WINDOW);
+	C$scene.c$475$2_0$249	= .
+	.globl	C$scene.c$475$2_0$249
+;src/scene.c:475: walker_byte |= (0x01 << CURRENT_WINDOW);
 	ld	hl, #_walker_byte
 	ld	a, (hl)
 	swap	a
@@ -3319,9 +3499,9 @@ _update_walker::
 	dec	b
 	jr	NZ,00173$
 	or	a, (hl)
-	C$scene.c$475$2_0$248	= .
-	.globl	C$scene.c$475$2_0$248
-;src/scene.c:475: window_components_on_current_floor[CURRENT_WINDOW & 0x03] = (bulky_bots[rand() & 0x03]) | ((bulky_tops[rand() & 0x03]) << 4);
+	C$scene.c$476$2_0$249	= .
+	.globl	C$scene.c$476$2_0$249
+;src/scene.c:476: window_components_on_current_floor[CURRENT_WINDOW & 0x03] = (bulky_bots[rand() & 0x03]) | ((bulky_tops[rand() & 0x03]) << 4);
 	ld	(hl), a
 	swap	a
 	and	a, #0x3
@@ -3367,34 +3547,34 @@ _update_walker::
 	or	a, (hl)
 	ld	(de), a
 00120$:
-	C$scene.c$477$1_0$244	= .
-	.globl	C$scene.c$477$1_0$244
-;src/scene.c:477: }
+	C$scene.c$478$1_0$245	= .
+	.globl	C$scene.c$478$1_0$245
+;src/scene.c:478: }
 	add	sp, #4
-	C$scene.c$477$1_0$244	= .
-	.globl	C$scene.c$477$1_0$244
+	C$scene.c$478$1_0$245	= .
+	.globl	C$scene.c$478$1_0$245
 	XG$update_walker$0$0	= .
 	.globl	XG$update_walker$0$0
 	ret
 	G$fill_window$0$0	= .
 	.globl	G$fill_window$0$0
-	C$scene.c$479$1_0$254	= .
-	.globl	C$scene.c$479$1_0$254
-;src/scene.c:479: void fill_window(void){
+	C$scene.c$480$1_0$255	= .
+	.globl	C$scene.c$480$1_0$255
+;src/scene.c:480: void fill_window(void){
 ;	---------------------------------
 ; Function fill_window
 ; ---------------------------------
 _fill_window::
 	dec	sp
-	C$scene.c$481$2_0$254	= .
-	.globl	C$scene.c$481$2_0$254
-;src/scene.c:481: for ( i = 0; i < 4; i++){
+	C$scene.c$482$2_0$255	= .
+	.globl	C$scene.c$482$2_0$255
+;src/scene.c:482: for ( i = 0; i < 4; i++){
 	ld	hl, #_i
 	ld	(hl), #0x00
 00105$:
-	C$scene.c$482$3_0$255	= .
-	.globl	C$scene.c$482$3_0$255
-;src/scene.c:482: if((VISITED_WINDOWS >> i) & 0x01) {
+	C$scene.c$483$3_0$256	= .
+	.globl	C$scene.c$483$3_0$256
+;src/scene.c:483: if((VISITED_WINDOWS >> i) & 0x01) {
 	ld	a, (#_i)
 	push	af
 	ld	hl, #_walker_byte
@@ -3409,9 +3589,9 @@ _fill_window::
 	jr	NZ, 00118$
 	bit	0, c
 	jr	NZ, 00103$
-	C$scene.c$485$3_0$255	= .
-	.globl	C$scene.c$485$3_0$255
-;src/scene.c:485: window_components_on_current_floor[i] = (all_bots[rand() & 0x07]) | ((all_tops[rand() & 0x07]) << 4);
+	C$scene.c$486$3_0$256	= .
+	.globl	C$scene.c$486$3_0$256
+;src/scene.c:486: window_components_on_current_floor[i] = (all_bots[rand() & 0x07]) | ((all_tops[rand() & 0x07]) << 4);
 	ld	bc, #_window_components_on_current_floor+0
 	ld	a, c
 	ld	hl, #_i
@@ -3455,9 +3635,9 @@ _fill_window::
 	ldhl	sp,	#0
 	or	a, (hl)
 	ld	(bc), a
-	C$scene.c$486$3_0$255	= .
-	.globl	C$scene.c$486$3_0$255
-;src/scene.c:486: walker_byte |= (0x01 << i);
+	C$scene.c$487$3_0$256	= .
+	.globl	C$scene.c$487$3_0$256
+;src/scene.c:487: walker_byte |= (0x01 << i);
 	ld	hl, #_i
 	ld	c, (hl)
 	ld	a, #0x01
@@ -3471,53 +3651,53 @@ _fill_window::
 	ld	hl, #_walker_byte
 	or	a, (hl)
 	ld	(hl), a
-	C$scene.c$487$3_0$255	= .
-	.globl	C$scene.c$487$3_0$255
-;src/scene.c:487: return;
+	C$scene.c$488$3_0$256	= .
+	.globl	C$scene.c$488$3_0$256
+;src/scene.c:488: return;
 	jr	00106$
 00103$:
-	C$scene.c$481$2_0$254	= .
-	.globl	C$scene.c$481$2_0$254
-;src/scene.c:481: for ( i = 0; i < 4; i++){
+	C$scene.c$482$2_0$255	= .
+	.globl	C$scene.c$482$2_0$255
+;src/scene.c:482: for ( i = 0; i < 4; i++){
 	ld	hl, #_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x04
 	jr	C, 00105$
 00106$:
-	C$scene.c$489$2_0$254	= .
-	.globl	C$scene.c$489$2_0$254
-;src/scene.c:489: }
+	C$scene.c$490$2_0$255	= .
+	.globl	C$scene.c$490$2_0$255
+;src/scene.c:490: }
 	inc	sp
-	C$scene.c$489$2_0$254	= .
-	.globl	C$scene.c$489$2_0$254
+	C$scene.c$490$2_0$255	= .
+	.globl	C$scene.c$490$2_0$255
 	XG$fill_window$0$0	= .
 	.globl	XG$fill_window$0$0
 	ret
 	G$mend_incorrect_windows$0$0	= .
 	.globl	G$mend_incorrect_windows$0$0
-	C$scene.c$491$2_0$258	= .
-	.globl	C$scene.c$491$2_0$258
-;src/scene.c:491: void mend_incorrect_windows(void){
+	C$scene.c$492$2_0$259	= .
+	.globl	C$scene.c$492$2_0$259
+;src/scene.c:492: void mend_incorrect_windows(void){
 ;	---------------------------------
 ; Function mend_incorrect_windows
 ; ---------------------------------
 _mend_incorrect_windows::
 	dec	sp
-	C$scene.c$492$1_0$258	= .
-	.globl	C$scene.c$492$1_0$258
-;src/scene.c:492: if(malloc_i == 4){
+	C$scene.c$493$1_0$259	= .
+	.globl	C$scene.c$493$1_0$259
+;src/scene.c:493: if(malloc_i == 4){
 	ld	a, (#_malloc_i)
 	sub	a, #0x04
 	jr	Z, 00108$
-	C$scene.c$493$2_0$259	= .
-	.globl	C$scene.c$493$2_0$259
-;src/scene.c:493: return;
+	C$scene.c$494$2_0$260	= .
+	.globl	C$scene.c$494$2_0$260
+;src/scene.c:494: return;
 	jr	00102$
 00102$:
-	C$scene.c$496$1_0$258	= .
-	.globl	C$scene.c$496$1_0$258
-;src/scene.c:496: if(window_components_on_current_floor[malloc_i] == 0x45){
+	C$scene.c$497$1_0$259	= .
+	.globl	C$scene.c$497$1_0$259
+;src/scene.c:497: if(window_components_on_current_floor[malloc_i] == 0x45){
 	ld	bc, #_window_components_on_current_floor+0
 	ld	a, c
 	ld	hl, #_malloc_i
@@ -3531,19 +3711,19 @@ _mend_incorrect_windows::
 	ld	(hl), a
 	sub	a, #0x45
 	jr	NZ, 00104$
-	C$scene.c$497$2_0$260	= .
-	.globl	C$scene.c$497$2_0$260
-;src/scene.c:497: window_components_on_current_floor[malloc_i] = 0x05; //no shingles above a cloth rack
+	C$scene.c$498$2_0$261	= .
+	.globl	C$scene.c$498$2_0$261
+;src/scene.c:498: window_components_on_current_floor[malloc_i] = 0x05; //no shingles above a cloth rack
 	ld	a, #0x05
 	ld	(bc), a
-	C$scene.c$498$2_0$260	= .
-	.globl	C$scene.c$498$2_0$260
-;src/scene.c:498: return;
+	C$scene.c$499$2_0$261	= .
+	.globl	C$scene.c$499$2_0$261
+;src/scene.c:499: return;
 	jr	00108$
 00104$:
-	C$scene.c$500$1_0$258	= .
-	.globl	C$scene.c$500$1_0$258
-;src/scene.c:500: if((window_components_on_current_floor[malloc_i] & 0x0F) == 0x03 && (map_components[camera_y_clamped][malloc_i].components & 0xF0) == 0x30){
+	C$scene.c$501$1_0$259	= .
+	.globl	C$scene.c$501$1_0$259
+;src/scene.c:501: if((window_components_on_current_floor[malloc_i] & 0x0F) == 0x03 && (map_components[camera_y_clamped][malloc_i].components & 0xF0) == 0x30){
 	ldhl	sp,	#0
 	ld	a, (hl)
 	and	a, #0x0f
@@ -3580,57 +3760,57 @@ _mend_incorrect_windows::
 	sub	a, #0x30
 	or	a, d
 	jr	NZ, 00108$
-	C$scene.c$501$2_0$261	= .
-	.globl	C$scene.c$501$2_0$261
-;src/scene.c:501: window_components_on_current_floor[malloc_i] &= 0xF0; //no spikes above an awning
+	C$scene.c$502$2_0$262	= .
+	.globl	C$scene.c$502$2_0$262
+;src/scene.c:502: window_components_on_current_floor[malloc_i] &= 0xF0; //no spikes above an awning
 	ldhl	sp,	#0
 	ld	a, (hl)
 	and	a, #0xf0
 	ld	(bc), a
-	C$scene.c$503$2_0$261	= .
-	.globl	C$scene.c$503$2_0$261
-;src/scene.c:503: return;
+	C$scene.c$504$2_0$262	= .
+	.globl	C$scene.c$504$2_0$262
+;src/scene.c:504: return;
 00108$:
-	C$scene.c$505$1_0$258	= .
-	.globl	C$scene.c$505$1_0$258
-;src/scene.c:505: }
+	C$scene.c$506$1_0$259	= .
+	.globl	C$scene.c$506$1_0$259
+;src/scene.c:506: }
 	inc	sp
-	C$scene.c$505$1_0$258	= .
-	.globl	C$scene.c$505$1_0$258
+	C$scene.c$506$1_0$259	= .
+	.globl	C$scene.c$506$1_0$259
 	XG$mend_incorrect_windows$0$0	= .
 	.globl	XG$mend_incorrect_windows$0$0
 	ret
 	G$fill_memory$0$0	= .
 	.globl	G$fill_memory$0$0
-	C$scene.c$507$1_0$263	= .
-	.globl	C$scene.c$507$1_0$263
-;src/scene.c:507: void fill_memory(void){
+	C$scene.c$508$1_0$264	= .
+	.globl	C$scene.c$508$1_0$264
+;src/scene.c:508: void fill_memory(void){
 ;	---------------------------------
 ; Function fill_memory
 ; ---------------------------------
 _fill_memory::
 	add	sp, #-3
-	C$scene.c$509$1_0$263	= .
-	.globl	C$scene.c$509$1_0$263
-;src/scene.c:509: if(malloc_i == 4){
+	C$scene.c$510$1_0$264	= .
+	.globl	C$scene.c$510$1_0$264
+;src/scene.c:510: if(malloc_i == 4){
 	ld	a, (#_malloc_i)
 	sub	a, #0x04
 	jr	NZ, 00102$
-	C$scene.c$510$2_0$264	= .
-	.globl	C$scene.c$510$2_0$264
-;src/scene.c:510: walker_byte |= 0x80;
+	C$scene.c$511$2_0$265	= .
+	.globl	C$scene.c$511$2_0$265
+;src/scene.c:511: walker_byte |= 0x80;
 	ld	hl, #_walker_byte
 	ld	a, (hl)
 	or	a, #0x80
 	ld	(hl), a
-	C$scene.c$511$2_0$264	= .
-	.globl	C$scene.c$511$2_0$264
-;src/scene.c:511: return;
+	C$scene.c$512$2_0$265	= .
+	.globl	C$scene.c$512$2_0$265
+;src/scene.c:512: return;
 	jp	00103$
 00102$:
-	C$scene.c$514$1_0$263	= .
-	.globl	C$scene.c$514$1_0$263
-;src/scene.c:514: memcpy_rect((malloc_i << 2) + 16, base, 4, 12);
+	C$scene.c$515$1_0$264	= .
+	.globl	C$scene.c$515$1_0$264
+;src/scene.c:515: memcpy_rect((malloc_i << 2) + 16, base, 4, 12);
 	ld	hl, #_malloc_i
 	ld	a, (hl)
 	add	a, a
@@ -3652,9 +3832,9 @@ _fill_memory::
 	inc	sp
 	call	_memcpy_rect
 	add	sp, #5
-	C$scene.c$515$1_0$263	= .
-	.globl	C$scene.c$515$1_0$263
-;src/scene.c:515: memcpy_rect(malloc_i << 2, top_info[(UINT8)(window_components_on_current_floor[malloc_i] >> 4)].map, 4, (top_info[(UINT8)(window_components_on_current_floor[malloc_i] >> 4)].h)<<2);
+	C$scene.c$516$1_0$264	= .
+	.globl	C$scene.c$516$1_0$264
+;src/scene.c:516: memcpy_rect(malloc_i << 2, top_info[(uint8_t)(window_components_on_current_floor[malloc_i] >> 4)].map, 4, (top_info[(uint8_t)(window_components_on_current_floor[malloc_i] >> 4)].h)<<2);
 	ld	a, #<(_window_components_on_current_floor)
 	ld	hl, #_malloc_i
 	add	a, (hl)
@@ -3698,9 +3878,9 @@ _fill_memory::
 	inc	sp
 	call	_memcpy_rect
 	add	sp, #5
-	C$scene.c$516$1_0$263	= .
-	.globl	C$scene.c$516$1_0$263
-;src/scene.c:516: memcpy_rect((malloc_i << 2) + ((bot_info[window_components_on_current_floor[malloc_i] & 0x0F].y_offset - 1)<<4), bot_info[window_components_on_current_floor[malloc_i] & 0x0F].map, 4, (bot_info[window_components_on_current_floor[malloc_i] & 0x0F].h)<<2);
+	C$scene.c$517$1_0$264	= .
+	.globl	C$scene.c$517$1_0$264
+;src/scene.c:517: memcpy_rect((malloc_i << 2) + ((bot_info[window_components_on_current_floor[malloc_i] & 0x0F].y_offset - 1)<<4), bot_info[window_components_on_current_floor[malloc_i] & 0x0F].map, 4, (bot_info[window_components_on_current_floor[malloc_i] & 0x0F].h)<<2);
 	ld	bc, #_bot_info+0
 	ld	a, #<(_window_components_on_current_floor)
 	ld	hl, #_malloc_i
@@ -3779,34 +3959,34 @@ _fill_memory::
 	inc	sp
 	call	_memcpy_rect
 	add	sp, #5
-	C$scene.c$518$1_0$263	= .
-	.globl	C$scene.c$518$1_0$263
-;src/scene.c:518: malloc_i++;
+	C$scene.c$519$1_0$264	= .
+	.globl	C$scene.c$519$1_0$264
+;src/scene.c:519: malloc_i++;
 	ld	hl, #_malloc_i
 	inc	(hl)
 00103$:
-	C$scene.c$519$1_0$263	= .
-	.globl	C$scene.c$519$1_0$263
-;src/scene.c:519: }
+	C$scene.c$520$1_0$264	= .
+	.globl	C$scene.c$520$1_0$264
+;src/scene.c:520: }
 	add	sp, #3
-	C$scene.c$519$1_0$263	= .
-	.globl	C$scene.c$519$1_0$263
+	C$scene.c$520$1_0$264	= .
+	.globl	C$scene.c$520$1_0$264
 	XG$fill_memory$0$0	= .
 	.globl	XG$fill_memory$0$0
 	ret
 	G$memcpy_rect$0$0	= .
 	.globl	G$memcpy_rect$0$0
-	C$scene.c$521$1_0$266	= .
-	.globl	C$scene.c$521$1_0$266
-;src/scene.c:521: void memcpy_rect(uint8_t wm_pos, uint8_t * p_src, uint8_t src_width, uint8_t size_bytes){
+	C$scene.c$522$1_0$267	= .
+	.globl	C$scene.c$522$1_0$267
+;src/scene.c:522: void memcpy_rect(uint8_t wm_pos, uint8_t * p_src, uint8_t src_width, uint8_t size_bytes){
 ;	---------------------------------
 ; Function memcpy_rect
 ; ---------------------------------
 _memcpy_rect::
 	add	sp, #-4
-	C$scene.c$525$1_0$266	= .
-	.globl	C$scene.c$525$1_0$266
-;src/scene.c:525: uint8_t * map_pointer = window_map + wm_pos;
+	C$scene.c$526$1_0$267	= .
+	.globl	C$scene.c$526$1_0$267
+;src/scene.c:526: uint8_t * map_pointer = window_map + wm_pos;
 	ld	bc, #_window_map+0
 	ldhl	sp,	#6
 	ld	l, (hl)
@@ -3814,22 +3994,22 @@ _memcpy_rect::
 	add	hl, bc
 	ld	c, l
 	ld	b, h
-	C$scene.c$526$1_0$266	= .
-	.globl	C$scene.c$526$1_0$266
-;src/scene.c:526: cur_row = src_width;
+	C$scene.c$527$1_0$267	= .
+	.globl	C$scene.c$527$1_0$267
+;src/scene.c:527: cur_row = src_width;
 	ldhl	sp,	#9
 	ld	e, (hl)
-	ld	hl, #_memcpy_rect_cur_row_65536_266
+	ld	hl, #_memcpy_rect_cur_row_65536_267
 	ld	(hl), e
-	C$scene.c$527$1_1$267	= .
-	.globl	C$scene.c$527$1_1$267
-;src/scene.c:527: uint8_t dest_next_row_start = 16U/*dest_width*/ - src_width; // only do this calc once
+	C$scene.c$528$1_1$268	= .
+	.globl	C$scene.c$528$1_1$268
+;src/scene.c:528: uint8_t dest_next_row_start = 16U/*dest_width*/ - src_width; // only do this calc once
 	ld	a, #0x10
 	sub	a, e
 	ldhl	sp,	#0
-	C$scene.c$529$3_1$269	= .
-	.globl	C$scene.c$529$3_1$269
-;src/scene.c:529: while (size_bytes--) {
+	C$scene.c$530$3_1$270	= .
+	.globl	C$scene.c$530$3_1$270
+;src/scene.c:530: while (size_bytes--) {
 	ld	(hl+), a
 	ld	(hl), e
 	ldhl	sp,	#7
@@ -3850,45 +4030,45 @@ _memcpy_rect::
 	ld	a, (hl)
 	or	a, a
 	jr	Z, 00106$
-	C$scene.c$530$2_1$268	= .
-	.globl	C$scene.c$530$2_1$268
-;src/scene.c:530: *map_pointer++ = *(p_src++);
+	C$scene.c$531$2_1$269	= .
+	.globl	C$scene.c$531$2_1$269
+;src/scene.c:531: *map_pointer++ = *(p_src++);
 	ld	a, (de)
 	inc	de
 	ld	(bc), a
 	inc	bc
-	C$scene.c$531$2_1$268	= .
-	.globl	C$scene.c$531$2_1$268
-;src/scene.c:531: cur_row--;
-	ld	hl, #_memcpy_rect_cur_row_65536_266
-	C$scene.c$532$2_1$268	= .
-	.globl	C$scene.c$532$2_1$268
-;src/scene.c:532: if (cur_row == 0) {
+	C$scene.c$532$2_1$269	= .
+	.globl	C$scene.c$532$2_1$269
+;src/scene.c:532: cur_row--;
+	ld	hl, #_memcpy_rect_cur_row_65536_267
+	C$scene.c$533$2_1$269	= .
+	.globl	C$scene.c$533$2_1$269
+;src/scene.c:533: if (cur_row == 0) {
 	dec	(hl)
 	jr	NZ, 00103$
-	C$scene.c$533$3_1$269	= .
-	.globl	C$scene.c$533$3_1$269
-;src/scene.c:533: map_pointer += dest_next_row_start;   
+	C$scene.c$534$3_1$270	= .
+	.globl	C$scene.c$534$3_1$270
+;src/scene.c:534: map_pointer += dest_next_row_start;   
 	ldhl	sp,	#0
 	ld	l, (hl)
 	ld	h, #0x00
 	add	hl, bc
 	ld	c, l
 	ld	b, h
-	C$scene.c$534$3_1$269	= .
-	.globl	C$scene.c$534$3_1$269
-;src/scene.c:534: cur_row = src_width;
+	C$scene.c$535$3_1$270	= .
+	.globl	C$scene.c$535$3_1$270
+;src/scene.c:535: cur_row = src_width;
 	ldhl	sp,	#1
 	ld	a, (hl)
-	ld	(#_memcpy_rect_cur_row_65536_266),a
+	ld	(#_memcpy_rect_cur_row_65536_267),a
 	jr	00103$
 00106$:
-	C$scene.c$537$1_1$266	= .
-	.globl	C$scene.c$537$1_1$266
-;src/scene.c:537: }
+	C$scene.c$538$1_1$267	= .
+	.globl	C$scene.c$538$1_1$267
+;src/scene.c:538: }
 	add	sp, #4
-	C$scene.c$537$1_1$266	= .
-	.globl	C$scene.c$537$1_1$266
+	C$scene.c$538$1_1$267	= .
+	.globl	C$scene.c$538$1_1$267
 	XG$memcpy_rect$0$0	= .
 	.globl	XG$memcpy_rect$0$0
 	ret
