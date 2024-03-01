@@ -1,10 +1,9 @@
 XL3
-H 9 areas 3 global symbols
+H 9 areas 2 global symbols
 M hud_map
-O -mgbz80
+O -msm83
 S .__.ABS. Def000000
 A _CODE size 3C flags 0 addr 0
-S G$hud_map$0_0$0 Def000000
 S _hud_map Def000000
 A _DATA size 0 flags 0 addr 0
 A _INITIALIZED size 0 flags 0 addr 0

@@ -26,6 +26,6 @@
 /* Bank of tiles. */
 #define TileLabelBank 0
 /* Start of tile array. */
-extern unsigned char partly_broken_bricks[];
+extern const unsigned char partly_broken_bricks[];
 
 /* End of PARTLY_BROKEN_BRICKS.H */

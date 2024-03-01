@@ -43,5 +43,6 @@ extern uint8_t clothes_position[4];
 extern uint8_t clothes_speed;
 extern uint8_t deactivate_weeds_flag;
 
+void load_map(void);
 void scene_init(void);
 void compute_scene_frame(void);

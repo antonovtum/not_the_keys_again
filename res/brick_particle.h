@@ -26,6 +26,6 @@
 /* Bank of tiles. */
 #define brick_particleBank 0
 /* Start of tile array. */
-extern unsigned char brick_particle[];
+extern const unsigned char brick_particle[];
 
 /* End of BRICK_PARTICLE.H */

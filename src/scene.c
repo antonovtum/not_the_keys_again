@@ -92,6 +92,7 @@ const unsigned char all_bots[] = {0x00, 0x01, 0x02, 0x03, 0x01, 0x05, 0x02, 0x02
 
 const unsigned char possible_clothes[] = {0x1F, 0x20};
 
+void load_map(void);
 void scene_init(void);
 void compute_scene_frame(void);
 void move_camera(void);
@@ -112,20 +113,46 @@ void move_rects(void);
 
 void memcpy_rect(uint8_t wm_pos, uint8_t * p_src, uint8_t src_width, uint8_t size_bytes);
 
-void scene_init(void){
-    // Load Background tiles and then map (160 x 144)
+void load_map(){
     set_bkg_data(0, 112U, hub_data);
-    set_bkg_data(112U, 13, numbers);
-    set_bkg_data(0x7D, 5, partly_broken_bricks);
     set_bkg_tiles(map_pos_x, 20U, 20u, 30u, hub_map);
     camera_y = 0;
+    move_bkg(map_pos_x << 3, camera_y);
+
+    //extra effects
+    set_sprite_data(29, 8, extra_sprites);
+    clothes_position[0] = 56;
+    clothes_position[1] = 136;
+    clothes_position[2] = 136;
+    clothes_position[3] = 136;
+    set_sprite_tile(16, 29);
+    move_sprite(16, 10, clothes_position[0] - camera_y);
+    set_sprite_tile(17, 29);
+    move_sprite(17, 13, clothes_position[1] - camera_y);
+    set_sprite_tile(18, 29);
+    move_sprite(18, 67, clothes_position[2] - camera_y);
+    set_sprite_tile(19, 29);
+    move_sprite(19, 155, clothes_position[3] - camera_y);
+
+    weeds_frame_counter = 0;
+    clothes_speed = 0b11100100;
+    deactivate_weeds_flag = 0;
+}
+
+void scene_init(void){
+    load_map();
+    //set_bkg_data(0, 112U, hub_data);
+    set_bkg_data(112U, 13, numbers);
+    set_bkg_data(0x7D, 5, partly_broken_bricks);
+    //set_bkg_tiles(map_pos_x, 20U, 20u, 30u, hub_map);
+    //camera_y = 0;
     old_camera_y = 0;
     frames_to_move = 40;
     current_cam_frame = 0;
     accelerate_cam_flag = 0;
     game_started_flag = false;
     game_ended_flag = false;
-    move_bkg(map_pos_x << 3, camera_y);
+    //move_bkg(map_pos_x << 3, camera_y);
     is_generated = false;
 
     rect ground = {0U, 152U, 0xFF, 23U, SOLID};
@@ -198,6 +225,7 @@ void scene_init(void){
     walker_byte = 0x00;
     malloc_i = 0;
 
+    /*
     //extra effects
     set_sprite_data(29, 8, extra_sprites);
     clothes_position[0] = 56;
@@ -216,6 +244,7 @@ void scene_init(void){
     weeds_frame_counter = 0;
     clothes_speed = 0b11100100;
     deactivate_weeds_flag = 0;
+    */
 }
 
 void compute_scene_frame(void){

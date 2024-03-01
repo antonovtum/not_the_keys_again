@@ -15,7 +15,7 @@
             "type": "emulicious-debugger",
             "request": "launch",
             "name": "Launch in Emulicious",
-            "program": "${workspaceFolder}/obj/UPWARD.gb",
+            "program": "${workspaceFolder}/obj/Example.gb", // previously UPWARD
             "port": 58870,
             "stopOnEntry": true
         }

@@ -1,11 +1,10 @@
 XL3
-H 9 areas 3 global symbols
+H 9 areas 2 global symbols
 M hub_map
-O -mgbz80
+O -msm83
 S .__.ABS. Def000000
 A _CODE size 258 flags 0 addr 0
 S _hub_map Def000000
-S G$hub_map$0_0$0 Def000000
 A _DATA size 0 flags 0 addr 0
 A _INITIALIZED size 0 flags 0 addr 0
 A _DABS size 0 flags 8 addr 0

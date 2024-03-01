@@ -26,6 +26,6 @@
 /* Bank of tiles. */
 #define extra_spritesBank 0
 /* Start of tile array. */
-extern unsigned char extra_sprites[];
+extern const unsigned char extra_sprites[];
 
 /* End of EXTRA_SPRITES.H */

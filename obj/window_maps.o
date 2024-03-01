@@ -1,37 +1,23 @@
 XL3
-H 9 areas 1D global symbols
+H 9 areas F global symbols
 M window_maps
-O -mgbz80
+O -msm83
 S .__.ABS. Def000000
 A _CODE size 64 flags 0 addr 0
 S _bot_map_00 Def00000C
 S _bot_map_01 Def000014
 S _bot_map_02 Def00001C
-S G$bot_map_00$0_0$0 Def00000C
 S _bot_map_03 Def000024
-S G$bot_map_01$0_0$0 Def000014
 S _bot_map_04 Def000030
-S G$bot_map_02$0_0$0 Def00001C
 S _bot_map_05 Def000038
-S G$bot_map_03$0_0$0 Def000024
-S G$bot_map_04$0_0$0 Def000030
-S G$bot_map_05$0_0$0 Def000038
 S _top_map_00 Def000040
 S _top_map_01 Def000044
 S _top_map_02 Def000048
-S G$top_map_00$0_0$0 Def000040
 S _top_map_03 Def00004C
-S G$top_map_01$0_0$0 Def000044
 S _top_map_04 Def000054
-S G$top_map_02$0_0$0 Def000048
-S G$top_map_03$0_0$0 Def00004C
-S G$top_map_04$0_0$0 Def000054
 S _bot_map_02_broken Def000058
-S G$bot_map_02_broken$0_0$0 Def000058
 S _top_map_02_broken Def000060
-S G$top_map_02_broken$0_0$0 Def000060
 S _base Def000000
-S G$base$0_0$0 Def000000
 A _DATA size 0 flags 0 addr 0
 A _INITIALIZED size 0 flags 0 addr 0
 A _DABS size 0 flags 8 addr 0

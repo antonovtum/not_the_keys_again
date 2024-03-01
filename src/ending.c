@@ -33,11 +33,11 @@ void ending_init(void);
 static void prepare_ending_frame(void);
 void compute_ending_frame(void);
 
-void VBL_isr() { 
+void VBL_isr(void) { 
     SHOW_WIN;
     LYC_REG = max_scan; 
 }
-void LCD_isr() {
+void LCD_isr(void) {
     if (LY_REG < 144) {
         HIDE_WIN;
         WX_REG = 160; //THIS IS TO COVER A BUG ON THE DMG!!! REMOVE IT FOR THE GBC VERSION

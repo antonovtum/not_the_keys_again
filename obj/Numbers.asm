@@ -1,9 +1,9 @@
 ;--------------------------------------------------------
-; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.1.6 #12539 (MINGW32)
+; File Created by SDCC : free open source ISO C Compiler 
+; Version 4.3.2 #14228 (Linux)
 ;--------------------------------------------------------
 	.module Numbers
-	.optsdcc -mgbz80
+	.optsdcc -msm83
 	
 ;--------------------------------------------------------
 ; Public variables in this module
@@ -41,7 +41,6 @@
 ;--------------------------------------------------------
 	.area _CODE
 	.area _CODE
-G$numbers$0_0$0 == .
 _numbers:
 	.db #0x00	; 0
 	.db #0x00	; 0

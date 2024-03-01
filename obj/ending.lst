@@ -1,9 +1,9 @@
                                       1 ;--------------------------------------------------------
-                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
-                                      3 ; Version 4.1.6 #12539 (MINGW32)
+                                      2 ; File Created by SDCC : free open source ISO C Compiler 
+                                      3 ; Version 4.3.2 #14228 (Linux)
                                       4 ;--------------------------------------------------------
                                       5 	.module ending
-                                      6 	.optsdcc -mgbz80
+                                      6 	.optsdcc -msm83
                                       7 	
                                       8 ;--------------------------------------------------------
                                       9 ; Public variables in this module
@@ -28,599 +28,446 @@
                                      28 ; ram data
                                      29 ;--------------------------------------------------------
                                      30 	.area _DATA
-                           000000    31 G$ending_flags$0_0$0==.
-      000000                         32 _ending_flags::
-      000000                         33 	.ds 1
-                           000001    34 Fending$subpix_speed$0_0$0==.
-      000001                         35 _subpix_speed:
-      000001                         36 	.ds 1
-                           000002    37 Fending$force$0_0$0==.
-      000002                         38 _force:
-      000002                         39 	.ds 1
-                           000003    40 Fending$win_height$0_0$0==.
-      000003                         41 _win_height:
-      000003                         42 	.ds 2
-                           000005    43 Fending$max_scan$0_0$0==.
-      000005                         44 _max_scan:
-      000005                         45 	.ds 1
-                           000006    46 Fending$score_text$0_0$0==.
-      000006                         47 _score_text:
-      000006                         48 	.ds 5
-                           00000B    49 Fending$i$0_0$0==.
-      00000B                         50 _i:
-      00000B                         51 	.ds 1
-                                     52 ;--------------------------------------------------------
-                                     53 ; ram data
-                                     54 ;--------------------------------------------------------
-                                     55 	.area _INITIALIZED
-                                     56 ;--------------------------------------------------------
-                                     57 ; absolute external ram data
-                                     58 ;--------------------------------------------------------
-                                     59 	.area _DABS (ABS)
+      000000                         31 _ending_flags::
+      000000                         32 	.ds 1
+      000001                         33 _subpix_speed:
+      000001                         34 	.ds 1
+      000002                         35 _force:
+      000002                         36 	.ds 1
+      000003                         37 _win_height:
+      000003                         38 	.ds 2
+      000005                         39 _max_scan:
+      000005                         40 	.ds 1
+      000006                         41 _score_text:
+      000006                         42 	.ds 5
+      00000B                         43 _i:
+      00000B                         44 	.ds 1
+                                     45 ;--------------------------------------------------------
+                                     46 ; ram data
+                                     47 ;--------------------------------------------------------
+                                     48 	.area _INITIALIZED
+                                     49 ;--------------------------------------------------------
+                                     50 ; absolute external ram data
+                                     51 ;--------------------------------------------------------
+                                     52 	.area _DABS (ABS)
+                                     53 ;--------------------------------------------------------
+                                     54 ; global & static initialisations
+                                     55 ;--------------------------------------------------------
+                                     56 	.area _HOME
+                                     57 	.area _GSINIT
+                                     58 	.area _GSFINAL
+                                     59 	.area _GSINIT
                                      60 ;--------------------------------------------------------
-                                     61 ; global & static initialisations
+                                     61 ; Home
                                      62 ;--------------------------------------------------------
                                      63 	.area _HOME
-                                     64 	.area _GSINIT
-                                     65 	.area _GSFINAL
-                                     66 	.area _GSINIT
+                                     64 	.area _HOME
+                                     65 ;--------------------------------------------------------
+                                     66 ; code
                                      67 ;--------------------------------------------------------
-                                     68 ; Home
-                                     69 ;--------------------------------------------------------
-                                     70 	.area _HOME
-                                     71 	.area _HOME
-                                     72 ;--------------------------------------------------------
-                                     73 ; code
-                                     74 ;--------------------------------------------------------
-                                     75 	.area _CODE
-                           000000    76 	G$VBL_isr$0$0	= .
-                                     77 	.globl	G$VBL_isr$0$0
-                           000000    78 	C$ending.c$36$0_0$125	= .
-                                     79 	.globl	C$ending.c$36$0_0$125
-                                     80 ;src/ending.c:36: void VBL_isr() { 
-                                     81 ;	---------------------------------
-                                     82 ; Function VBL_isr
-                                     83 ; ---------------------------------
-      000000                         84 _VBL_isr::
-                           000000    85 	C$ending.c$37$1_0$125	= .
-                                     86 	.globl	C$ending.c$37$1_0$125
-                                     87 ;src/ending.c:37: SHOW_WIN;
-      000000 F0r00                   88 	ldh	a, (_LCDC_REG + 0)
-      000002 F6 20                   89 	or	a, #0x20
-      000004 E0r00                   90 	ldh	(_LCDC_REG + 0), a
-                           000006    91 	C$ending.c$38$1_0$125	= .
-                                     92 	.globl	C$ending.c$38$1_0$125
-                                     93 ;src/ending.c:38: LYC_REG = max_scan; 
-      000006 FAr05r00                94 	ld	a, (#_max_scan)
-      000009 E0r00                   95 	ldh	(_LYC_REG + 0), a
-                           00000B    96 	C$ending.c$39$1_0$125	= .
-                                     97 	.globl	C$ending.c$39$1_0$125
-                                     98 ;src/ending.c:39: }
-                           00000B    99 	C$ending.c$39$1_0$125	= .
-                                    100 	.globl	C$ending.c$39$1_0$125
-                           00000B   101 	XG$VBL_isr$0$0	= .
-                                    102 	.globl	XG$VBL_isr$0$0
-      00000B C9                     103 	ret
-                           00000C   104 	G$LCD_isr$0$0	= .
-                                    105 	.globl	G$LCD_isr$0$0
-                           00000C   106 	C$ending.c$40$1_0$126	= .
-                                    107 	.globl	C$ending.c$40$1_0$126
-                                    108 ;src/ending.c:40: void LCD_isr() {
-                                    109 ;	---------------------------------
-                                    110 ; Function LCD_isr
-                                    111 ; ---------------------------------
-      00000C                        112 _LCD_isr::
-                           00000C   113 	C$ending.c$41$1_0$126	= .
-                                    114 	.globl	C$ending.c$41$1_0$126
-                                    115 ;src/ending.c:41: if (LY_REG < 144) {
-      00000C F0r00                  116 	ldh	a, (_LY_REG + 0)
-      00000E D6 90                  117 	sub	a, #0x90
-      000010 D0                     118 	ret	NC
-                           000011   119 	C$ending.c$42$2_0$127	= .
-                                    120 	.globl	C$ending.c$42$2_0$127
-                                    121 ;src/ending.c:42: HIDE_WIN;
-      000011 F0r00                  122 	ldh	a, (_LCDC_REG + 0)
-      000013 E6 DF                  123 	and	a, #0xdf
-      000015 E0r00                  124 	ldh	(_LCDC_REG + 0), a
-                           000017   125 	C$ending.c$43$2_0$127	= .
-                                    126 	.globl	C$ending.c$43$2_0$127
-                                    127 ;src/ending.c:43: WX_REG = 160; //THIS IS TO COVER A BUG ON THE DMG!!! REMOVE IT FOR THE GBC VERSION
-      000017 3E A0                  128 	ld	a, #0xa0
-      000019 E0r00                  129 	ldh	(_WX_REG + 0), a
-                           00001B   130 	C$ending.c$45$1_0$126	= .
-                                    131 	.globl	C$ending.c$45$1_0$126
-                                    132 ;src/ending.c:45: }
-                           00001B   133 	C$ending.c$45$1_0$126	= .
-                                    134 	.globl	C$ending.c$45$1_0$126
-                           00001B   135 	XG$LCD_isr$0$0	= .
-                                    136 	.globl	XG$LCD_isr$0$0
-      00001B C9                     137 	ret
-                           00001C   138 	G$ending_init$0$0	= .
-                                    139 	.globl	G$ending_init$0$0
-                           00001C   140 	C$ending.c$47$1_0$129	= .
-                                    141 	.globl	C$ending.c$47$1_0$129
-                                    142 ;src/ending.c:47: void ending_init(void){
-                                    143 ;	---------------------------------
-                                    144 ; Function ending_init
-                                    145 ; ---------------------------------
-      00001C                        146 _ending_init::
-                           00001C   147 	C$ending.c$48$1_0$129	= .
-                                    148 	.globl	C$ending.c$48$1_0$129
-                                    149 ;src/ending.c:48: ending_flags = 0b10000000;
-      00001C 21r00r00               150 	ld	hl, #_ending_flags
-      00001F 36 80                  151 	ld	(hl), #0x80
-                           000021   152 	C$ending.c$51$1_0$129	= .
-                                    153 	.globl	C$ending.c$51$1_0$129
-                                    154 ;src/ending.c:51: remove_VBL(VBL_isr);
-      000021 11r00r00               155 	ld	de, #_VBL_isr
-      000024 D5                     156 	push	de
-      000025 CDr00r00               157 	call	_remove_VBL
-      000028 E1                     158 	pop	hl
-                           000029   159 	C$ending.c$52$1_0$129	= .
-                                    160 	.globl	C$ending.c$52$1_0$129
-                                    161 ;src/ending.c:52: remove_LCD(LCD_isr);
-      000029 11r0Cr00               162 	ld	de, #_LCD_isr
-      00002C D5                     163 	push	de
-      00002D CDr00r00               164 	call	_remove_LCD
-      000030 E1                     165 	pop	hl
-                                    166 ;C:/gbdk/include/gb/gb.h:1546: shadow_OAM[nb].y = 0;
-      000031 21r50r00               167 	ld	hl, #(_shadow_OAM + 80)
-      000034 36 00                  168 	ld	(hl), #0x00
-      000036 21r54r00               169 	ld	hl, #(_shadow_OAM + 84)
-      000039 36 00                  170 	ld	(hl), #0x00
-      00003B 21r58r00               171 	ld	hl, #(_shadow_OAM + 88)
-      00003E 36 00                  172 	ld	(hl), #0x00
-      000040 21r5Cr00               173 	ld	hl, #(_shadow_OAM + 92)
-      000043 36 00                  174 	ld	(hl), #0x00
-      000045 21r60r00               175 	ld	hl, #(_shadow_OAM + 96)
-      000048 36 00                  176 	ld	(hl), #0x00
-      00004A 21r64r00               177 	ld	hl, #(_shadow_OAM + 100)
-      00004D 36 00                  178 	ld	(hl), #0x00
-                           00004F   179 	C$ending.c$59$3_0$129	= .
-                                    180 	.globl	C$ending.c$59$3_0$129
-                                    181 ;src/ending.c:59: hide_sprite(25);
-                           00004F   182 	C$ending.c$60$3_0$129	= .
-                                    183 	.globl	C$ending.c$60$3_0$129
-                                    184 ;src/ending.c:60: }
-                           00004F   185 	C$ending.c$60$3_0$129	= .
-                                    186 	.globl	C$ending.c$60$3_0$129
-                           00004F   187 	XG$ending_init$0$0	= .
-                                    188 	.globl	XG$ending_init$0$0
-      00004F C9                     189 	ret
-                           000050   190 	Fending$prepare_ending_frame$0$0	= .
-                                    191 	.globl	Fending$prepare_ending_frame$0$0
-                           000050   192 	C$ending.c$62$3_0$149	= .
-                                    193 	.globl	C$ending.c$62$3_0$149
-                                    194 ;src/ending.c:62: void prepare_ending_frame(void){
-                                    195 ;	---------------------------------
-                                    196 ; Function prepare_ending_frame
-                                    197 ; ---------------------------------
-      000050                        198 _prepare_ending_frame:
-      000050 3B                     199 	dec	sp
-                           000051   200 	C$ending.c$64$1_0$149	= .
-                                    201 	.globl	C$ending.c$64$1_0$149
-                                    202 ;src/ending.c:64: if(IS_ANIMATION_STARTED) {return;}
-      000051 FAr00r00               203 	ld	a, (#_ending_flags)
-      000054 CB 57                  204 	bit	2, a
-      000056 C2r3Br01               205 	jp	NZ,00116$
-                           000059   206 	C$ending.c$66$1_0$149	= .
-                                    207 	.globl	C$ending.c$66$1_0$149
-                                    208 ;src/ending.c:66: ending_flags |= 0x04; //mark is_ended as true
-      000059 21r00r00               209 	ld	hl, #_ending_flags
-      00005C 7E                     210 	ld	a, (hl)
-      00005D F6 04                  211 	or	a, #0x04
-      00005F 77                     212 	ld	(hl), a
-                           000060   213 	C$ending.c$67$1_0$149	= .
-                                    214 	.globl	C$ending.c$67$1_0$149
-                                    215 ;src/ending.c:67: win_height = 0xB000u;
-      000060 21r03r00               216 	ld	hl, #_win_height
-      000063 AF                     217 	xor	a, a
-      000064 22                     218 	ld	(hl+), a
-      000065 36 B0                  219 	ld	(hl), #0xb0
-                           000067   220 	C$ending.c$69$1_0$149	= .
-                                    221 	.globl	C$ending.c$69$1_0$149
-                                    222 ;src/ending.c:69: force = 4u; //initial force is 4u
-      000067 21r02r00               223 	ld	hl, #_force
-      00006A 36 04                  224 	ld	(hl), #0x04
-                           00006C   225 	C$ending.c$72$1_0$149	= .
-                                    226 	.globl	C$ending.c$72$1_0$149
-                                    227 ;src/ending.c:72: set_win_tiles(0,0, 20U, 3U, hud_map);
-      00006C 11r00r00               228 	ld	de, #_hud_map
-      00006F D5                     229 	push	de
-      000070 21 14 03               230 	ld	hl, #0x314
-      000073 E5                     231 	push	hl
-      000074 AF                     232 	xor	a, a
-      000075 0F                     233 	rrca
-      000076 F5                     234 	push	af
-      000077 CDr00r00               235 	call	_set_win_tiles
-      00007A E8 06                  236 	add	sp, #6
-                           00007C   237 	C$ending.c$73$1_0$149	= .
-                                    238 	.globl	C$ending.c$73$1_0$149
-                                    239 ;src/ending.c:73: itoa(score, score_text, 10);
-      00007C 01r06r00               240 	ld	bc, #_score_text+0
-      00007F 59                     241 	ld	e, c
-      000080 50                     242 	ld	d, b
-      000081 21r00r00               243 	ld	hl, #_score
-      000084 6E                     244 	ld	l, (hl)
-                                    245 ;	spillPairReg hl
-                                    246 ;	spillPairReg hl
-      000085 FAr01r00               247 	ld	a, (_score + 1)
-      000088 67                     248 	ld	h, a
-                                    249 ;	spillPairReg hl
-                                    250 ;	spillPairReg hl
-      000089 C5                     251 	push	bc
-      00008A 3E 0A                  252 	ld	a, #0x0a
-      00008C F5                     253 	push	af
-      00008D 33                     254 	inc	sp
-      00008E D5                     255 	push	de
-      00008F E5                     256 	push	hl
-      000090 CDr00r00               257 	call	_itoa
-      000093 E8 05                  258 	add	sp, #5
-      000095 C1                     259 	pop	bc
-                           000096   260 	C$ending.c$74$2_0$151	= .
-                                    261 	.globl	C$ending.c$74$2_0$151
-                                    262 ;src/ending.c:74: for(i=0; score_text[i] != 0 && i < 5; i++){
-      000096 21r0Br00               263 	ld	hl, #_i
-      000099 36 00                  264 	ld	(hl), #0x00
-      00009B                        265 00114$:
-      00009B 79                     266 	ld	a, c
-      00009C 21r0Br00               267 	ld	hl, #_i
-      00009F 86                     268 	add	a, (hl)
-      0000A0 5F                     269 	ld	e, a
-      0000A1 78                     270 	ld	a, b
-      0000A2 CE 00                  271 	adc	a, #0x00
-      0000A4 57                     272 	ld	d, a
-      0000A5 1A                     273 	ld	a, (de)
-      0000A6 F8 00                  274 	ldhl	sp,	#0
-      0000A8 77                     275 	ld	(hl), a
-      0000A9 7E                     276 	ld	a, (hl)
-      0000AA B7                     277 	or	a, a
-      0000AB 28 13                  278 	jr	Z, 00103$
-      0000AD FAr0Br00               279 	ld	a, (#_i)
-      0000B0 D6 05                  280 	sub	a, #0x05
-      0000B2 30 0C                  281 	jr	NC, 00103$
-                           0000B4   282 	C$ending.c$75$3_0$152	= .
-                                    283 	.globl	C$ending.c$75$3_0$152
-                                    284 ;src/ending.c:75: score_text[i] += 64U;
-      0000B4 F8 00                  285 	ldhl	sp,	#0
-      0000B6 7E                     286 	ld	a, (hl)
-      0000B7 C6 40                  287 	add	a, #0x40
-      0000B9 12                     288 	ld	(de), a
-                           0000BA   289 	C$ending.c$74$2_0$151	= .
-                                    290 	.globl	C$ending.c$74$2_0$151
-                                    291 ;src/ending.c:74: for(i=0; score_text[i] != 0 && i < 5; i++){
-      0000BA 21r0Br00               292 	ld	hl, #_i
-      0000BD 34                     293 	inc	(hl)
-      0000BE 18 DB                  294 	jr	00114$
-      0000C0                        295 00103$:
-                           0000C0   296 	C$ending.c$77$1_0$149	= .
-                                    297 	.globl	C$ending.c$77$1_0$149
-                                    298 ;src/ending.c:77: set_win_tiles(8, 1, i, 1, score_text);
-      0000C0 C5                     299 	push	bc
-      0000C1 3E 01                  300 	ld	a, #0x01
-      0000C3 F5                     301 	push	af
-      0000C4 33                     302 	inc	sp
-      0000C5 FAr0Br00               303 	ld	a, (#_i)
-      0000C8 67                     304 	ld	h, a
-      0000C9 2E 01                  305 	ld	l, #0x01
-      0000CB E5                     306 	push	hl
-      0000CC 3E 08                  307 	ld	a, #0x08
-      0000CE F5                     308 	push	af
-      0000CF 33                     309 	inc	sp
-      0000D0 CDr00r00               310 	call	_set_win_tiles
-      0000D3 E8 06                  311 	add	sp, #6
-                           0000D5   312 	C$ending.c$78$1_0$149	= .
-                                    313 	.globl	C$ending.c$78$1_0$149
-                                    314 ;src/ending.c:78: set_win_tile_xy(8 + i, 1, 0x7A);
-      0000D5 21r0Br00               315 	ld	hl, #_i
-      0000D8 7E                     316 	ld	a, (hl)
-      0000D9 C6 08                  317 	add	a, #0x08
-      0000DB 26 7A                  318 	ld	h, #0x7a
-                                    319 ;	spillPairReg hl
-                                    320 ;	spillPairReg hl
-      0000DD E5                     321 	push	hl
-      0000DE 33                     322 	inc	sp
-      0000DF 26 01                  323 	ld	h, #0x01
-                                    324 ;	spillPairReg hl
-                                    325 ;	spillPairReg hl
-      0000E1 E5                     326 	push	hl
-      0000E2 33                     327 	inc	sp
-      0000E3 F5                     328 	push	af
-      0000E4 33                     329 	inc	sp
-      0000E5 CDr00r00               330 	call	_set_win_tile_xy
-      0000E8 E8 03                  331 	add	sp, #3
-                                    332 ;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
-      0000EA 21r52r00               333 	ld	hl, #(_shadow_OAM + 82)
-      0000ED 36 81                  334 	ld	(hl), #0x81
-                                    335 ;C:/gbdk/include/gb/gb.h:1493: shadow_OAM[nb].prop=prop;
-      0000EF 21r53r00               336 	ld	hl, #(_shadow_OAM + 83)
-      0000F2 36 40                  337 	ld	(hl), #0x40
-                                    338 ;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
-      0000F4 21r56r00               339 	ld	hl, #(_shadow_OAM + 86)
-      0000F7 36 80                  340 	ld	(hl), #0x80
-                                    341 ;C:/gbdk/include/gb/gb.h:1493: shadow_OAM[nb].prop=prop;
-      0000F9 21r57r00               342 	ld	hl, #(_shadow_OAM + 87)
-      0000FC 36 40                  343 	ld	(hl), #0x40
-                                    344 ;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
-      0000FE 21r5Ar00               345 	ld	hl, #(_shadow_OAM + 90)
-      000101 36 23                  346 	ld	(hl), #0x23
-      000103 21r5Er00               347 	ld	hl, #(_shadow_OAM + 94)
-      000106 36 23                  348 	ld	(hl), #0x23
-      000108 21r62r00               349 	ld	hl, #(_shadow_OAM + 98)
-      00010B 36 24                  350 	ld	(hl), #0x24
-      00010D 21r66r00               351 	ld	hl, #(_shadow_OAM + 102)
-      000110 36 24                  352 	ld	(hl), #0x24
-                           000112   353 	C$ending.c$91$1_0$149	= .
-                                    354 	.globl	C$ending.c$91$1_0$149
-                                    355 ;src/ending.c:91: subpix_speed = 252u;
-      000112 21r01r00               356 	ld	hl, #_subpix_speed
-      000115 36 FC                  357 	ld	(hl), #0xfc
-                           000117   358 	C$ending.c$99$1_0$149	= .
-                                    359 	.globl	C$ending.c$99$1_0$149
-                                    360 ;src/ending.c:99: }
-      000117 F3                     361 	di
-                           000118   362 	C$ending.c$94$2_0$153	= .
-                                    363 	.globl	C$ending.c$94$2_0$153
-                                    364 ;src/ending.c:94: add_VBL(VBL_isr);
-      000118 11r00r00               365 	ld	de, #_VBL_isr
-      00011B D5                     366 	push	de
-      00011C CDr00r00               367 	call	_add_VBL
-      00011F E1                     368 	pop	hl
-                           000120   369 	C$ending.c$95$2_0$153	= .
-                                    370 	.globl	C$ending.c$95$2_0$153
-                                    371 ;src/ending.c:95: add_LCD(LCD_isr);
-      000120 11r0Cr00               372 	ld	de, #_LCD_isr
-      000123 D5                     373 	push	de
-      000124 CDr00r00               374 	call	_add_LCD
-      000127 E1                     375 	pop	hl
-                           000128   376 	C$ending.c$96$2_0$153	= .
-                                    377 	.globl	C$ending.c$96$2_0$153
-                                    378 ;src/ending.c:96: set_interrupts(VBL_IFLAG | LCD_IFLAG);
-      000128 3E 03                  379 	ld	a, #0x03
-      00012A F5                     380 	push	af
-      00012B 33                     381 	inc	sp
-      00012C CDr00r00               382 	call	_set_interrupts
-      00012F 33                     383 	inc	sp
-                           000130   384 	C$ending.c$97$2_0$153	= .
-                                    385 	.globl	C$ending.c$97$2_0$153
-                                    386 ;src/ending.c:97: STAT_REG |= 0x40; // enable LY == LYC mode 
-      000130 F0r00                  387 	ldh	a, (_STAT_REG + 0)
-      000132 F6 40                  388 	or	a, #0x40
-      000134 E0r00                  389 	ldh	(_STAT_REG + 0), a
-                           000136   390 	C$ending.c$98$2_0$153	= .
-                                    391 	.globl	C$ending.c$98$2_0$153
-                                    392 ;src/ending.c:98: LYC_REG = 160u;   // make it never fire
-      000136 3E A0                  393 	ld	a, #0xa0
-      000138 E0r00                  394 	ldh	(_LYC_REG + 0), a
-      00013A FB                     395 	ei
-      00013B                        396 00116$:
-                           00013B   397 	C$ending.c$100$2_0$149	= .
-                                    398 	.globl	C$ending.c$100$2_0$149
-                                    399 ;src/ending.c:100: }
-      00013B 33                     400 	inc	sp
-                           00013C   401 	C$ending.c$100$2_0$149	= .
-                                    402 	.globl	C$ending.c$100$2_0$149
-                           00013C   403 	XFending$prepare_ending_frame$0$0	= .
-                                    404 	.globl	XFending$prepare_ending_frame$0$0
-      00013C C9                     405 	ret
-                           00013D   406 	G$compute_ending_frame$0$0	= .
-                                    407 	.globl	G$compute_ending_frame$0$0
-                           00013D   408 	C$ending.c$102$2_0$179	= .
-                                    409 	.globl	C$ending.c$102$2_0$179
-                                    410 ;src/ending.c:102: void compute_ending_frame(void){
-                                    411 ;	---------------------------------
-                                    412 ; Function compute_ending_frame
-                                    413 ; ---------------------------------
-      00013D                        414 _compute_ending_frame::
-                           00013D   415 	C$ending.c$103$1_0$179	= .
-                                    416 	.globl	C$ending.c$103$1_0$179
-                                    417 ;src/ending.c:103: prepare_ending_frame();
-      00013D CDr50r00               418 	call	_prepare_ending_frame
-                                    419 ;src/ending.c:104: move_win(7u, WIN_PIXEL);
-      000140 21r04r00               420 	ld	hl, #_win_height + 1
-      000143 4E                     421 	ld	c, (hl)
-      000144 41                     422 	ld	b, c
-                                    423 ;C:/gbdk/include/gb/gb.h:1316: WX_REG=x, WY_REG=y;
-      000145 3E 07                  424 	ld	a, #0x07
-      000147 E0r00                  425 	ldh	(_WX_REG + 0), a
-      000149 78                     426 	ld	a, b
-      00014A E0r00                  427 	ldh	(_WY_REG + 0), a
-                                    428 ;src/ending.c:105: move_sprite(20, 8, WIN_PIXEL + 8u);
-      00014C 79                     429 	ld	a, c
-      00014D C6 08                  430 	add	a, #0x08
-                                    431 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
-                                    432 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
-      00014F 21r50r00               433 	ld	hl, #(_shadow_OAM + 80)
-      000152 22                     434 	ld	(hl+), a
-      000153 36 08                  435 	ld	(hl), #0x08
-                                    436 ;src/ending.c:106: move_sprite(21, 160, WIN_PIXEL + 8u);
-      000155 FAr04r00               437 	ld	a, (#_win_height + 1)
-      000158 C6 08                  438 	add	a, #0x08
-      00015A 4F                     439 	ld	c, a
-                                    440 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
-      00015B 21r54r00               441 	ld	hl, #(_shadow_OAM + 84)
-                                    442 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
-      00015E 71                     443 	ld	(hl), c
-      00015F 23                     444 	inc	hl
-      000160 36 A0                  445 	ld	(hl), #0xa0
-                                    446 ;src/ending.c:107: move_sprite(22, 8, WIN_PIXEL - 8);
-      000162 FAr04r00               447 	ld	a, (#_win_height + 1)
-      000165 C6 F8                  448 	add	a, #0xf8
-                                    449 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
-                                    450 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
-      000167 21r58r00               451 	ld	hl, #(_shadow_OAM + 88)
-      00016A 22                     452 	ld	(hl+), a
-      00016B 36 08                  453 	ld	(hl), #0x08
-                                    454 ;src/ending.c:108: move_sprite(23, 160, WIN_PIXEL - 8);
-      00016D FAr04r00               455 	ld	a, (#_win_height + 1)
-      000170 C6 F8                  456 	add	a, #0xf8
-      000172 4F                     457 	ld	c, a
-                                    458 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
-      000173 21r5Cr00               459 	ld	hl, #(_shadow_OAM + 92)
-                                    460 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
-      000176 71                     461 	ld	(hl), c
-      000177 23                     462 	inc	hl
-      000178 36 A0                  463 	ld	(hl), #0xa0
-                                    464 ;src/ending.c:109: move_sprite(24, 8, WIN_PIXEL);
-      00017A 21r04r00               465 	ld	hl, #_win_height + 1
-      00017D 4E                     466 	ld	c, (hl)
-                                    467 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
-      00017E 21r60r00               468 	ld	hl, #(_shadow_OAM + 96)
-                                    469 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
-      000181 71                     470 	ld	(hl), c
-      000182 23                     471 	inc	hl
-      000183 36 08                  472 	ld	(hl), #0x08
-                                    473 ;src/ending.c:110: move_sprite(25, 160, WIN_PIXEL);
-      000185 21r04r00               474 	ld	hl, #_win_height + 1
-      000188 4E                     475 	ld	c, (hl)
-                                    476 ;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
-      000189 21r64r00               477 	ld	hl, #(_shadow_OAM + 100)
-                                    478 ;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
-      00018C 71                     479 	ld	(hl), c
-      00018D 23                     480 	inc	hl
-      00018E 36 A0                  481 	ld	(hl), #0xa0
-                           000190   482 	C$ending.c$113$1_0$179	= .
-                                    483 	.globl	C$ending.c$113$1_0$179
-                                    484 ;src/ending.c:113: if(subpix_speed > MAX_SPEED) {
-      000190 3E 0D                  485 	ld	a, #0x0d
-      000192 21r01r00               486 	ld	hl, #_subpix_speed
-      000195 96                     487 	sub	a, (hl)
-      000196 30 13                  488 	jr	NC, 00104$
-                           000198   489 	C$ending.c$114$2_0$180	= .
-                                    490 	.globl	C$ending.c$114$2_0$180
-                                    491 ;src/ending.c:114: ending_flags &= 0b11110111; //IS_FORCE_ADDED = false
-      000198 21r00r00               492 	ld	hl, #_ending_flags
-      00019B 7E                     493 	ld	a, (hl)
-      00019C E6 F7                  494 	and	a, #0xf7
-      00019E 77                     495 	ld	(hl), a
-                                    496 ;C:/gbdk/include/gb/gb.h:1493: shadow_OAM[nb].prop=prop;
-      00019F 21r63r00               497 	ld	hl, #(_shadow_OAM + 99)
-      0001A2 36 20                  498 	ld	(hl), #0x20
-      0001A4 21r67r00               499 	ld	hl, #(_shadow_OAM + 103)
-      0001A7 36 20                  500 	ld	(hl), #0x20
-                           0001A9   501 	C$ending.c$116$1_0$179	= .
-                                    502 	.globl	C$ending.c$116$1_0$179
-                                    503 ;src/ending.c:116: set_sprite_prop(25, S_FLIPX);
-      0001A9 18 20                  504 	jr	00105$
-      0001AB                        505 00104$:
-                           0001AB   506 	C$ending.c$118$1_0$179	= .
-                                    507 	.globl	C$ending.c$118$1_0$179
-                                    508 ;src/ending.c:118: else if(subpix_speed == 0) {
-      0001AB FAr01r00               509 	ld	a, (#_subpix_speed)
-      0001AE B7                     510 	or	a, a
-      0001AF 20 1A                  511 	jr	NZ, 00105$
-                           0001B1   512 	C$ending.c$120$2_0$181	= .
-                                    513 	.globl	C$ending.c$120$2_0$181
-                                    514 ;src/ending.c:120: ending_flags |= 0b00001001; //IS_FORCE_ADDED = true, IS_ANIMATION_FINISHED = true
-      0001B1 21r00r00               515 	ld	hl, #_ending_flags
-      0001B4 7E                     516 	ld	a, (hl)
-      0001B5 F6 09                  517 	or	a, #0x09
-      0001B7 77                     518 	ld	(hl), a
-                           0001B8   519 	C$ending.c$121$2_0$181	= .
-                                    520 	.globl	C$ending.c$121$2_0$181
-                                    521 ;src/ending.c:121: ending_flags ^= 0b00000010; //swap WIN_DIRECTION
-      0001B8 7E                     522 	ld	a, (hl)
-      0001B9 EE 02                  523 	xor	a, #0x02
-      0001BB 77                     524 	ld	(hl), a
-                           0001BC   525 	C$ending.c$122$2_0$181	= .
-                                    526 	.globl	C$ending.c$122$2_0$181
-                                    527 ;src/ending.c:122: force = 0x00; //make the force smaller for the sway, 0 so it turns to 1 now
-      0001BC 21r02r00               528 	ld	hl, #_force
-      0001BF 36 00                  529 	ld	(hl), #0x00
-                                    530 ;C:/gbdk/include/gb/gb.h:1493: shadow_OAM[nb].prop=prop;
-      0001C1 21r63r00               531 	ld	hl, #(_shadow_OAM + 99)
-      0001C4 36 00                  532 	ld	(hl), #0x00
-      0001C6 21r67r00               533 	ld	hl, #(_shadow_OAM + 103)
-      0001C9 36 00                  534 	ld	(hl), #0x00
-                           0001CB   535 	C$ending.c$124$1_0$179	= .
-                                    536 	.globl	C$ending.c$124$1_0$179
-                                    537 ;src/ending.c:124: set_sprite_prop(25, 0x00);
-      0001CB                        538 00105$:
-                           0001CB   539 	C$ending.c$114$1_0$179	= .
-                                    540 	.globl	C$ending.c$114$1_0$179
-                                    541 ;src/ending.c:114: ending_flags &= 0b11110111; //IS_FORCE_ADDED = false
-      0001CB 21r00r00               542 	ld	hl, #_ending_flags
-      0001CE 5E                     543 	ld	e, (hl)
-                           0001CF   544 	C$ending.c$127$1_0$179	= .
-                                    545 	.globl	C$ending.c$127$1_0$179
-                                    546 ;src/ending.c:127: if(IS_ANIMATION_FINISHED){      
-      0001CF CB 43                  547 	bit	0, e
-      0001D1 28 07                  548 	jr	Z, 00107$
-                           0001D3   549 	C$ending.c$128$2_0$182	= .
-                                    550 	.globl	C$ending.c$128$2_0$182
-                                    551 ;src/ending.c:128: force ^= 0x01; //make the force smaller for the sway, either 1 or 0
-      0001D3 21r02r00               552 	ld	hl, #_force
-      0001D6 7E                     553 	ld	a, (hl)
-      0001D7 EE 01                  554 	xor	a, #0x01
-      0001D9 77                     555 	ld	(hl), a
-      0001DA                        556 00107$:
-                           0001DA   557 	C$ending.c$130$1_0$179	= .
-                                    558 	.globl	C$ending.c$130$1_0$179
-                                    559 ;src/ending.c:130: subpix_speed = (IS_FORCE_ADDED) ? subpix_speed + force : subpix_speed - force;
-      0001DA CB 5B                  560 	bit	3, e
-      0001DC 28 09                  561 	jr	Z, 00121$
-      0001DE FAr01r00               562 	ld	a, (#_subpix_speed)
-      0001E1 21r02r00               563 	ld	hl, #_force
-      0001E4 86                     564 	add	a, (hl)
-      0001E5 18 07                  565 	jr	00122$
-      0001E7                        566 00121$:
-      0001E7 FAr01r00               567 	ld	a, (#_subpix_speed)
-      0001EA 21r02r00               568 	ld	hl, #_force
-      0001ED 96                     569 	sub	a, (hl)
-      0001EE                        570 00122$:
-      0001EE 21r01r00               571 	ld	hl, #_subpix_speed
-      0001F1 77                     572 	ld	(hl), a
-                           0001F2   573 	C$ending.c$131$1_0$179	= .
-                                    574 	.globl	C$ending.c$131$1_0$179
-                                    575 ;src/ending.c:131: win_height = WIN_DIRECTION ? win_height + ((uint16_t)(subpix_speed) << 2) : win_height - ((uint16_t)(subpix_speed) << 2);
-      0001F2 6E                     576 	ld	l, (hl)
-                                    577 ;	spillPairReg hl
-                                    578 ;	spillPairReg hl
-      0001F3 26 00                  579 	ld	h, #0x00
-                                    580 ;	spillPairReg hl
-                                    581 ;	spillPairReg hl
-      0001F5 29                     582 	add	hl, hl
-      0001F6 29                     583 	add	hl, hl
-      0001F7 4D                     584 	ld	c, l
-      0001F8 44                     585 	ld	b, h
-      0001F9 CB 4B                  586 	bit	1, e
-      0001FB 28 0C                  587 	jr	Z, 00123$
-      0001FD 79                     588 	ld	a, c
-      0001FE 21r03r00               589 	ld	hl, #_win_height
-      000201 86                     590 	add	a, (hl)
-      000202 23                     591 	inc	hl
-      000203 4F                     592 	ld	c, a
-      000204 78                     593 	ld	a, b
-      000205 8E                     594 	adc	a, (hl)
-      000206 47                     595 	ld	b, a
-      000207 18 09                  596 	jr	00124$
-      000209                        597 00123$:
-      000209 21r03r00               598 	ld	hl, #_win_height
-      00020C 2A                     599 	ld	a, (hl+)
-      00020D 91                     600 	sub	a, c
-      00020E 4F                     601 	ld	c, a
-      00020F 7E                     602 	ld	a, (hl)
-      000210 98                     603 	sbc	a, b
-      000211 47                     604 	ld	b, a
-      000212                        605 00124$:
-      000212 21r03r00               606 	ld	hl, #_win_height
-      000215 79                     607 	ld	a, c
-      000216 22                     608 	ld	(hl+), a
-      000217 70                     609 	ld	(hl), b
-                           000218   610 	C$ending.c$132$1_0$179	= .
-                                    611 	.globl	C$ending.c$132$1_0$179
-                                    612 ;src/ending.c:132: max_scan = WIN_PIXEL + 24U; //REMOVE THE 1PX PADDING FOR THE CGB VERSION (23U)
-      000218 7E                     613 	ld	a, (hl)
-      000219 C6 18                  614 	add	a, #0x18
-      00021B EAr05r00               615 	ld	(#_max_scan),a
-                           00021E   616 	C$ending.c$133$1_0$179	= .
-                                    617 	.globl	C$ending.c$133$1_0$179
-                                    618 ;src/ending.c:133: }
-                           00021E   619 	C$ending.c$133$1_0$179	= .
-                                    620 	.globl	C$ending.c$133$1_0$179
-                           00021E   621 	XG$compute_ending_frame$0$0	= .
-                                    622 	.globl	XG$compute_ending_frame$0$0
-      00021E C9                     623 	ret
-                                    624 	.area _CODE
-                                    625 	.area _INITIALIZER
-                                    626 	.area _CABS (ABS)
+                                     68 	.area _CODE
+                                     69 ;src/ending.c:36: void VBL_isr(void) { 
+                                     70 ;	---------------------------------
+                                     71 ; Function VBL_isr
+                                     72 ; ---------------------------------
+      000000                         73 _VBL_isr::
+                                     74 ;src/ending.c:37: SHOW_WIN;
+      000000 F0r00            [12]   75 	ldh	a, (_LCDC_REG + 0)
+      000002 F6 20            [ 8]   76 	or	a, #0x20
+      000004 E0r00            [12]   77 	ldh	(_LCDC_REG + 0), a
+                                     78 ;src/ending.c:38: LYC_REG = max_scan; 
+      000006 FAr05r00         [16]   79 	ld	a, (#_max_scan)
+      000009 E0r00            [12]   80 	ldh	(_LYC_REG + 0), a
+                                     81 ;src/ending.c:39: }
+      00000B C9               [16]   82 	ret
+                                     83 ;src/ending.c:40: void LCD_isr(void) {
+                                     84 ;	---------------------------------
+                                     85 ; Function LCD_isr
+                                     86 ; ---------------------------------
+      00000C                         87 _LCD_isr::
+                                     88 ;src/ending.c:41: if (LY_REG < 144) {
+      00000C F0r00            [12]   89 	ldh	a, (_LY_REG + 0)
+      00000E D6 90            [ 8]   90 	sub	a, #0x90
+      000010 D0               [20]   91 	ret	NC
+                                     92 ;src/ending.c:42: HIDE_WIN;
+      000011 F0r00            [12]   93 	ldh	a, (_LCDC_REG + 0)
+      000013 E6 DF            [ 8]   94 	and	a, #0xdf
+      000015 E0r00            [12]   95 	ldh	(_LCDC_REG + 0), a
+                                     96 ;src/ending.c:43: WX_REG = 160; //THIS IS TO COVER A BUG ON THE DMG!!! REMOVE IT FOR THE GBC VERSION
+      000017 3E A0            [ 8]   97 	ld	a, #0xa0
+      000019 E0r00            [12]   98 	ldh	(_WX_REG + 0), a
+                                     99 ;src/ending.c:45: }
+      00001B C9               [16]  100 	ret
+                                    101 ;src/ending.c:47: void ending_init(void){
+                                    102 ;	---------------------------------
+                                    103 ; Function ending_init
+                                    104 ; ---------------------------------
+      00001C                        105 _ending_init::
+                                    106 ;src/ending.c:48: ending_flags = 0b10000000;
+      00001C 21r00r00         [12]  107 	ld	hl, #_ending_flags
+      00001F 36 80            [12]  108 	ld	(hl), #0x80
+                                    109 ;src/ending.c:51: remove_VBL(VBL_isr);
+      000021 11r00r00         [12]  110 	ld	de, #_VBL_isr
+      000024 CDr00r00         [24]  111 	call	_remove_VBL
+                                    112 ;src/ending.c:52: remove_LCD(LCD_isr);
+      000027 11r0Cr00         [12]  113 	ld	de, #_LCD_isr
+      00002A CDr00r00         [24]  114 	call	_remove_LCD
+                                    115 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1905: shadow_OAM[nb].y = 0;
+      00002D 21r50r00         [12]  116 	ld	hl, #(_shadow_OAM + 80)
+      000030 36 00            [12]  117 	ld	(hl), #0x00
+      000032 21r54r00         [12]  118 	ld	hl, #(_shadow_OAM + 84)
+      000035 36 00            [12]  119 	ld	(hl), #0x00
+      000037 21r58r00         [12]  120 	ld	hl, #(_shadow_OAM + 88)
+      00003A 36 00            [12]  121 	ld	(hl), #0x00
+      00003C 21r5Cr00         [12]  122 	ld	hl, #(_shadow_OAM + 92)
+      00003F 36 00            [12]  123 	ld	(hl), #0x00
+      000041 21r60r00         [12]  124 	ld	hl, #(_shadow_OAM + 96)
+      000044 36 00            [12]  125 	ld	(hl), #0x00
+      000046 21r64r00         [12]  126 	ld	hl, #(_shadow_OAM + 100)
+      000049 36 00            [12]  127 	ld	(hl), #0x00
+                                    128 ;src/ending.c:59: hide_sprite(25);
+                                    129 ;src/ending.c:60: }
+      00004B C9               [16]  130 	ret
+                                    131 ;src/ending.c:62: void prepare_ending_frame(void){
+                                    132 ;	---------------------------------
+                                    133 ; Function prepare_ending_frame
+                                    134 ; ---------------------------------
+      00004C                        135 _prepare_ending_frame:
+      00004C 3B               [ 8]  136 	dec	sp
+                                    137 ;src/ending.c:64: if(IS_ANIMATION_STARTED) {return;}
+      00004D FAr00r00         [16]  138 	ld	a, (#_ending_flags)
+      000050 CB 57            [ 8]  139 	bit	2, a
+      000052 C2r30r01         [16]  140 	jp	NZ,00116$
+                                    141 ;src/ending.c:66: ending_flags |= 0x04; //mark is_ended as true
+      000055 21r00r00         [12]  142 	ld	hl, #_ending_flags
+      000058 7E               [ 8]  143 	ld	a, (hl)
+      000059 F6 04            [ 8]  144 	or	a, #0x04
+      00005B 77               [ 8]  145 	ld	(hl), a
+                                    146 ;src/ending.c:67: win_height = 0xB000u;
+      00005C 21r03r00         [12]  147 	ld	hl, #_win_height
+      00005F AF               [ 4]  148 	xor	a, a
+      000060 22               [ 8]  149 	ld	(hl+), a
+      000061 36 B0            [12]  150 	ld	(hl), #0xb0
+                                    151 ;src/ending.c:69: force = 4u; //initial force is 4u
+      000063 21r02r00         [12]  152 	ld	hl, #_force
+      000066 36 04            [12]  153 	ld	(hl), #0x04
+                                    154 ;src/ending.c:72: set_win_tiles(0,0, 20U, 3U, hud_map);
+      000068 11r00r00         [12]  155 	ld	de, #_hud_map
+      00006B D5               [16]  156 	push	de
+      00006C 21 14 03         [12]  157 	ld	hl, #0x314
+      00006F E5               [16]  158 	push	hl
+      000070 AF               [ 4]  159 	xor	a, a
+      000071 0F               [ 4]  160 	rrca
+      000072 F5               [16]  161 	push	af
+      000073 CDr00r00         [24]  162 	call	_set_win_tiles
+      000076 E8 06            [16]  163 	add	sp, #6
+                                    164 ;src/ending.c:73: itoa(score, score_text, 10);
+      000078 01r06r00         [12]  165 	ld	bc, #_score_text+0
+      00007B 59               [ 4]  166 	ld	e, c
+      00007C 50               [ 4]  167 	ld	d, b
+      00007D 21r00r00         [12]  168 	ld	hl, #_score
+      000080 6E               [ 8]  169 	ld	l, (hl)
+                                    170 ;	spillPairReg hl
+                                    171 ;	spillPairReg hl
+      000081 FAr01r00         [16]  172 	ld	a, (_score + 1)
+      000084 67               [ 4]  173 	ld	h, a
+                                    174 ;	spillPairReg hl
+                                    175 ;	spillPairReg hl
+      000085 C5               [16]  176 	push	bc
+      000086 3E 0A            [ 8]  177 	ld	a, #0x0a
+      000088 F5               [16]  178 	push	af
+      000089 33               [ 8]  179 	inc	sp
+      00008A D5               [16]  180 	push	de
+      00008B E5               [16]  181 	push	hl
+      00008C CDr00r00         [24]  182 	call	_itoa
+      00008F E8 05            [16]  183 	add	sp, #5
+      000091 C1               [12]  184 	pop	bc
+                                    185 ;src/ending.c:74: for(i=0; score_text[i] != 0 && i < 5; i++){
+      000092 21r0Br00         [12]  186 	ld	hl, #_i
+      000095 36 00            [12]  187 	ld	(hl), #0x00
+      000097                        188 00114$:
+      000097 79               [ 4]  189 	ld	a, c
+      000098 21r0Br00         [12]  190 	ld	hl, #_i
+      00009B 86               [ 8]  191 	add	a, (hl)
+      00009C 5F               [ 4]  192 	ld	e, a
+      00009D 78               [ 4]  193 	ld	a, b
+      00009E CE 00            [ 8]  194 	adc	a, #0x00
+      0000A0 57               [ 4]  195 	ld	d, a
+      0000A1 1A               [ 8]  196 	ld	a, (de)
+      0000A2 F8 00            [12]  197 	ldhl	sp,	#0
+      0000A4 77               [ 8]  198 	ld	(hl), a
+      0000A5 7E               [ 8]  199 	ld	a, (hl)
+      0000A6 B7               [ 4]  200 	or	a, a
+      0000A7 28 13            [12]  201 	jr	Z, 00103$
+      0000A9 FAr0Br00         [16]  202 	ld	a, (#_i)
+      0000AC D6 05            [ 8]  203 	sub	a, #0x05
+      0000AE 30 0C            [12]  204 	jr	NC, 00103$
+                                    205 ;src/ending.c:75: score_text[i] += 64U;
+      0000B0 F8 00            [12]  206 	ldhl	sp,	#0
+      0000B2 7E               [ 8]  207 	ld	a, (hl)
+      0000B3 C6 40            [ 8]  208 	add	a, #0x40
+      0000B5 12               [ 8]  209 	ld	(de), a
+                                    210 ;src/ending.c:74: for(i=0; score_text[i] != 0 && i < 5; i++){
+      0000B6 21r0Br00         [12]  211 	ld	hl, #_i
+      0000B9 34               [12]  212 	inc	(hl)
+      0000BA 18 DB            [12]  213 	jr	00114$
+      0000BC                        214 00103$:
+                                    215 ;src/ending.c:77: set_win_tiles(8, 1, i, 1, score_text);
+      0000BC C5               [16]  216 	push	bc
+      0000BD 3E 01            [ 8]  217 	ld	a, #0x01
+      0000BF F5               [16]  218 	push	af
+      0000C0 33               [ 8]  219 	inc	sp
+      0000C1 FAr0Br00         [16]  220 	ld	a, (#_i)
+      0000C4 67               [ 4]  221 	ld	h, a
+      0000C5 2E 01            [ 8]  222 	ld	l, #0x01
+      0000C7 E5               [16]  223 	push	hl
+      0000C8 3E 08            [ 8]  224 	ld	a, #0x08
+      0000CA F5               [16]  225 	push	af
+      0000CB 33               [ 8]  226 	inc	sp
+      0000CC CDr00r00         [24]  227 	call	_set_win_tiles
+      0000CF E8 06            [16]  228 	add	sp, #6
+                                    229 ;src/ending.c:78: set_win_tile_xy(8 + i, 1, 0x7A);
+      0000D1 21r0Br00         [12]  230 	ld	hl, #_i
+      0000D4 7E               [ 8]  231 	ld	a, (hl)
+      0000D5 C6 08            [ 8]  232 	add	a, #0x08
+      0000D7 26 7A            [ 8]  233 	ld	h, #0x7a
+                                    234 ;	spillPairReg hl
+                                    235 ;	spillPairReg hl
+      0000D9 E5               [16]  236 	push	hl
+      0000DA 33               [ 8]  237 	inc	sp
+      0000DB 26 01            [ 8]  238 	ld	h, #0x01
+                                    239 ;	spillPairReg hl
+                                    240 ;	spillPairReg hl
+      0000DD E5               [16]  241 	push	hl
+      0000DE 33               [ 8]  242 	inc	sp
+      0000DF F5               [16]  243 	push	af
+      0000E0 33               [ 8]  244 	inc	sp
+      0000E1 CDr00r00         [24]  245 	call	_set_win_tile_xy
+      0000E4 E8 03            [16]  246 	add	sp, #3
+                                    247 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
+      0000E6 21r52r00         [12]  248 	ld	hl, #(_shadow_OAM + 82)
+      0000E9 36 81            [12]  249 	ld	(hl), #0x81
+                                    250 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
+      0000EB 21r53r00         [12]  251 	ld	hl, #(_shadow_OAM + 83)
+      0000EE 36 40            [12]  252 	ld	(hl), #0x40
+                                    253 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
+      0000F0 21r56r00         [12]  254 	ld	hl, #(_shadow_OAM + 86)
+      0000F3 36 80            [12]  255 	ld	(hl), #0x80
+                                    256 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
+      0000F5 21r57r00         [12]  257 	ld	hl, #(_shadow_OAM + 87)
+      0000F8 36 40            [12]  258 	ld	(hl), #0x40
+                                    259 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
+      0000FA 21r5Ar00         [12]  260 	ld	hl, #(_shadow_OAM + 90)
+      0000FD 36 23            [12]  261 	ld	(hl), #0x23
+      0000FF 21r5Er00         [12]  262 	ld	hl, #(_shadow_OAM + 94)
+      000102 36 23            [12]  263 	ld	(hl), #0x23
+      000104 21r62r00         [12]  264 	ld	hl, #(_shadow_OAM + 98)
+      000107 36 24            [12]  265 	ld	(hl), #0x24
+      000109 21r66r00         [12]  266 	ld	hl, #(_shadow_OAM + 102)
+      00010C 36 24            [12]  267 	ld	(hl), #0x24
+                                    268 ;src/ending.c:91: subpix_speed = 252u;
+      00010E 21r01r00         [12]  269 	ld	hl, #_subpix_speed
+      000111 36 FC            [12]  270 	ld	(hl), #0xfc
+                                    271 ;src/ending.c:99: }
+      000113 F3               [ 4]  272 	di
+                                    273 ;src/ending.c:94: add_VBL(VBL_isr);
+      000114 11r00r00         [12]  274 	ld	de, #_VBL_isr
+      000117 CDr00r00         [24]  275 	call	_add_VBL
+                                    276 ;src/ending.c:95: add_LCD(LCD_isr);
+      00011A 11r0Cr00         [12]  277 	ld	de, #_LCD_isr
+      00011D CDr00r00         [24]  278 	call	_add_LCD
+                                    279 ;src/ending.c:96: set_interrupts(VBL_IFLAG | LCD_IFLAG);
+      000120 3E 03            [ 8]  280 	ld	a, #0x03
+      000122 CDr00r00         [24]  281 	call	_set_interrupts
+                                    282 ;src/ending.c:97: STAT_REG |= 0x40; // enable LY == LYC mode 
+      000125 F0r00            [12]  283 	ldh	a, (_STAT_REG + 0)
+      000127 F6 40            [ 8]  284 	or	a, #0x40
+      000129 E0r00            [12]  285 	ldh	(_STAT_REG + 0), a
+                                    286 ;src/ending.c:98: LYC_REG = 160u;   // make it never fire
+      00012B 3E A0            [ 8]  287 	ld	a, #0xa0
+      00012D E0r00            [12]  288 	ldh	(_LYC_REG + 0), a
+      00012F FB               [ 4]  289 	ei
+      000130                        290 00116$:
+                                    291 ;src/ending.c:100: }
+      000130 33               [ 8]  292 	inc	sp
+      000131 C9               [16]  293 	ret
+                                    294 ;src/ending.c:102: void compute_ending_frame(void){
+                                    295 ;	---------------------------------
+                                    296 ; Function compute_ending_frame
+                                    297 ; ---------------------------------
+      000132                        298 _compute_ending_frame::
+                                    299 ;src/ending.c:103: prepare_ending_frame();
+      000132 CDr4Cr00         [24]  300 	call	_prepare_ending_frame
+                                    301 ;src/ending.c:104: move_win(7u, WIN_PIXEL);
+      000135 21r04r00         [12]  302 	ld	hl, #_win_height + 1
+      000138 4E               [ 8]  303 	ld	c, (hl)
+      000139 41               [ 4]  304 	ld	b, c
+                                    305 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1656: WX_REG=x, WY_REG=y;
+      00013A 3E 07            [ 8]  306 	ld	a, #0x07
+      00013C E0r00            [12]  307 	ldh	(_WX_REG + 0), a
+      00013E 78               [ 4]  308 	ld	a, b
+      00013F E0r00            [12]  309 	ldh	(_WY_REG + 0), a
+                                    310 ;src/ending.c:105: move_sprite(20, 8, WIN_PIXEL + 8u);
+      000141 79               [ 4]  311 	ld	a, c
+      000142 C6 08            [ 8]  312 	add	a, #0x08
+                                    313 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
+                                    314 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
+      000144 21r50r00         [12]  315 	ld	hl, #(_shadow_OAM + 80)
+      000147 22               [ 8]  316 	ld	(hl+), a
+      000148 36 08            [12]  317 	ld	(hl), #0x08
+                                    318 ;src/ending.c:106: move_sprite(21, 160, WIN_PIXEL + 8u);
+      00014A FAr04r00         [16]  319 	ld	a, (#_win_height + 1)
+      00014D C6 08            [ 8]  320 	add	a, #0x08
+      00014F 4F               [ 4]  321 	ld	c, a
+                                    322 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
+      000150 21r54r00         [12]  323 	ld	hl, #(_shadow_OAM + 84)
+                                    324 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
+      000153 71               [ 8]  325 	ld	(hl), c
+      000154 23               [ 8]  326 	inc	hl
+      000155 36 A0            [12]  327 	ld	(hl), #0xa0
+                                    328 ;src/ending.c:107: move_sprite(22, 8, WIN_PIXEL - 8);
+      000157 FAr04r00         [16]  329 	ld	a, (#_win_height + 1)
+      00015A C6 F8            [ 8]  330 	add	a, #0xf8
+                                    331 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
+                                    332 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
+      00015C 21r58r00         [12]  333 	ld	hl, #(_shadow_OAM + 88)
+      00015F 22               [ 8]  334 	ld	(hl+), a
+      000160 36 08            [12]  335 	ld	(hl), #0x08
+                                    336 ;src/ending.c:108: move_sprite(23, 160, WIN_PIXEL - 8);
+      000162 FAr04r00         [16]  337 	ld	a, (#_win_height + 1)
+      000165 C6 F8            [ 8]  338 	add	a, #0xf8
+      000167 4F               [ 4]  339 	ld	c, a
+                                    340 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
+      000168 21r5Cr00         [12]  341 	ld	hl, #(_shadow_OAM + 92)
+                                    342 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
+      00016B 71               [ 8]  343 	ld	(hl), c
+      00016C 23               [ 8]  344 	inc	hl
+      00016D 36 A0            [12]  345 	ld	(hl), #0xa0
+                                    346 ;src/ending.c:109: move_sprite(24, 8, WIN_PIXEL);
+      00016F 21r04r00         [12]  347 	ld	hl, #_win_height + 1
+      000172 4E               [ 8]  348 	ld	c, (hl)
+                                    349 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
+      000173 21r60r00         [12]  350 	ld	hl, #(_shadow_OAM + 96)
+                                    351 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
+      000176 71               [ 8]  352 	ld	(hl), c
+      000177 23               [ 8]  353 	inc	hl
+      000178 36 08            [12]  354 	ld	(hl), #0x08
+                                    355 ;src/ending.c:110: move_sprite(25, 160, WIN_PIXEL);
+      00017A 21r04r00         [12]  356 	ld	hl, #_win_height + 1
+      00017D 4E               [ 8]  357 	ld	c, (hl)
+                                    358 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
+      00017E 21r64r00         [12]  359 	ld	hl, #(_shadow_OAM + 100)
+                                    360 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
+      000181 71               [ 8]  361 	ld	(hl), c
+      000182 23               [ 8]  362 	inc	hl
+      000183 36 A0            [12]  363 	ld	(hl), #0xa0
+                                    364 ;src/ending.c:113: if(subpix_speed > MAX_SPEED) {
+      000185 3E 0D            [ 8]  365 	ld	a, #0x0d
+      000187 21r01r00         [12]  366 	ld	hl, #_subpix_speed
+      00018A 96               [ 8]  367 	sub	a, (hl)
+      00018B 30 13            [12]  368 	jr	NC, 00104$
+                                    369 ;src/ending.c:114: ending_flags &= 0b11110111; //IS_FORCE_ADDED = false
+      00018D 21r00r00         [12]  370 	ld	hl, #_ending_flags
+      000190 7E               [ 8]  371 	ld	a, (hl)
+      000191 E6 F7            [ 8]  372 	and	a, #0xf7
+      000193 77               [ 8]  373 	ld	(hl), a
+                                    374 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
+      000194 21r63r00         [12]  375 	ld	hl, #(_shadow_OAM + 99)
+      000197 36 20            [12]  376 	ld	(hl), #0x20
+      000199 21r67r00         [12]  377 	ld	hl, #(_shadow_OAM + 103)
+      00019C 36 20            [12]  378 	ld	(hl), #0x20
+                                    379 ;src/ending.c:116: set_sprite_prop(25, S_FLIPX);
+      00019E 18 20            [12]  380 	jr	00105$
+      0001A0                        381 00104$:
+                                    382 ;src/ending.c:118: else if(subpix_speed == 0) {
+      0001A0 FAr01r00         [16]  383 	ld	a, (#_subpix_speed)
+      0001A3 B7               [ 4]  384 	or	a, a
+      0001A4 20 1A            [12]  385 	jr	NZ, 00105$
+                                    386 ;src/ending.c:120: ending_flags |= 0b00001001; //IS_FORCE_ADDED = true, IS_ANIMATION_FINISHED = true
+      0001A6 21r00r00         [12]  387 	ld	hl, #_ending_flags
+      0001A9 7E               [ 8]  388 	ld	a, (hl)
+      0001AA F6 09            [ 8]  389 	or	a, #0x09
+      0001AC 77               [ 8]  390 	ld	(hl), a
+                                    391 ;src/ending.c:121: ending_flags ^= 0b00000010; //swap WIN_DIRECTION
+      0001AD 7E               [ 8]  392 	ld	a, (hl)
+      0001AE EE 02            [ 8]  393 	xor	a, #0x02
+      0001B0 77               [ 8]  394 	ld	(hl), a
+                                    395 ;src/ending.c:122: force = 0x00; //make the force smaller for the sway, 0 so it turns to 1 now
+      0001B1 21r02r00         [12]  396 	ld	hl, #_force
+      0001B4 36 00            [12]  397 	ld	(hl), #0x00
+                                    398 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
+      0001B6 21r63r00         [12]  399 	ld	hl, #(_shadow_OAM + 99)
+      0001B9 36 00            [12]  400 	ld	(hl), #0x00
+      0001BB 21r67r00         [12]  401 	ld	hl, #(_shadow_OAM + 103)
+      0001BE 36 00            [12]  402 	ld	(hl), #0x00
+                                    403 ;src/ending.c:124: set_sprite_prop(25, 0x00);
+      0001C0                        404 00105$:
+                                    405 ;src/ending.c:127: if(IS_ANIMATION_FINISHED){      
+      0001C0 21r00r00         [12]  406 	ld	hl, #_ending_flags
+      0001C3 5E               [ 8]  407 	ld	e, (hl)
+      0001C4 CB 43            [ 8]  408 	bit	0, e
+      0001C6 28 07            [12]  409 	jr	Z, 00107$
+                                    410 ;src/ending.c:128: force ^= 0x01; //make the force smaller for the sway, either 1 or 0
+      0001C8 21r02r00         [12]  411 	ld	hl, #_force
+      0001CB 7E               [ 8]  412 	ld	a, (hl)
+      0001CC EE 01            [ 8]  413 	xor	a, #0x01
+      0001CE 77               [ 8]  414 	ld	(hl), a
+      0001CF                        415 00107$:
+                                    416 ;src/ending.c:130: subpix_speed = (IS_FORCE_ADDED) ? subpix_speed + force : subpix_speed - force;
+      0001CF CB 5B            [ 8]  417 	bit	3, e
+      0001D1 28 09            [12]  418 	jr	Z, 00121$
+      0001D3 FAr01r00         [16]  419 	ld	a, (#_subpix_speed)
+      0001D6 21r02r00         [12]  420 	ld	hl, #_force
+      0001D9 86               [ 8]  421 	add	a, (hl)
+      0001DA 18 07            [12]  422 	jr	00122$
+      0001DC                        423 00121$:
+      0001DC FAr01r00         [16]  424 	ld	a, (#_subpix_speed)
+      0001DF 21r02r00         [12]  425 	ld	hl, #_force
+      0001E2 96               [ 8]  426 	sub	a, (hl)
+      0001E3                        427 00122$:
+      0001E3 21r01r00         [12]  428 	ld	hl, #_subpix_speed
+      0001E6 77               [ 8]  429 	ld	(hl), a
+                                    430 ;src/ending.c:131: win_height = WIN_DIRECTION ? win_height + ((uint16_t)(subpix_speed) << 2) : win_height - ((uint16_t)(subpix_speed) << 2);
+      0001E7 6E               [ 8]  431 	ld	l, (hl)
+                                    432 ;	spillPairReg hl
+                                    433 ;	spillPairReg hl
+      0001E8 26 00            [ 8]  434 	ld	h, #0x00
+                                    435 ;	spillPairReg hl
+                                    436 ;	spillPairReg hl
+      0001EA 29               [ 8]  437 	add	hl, hl
+      0001EB 29               [ 8]  438 	add	hl, hl
+      0001EC 4D               [ 4]  439 	ld	c, l
+      0001ED 44               [ 4]  440 	ld	b, h
+      0001EE CB 4B            [ 8]  441 	bit	1, e
+      0001F0 28 0C            [12]  442 	jr	Z, 00123$
+      0001F2 79               [ 4]  443 	ld	a, c
+      0001F3 21r03r00         [12]  444 	ld	hl, #_win_height
+      0001F6 86               [ 8]  445 	add	a, (hl)
+      0001F7 23               [ 8]  446 	inc	hl
+      0001F8 4F               [ 4]  447 	ld	c, a
+      0001F9 78               [ 4]  448 	ld	a, b
+      0001FA 8E               [ 8]  449 	adc	a, (hl)
+      0001FB 47               [ 4]  450 	ld	b, a
+      0001FC 18 09            [12]  451 	jr	00124$
+      0001FE                        452 00123$:
+      0001FE 21r03r00         [12]  453 	ld	hl, #_win_height
+      000201 2A               [ 8]  454 	ld	a, (hl+)
+      000202 91               [ 4]  455 	sub	a, c
+      000203 4F               [ 4]  456 	ld	c, a
+      000204 7E               [ 8]  457 	ld	a, (hl)
+      000205 98               [ 4]  458 	sbc	a, b
+      000206 47               [ 4]  459 	ld	b, a
+      000207                        460 00124$:
+      000207 21r03r00         [12]  461 	ld	hl, #_win_height
+      00020A 79               [ 4]  462 	ld	a, c
+      00020B 22               [ 8]  463 	ld	(hl+), a
+      00020C 70               [ 8]  464 	ld	(hl), b
+                                    465 ;src/ending.c:132: max_scan = WIN_PIXEL + 24U; //REMOVE THE 1PX PADDING FOR THE CGB VERSION (23U)
+      00020D 7E               [ 8]  466 	ld	a, (hl)
+      00020E C6 18            [ 8]  467 	add	a, #0x18
+      000210 EAr05r00         [16]  468 	ld	(#_max_scan),a
+                                    469 ;src/ending.c:133: }
+      000213 C9               [16]  470 	ret
+                                    471 	.area _CODE
+                                    472 	.area _INITIALIZER
+                                    473 	.area _CABS (ABS)

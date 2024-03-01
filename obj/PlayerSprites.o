@@ -1,63 +1,36 @@
 XL3
-H 9 areas 37 global symbols
+H 9 areas 1C global symbols
 M PlayerSprites
-O -mgbz80
+O -msm83
 S .__.ABS. Def000000
 A _CODE size 2C4 flags 0 addr 0
 S _metasprites_states Def0002AB
 S _run_metasprites Def000254
-S G$metasprites_states$0_0$0 Def0002AB
-S G$run_metasprites$0_0$0 Def000254
 S _jump0 Def000266
 S _jump_speed Def00027C
 S _idle_metasprites Def0001D0
-S G$jump_speed$0_0$0 Def00027C
-S G$jump0$0_0$0 Def000266
 S _fall_metasprites Def000291
-S G$idle_metasprites$0_0$0 Def0001D0
-S G$fall_metasprites$0_0$0 Def000291
 S _hurt0 Def000294
 S _hurt_speed Def0002AA
 S _frames_in_state Def0002BF
-S G$hurt_speed$0_0$0 Def0002AA
-S G$hurt0$0_0$0 Def000294
-S G$frames_in_state$0_0$0 Def0002BF
 S _playerSprites Def000000
-S G$playerSprites$0_0$0 Def000000
 S _run0 Def0001DC
 S _run_speed Def000260
 S _run1 Def0001F0
 S _run2 Def000204
-S G$run_speed$0_0$0 Def000260
-S G$run0$0_0$0 Def0001DC
 S _run3 Def000218
-S G$run1$0_0$0 Def0001F0
 S _run4 Def00022C
-S G$run2$0_0$0 Def000204
 S _run5 Def000240
-S G$run3$0_0$0 Def000218
-S G$run4$0_0$0 Def00022C
 S _jump_metasprites Def00027A
-S G$run5$0_0$0 Def000240
 S _idle0 Def000180
 S _idle_speed Def0001D8
-S G$jump_metasprites$0_0$0 Def00027A
 S _idle1 Def000194
 S _fall0 Def00027D
 S _fall_speed Def000293
 S _idle2 Def0001A8
-S G$idle_speed$0_0$0 Def0001D8
-S G$idle0$0_0$0 Def000180
 S _idle3 Def0001BC
-S G$fall_speed$0_0$0 Def000293
-S G$fall0$0_0$0 Def00027D
-S G$idle1$0_0$0 Def000194
-S G$idle2$0_0$0 Def0001A8
 S _hurt_metasprites Def0002A8
-S G$idle3$0_0$0 Def0001BC
 S _metasprites_speeds Def0002B5
-S G$hurt_metasprites$0_0$0 Def0002A8
-S G$metasprites_speeds$0_0$0 Def0002B5
 A _DATA size 0 flags 0 addr 0
 A _INITIALIZED size 0 flags 0 addr 0
 A _DABS size 0 flags 8 addr 0

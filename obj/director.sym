@@ -1,0 +1,112 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 1
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    .__.$$$.                                                    =  002710 L
+    .__.ABS.                                                    =  000000 G
+    .__.CPU.                                                    =  000000 L
+    .__.H$L.                                                    =  000000 L
+    _BGP_REG                                                       ****** GX
+    _LCDC_REG                                                      ****** GX
+  0 _LCD_interrupt                                                 0000C3 GR
+    _LYC_REG                                                       ****** GX
+    _LY_REG                                                        ****** GX
+    _OBP1_REG                                                      ****** GX
+    _SCX_REG                                                       ****** GX
+    _SCY_REG                                                       ****** GX
+    _STAT_REG                                                      ****** GX
+  0 _VBL_interrupt                                                 000000 GR
+    _WX_REG                                                        ****** GX
+    _WY_REG                                                        ****** GX
+    ___current_base_prop                                           ****** GX
+    ___current_base_tile                                           ****** GX
+    ___current_metasprite                                          ****** GX
+    ___hide_metasprite                                             ****** GX
+    ___move_metasprite                                             ****** GX
+    ___move_metasprite_hflip                                       ****** GX
+    ___move_metasprite_hvflip                                      ****** GX
+    ___move_metasprite_vflip                                       ****** GX
+    __map_tile_offset                                              ****** GX
+  7 __xinit__frame_counter                                         000000 R
+    _add_LCD                                                       ****** GX
+    _add_VBL                                                       ****** GX
+    _base_floor_map                                                ****** GX
+    _bubble_empty                                                  ****** GX
+    _bubble_key                                                    ****** GX
+    _bubble_qmark                                                  ****** GX
+    _button_1                                                      ****** GX
+    _button_2                                                      ****** GX
+    _camera_y                                                      ****** GX
+  1 _cloud_cut_scan                                                000005 R
+  0 _cloud_map                                                     00002F GR
+  0 _cloud_tiles                                                   00000F GR
+  1 _current_camera_y                                              000001 R
+    _current_state                                                 ****** GX
+    _end_frame                                                     ****** GX
+    _fall_metasprites                                              ****** GX
+    _fallen                                                        ****** GX
+    _fill_bkg_rect                                                 ****** GX
+  0 _finish_frame_inner                                            000DC7 GR
+  0 _finish_frame_with_animation_inner                             000DE4 GR
+  2 _frame_counter                                                 000000 R
+  1 _i                                                             000000 R
+    _idle_metasprites                                              ****** GX
+    _is_facing_right                                               ****** GX
+  1 _is_generated                                                  000003 R
+    _joypad                                                        ****** GX
+    _jump_metasprites                                              ****** GX
+    _key_left_0                                                    ****** GX
+    _key_left_1                                                    ****** GX
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    _key_right_0                                                   ****** GX
+    _key_right_1                                                   ****** GX
+    _load_map                                                      ****** GX
+    _look_up                                                       ****** GX
+  1 _max_scan                                                      000004 R
+  0 _open_window_map                                               0000AF GR
+  0 _open_window_tiles                                             00004F GR
+  0 _pan_cloud                                                     000F8A GR
+  0 _pan_up                                                        000EA0 GR
+  0 _play_intro_cinematic                                          0000FC GR
+    _playerSprite_extra                                            ****** GX
+    _player_init                                                   ****** GX
+    _player_x                                                      ****** GX
+    _player_y                                                      ****** GX
+  1 _prev_camera_y                                                 000002 R
+    _pull_0                                                        ****** GX
+    _pull_1                                                        ****** GX
+    _remove_LCD                                                    ****** GX
+    _remove_VBL                                                    ****** GX
+    _render_player                                                 ****** GX
+  0 _screen_shake                                                  000E09 GR
+    _set_bkg_data                                                  ****** GX
+    _set_bkg_tile_xy                                               ****** GX
+    _set_bkg_tiles                                                 ****** GX
+    _set_interrupts                                                ****** GX
+    _set_sprite_data                                               ****** GX
+    _set_win_tiles                                                 ****** GX
+    _shadow_OAM                                                    ****** GX
+    _thought_bubble                                                ****** GX
+    _wait_vbl_done                                                 ****** GX
+
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 3
+Hexadecimal [24-Bits]
+
+Area Table
+
+   0 _CODE                                      size   106F   flags    0
+   1 _DATA                                      size      6   flags    0
+   2 _INITIALIZED                               size      1   flags    0
+   3 _DABS                                      size      0   flags    8
+   4 _HOME                                      size      0   flags    0
+   5 _GSINIT                                    size      0   flags    0
+   6 _GSFINAL                                   size      0   flags    0
+   7 _INITIALIZER                               size      1   flags    0
+   8 _CABS                                      size      0   flags    8
+

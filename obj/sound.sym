@@ -1,4 +1,4 @@
-ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 1.
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 1
 Hexadecimal [24-Bits]
 
 Symbol Table
@@ -7,151 +7,6 @@ Symbol Table
     .__.ABS.                                                    =  000000 G
     .__.CPU.                                                    =  000000 L
     .__.H$L.                                                    =  000000 L
-  0 A$sound$104                                                    000011 GR
-  0 A$sound$117                                                    000012 GR
-  0 A$sound$118                                                    000014 GR
-  0 A$sound$122                                                    000016 GR
-  0 A$sound$123                                                    000018 GR
-  0 A$sound$127                                                    00001A GR
-  0 A$sound$128                                                    00001C GR
-  0 A$sound$132                                                    00001E GR
-  0 A$sound$133                                                    000020 GR
-  0 A$sound$137                                                    000022 GR
-  0 A$sound$138                                                    000024 GR
-  0 A$sound$146                                                    000026 GR
-  0 A$sound$159                                                    000027 GR
-  0 A$sound$160                                                    000029 GR
-  0 A$sound$168                                                    00002B GR
-  0 A$sound$181                                                    00002C GR
-  0 A$sound$182                                                    00002E GR
-  0 A$sound$186                                                    000030 GR
-  0 A$sound$187                                                    000032 GR
-  0 A$sound$191                                                    000034 GR
-  0 A$sound$192                                                    000036 GR
-  0 A$sound$196                                                    000038 GR
-  0 A$sound$197                                                    00003A GR
-  0 A$sound$201                                                    00003C GR
-  0 A$sound$202                                                    00003E GR
-  0 A$sound$210                                                    000040 GR
-  0 A$sound$223                                                    000041 GR
-  0 A$sound$224                                                    000043 GR
-  0 A$sound$228                                                    000045 GR
-  0 A$sound$229                                                    000047 GR
-  0 A$sound$233                                                    000049 GR
-  0 A$sound$234                                                    00004B GR
-  0 A$sound$238                                                    00004D GR
-  0 A$sound$239                                                    00004F GR
-  0 A$sound$247                                                    000051 GR
-  0 A$sound$260                                                    000052 GR
-  0 A$sound$261                                                    000054 GR
-  0 A$sound$265                                                    000056 GR
-  0 A$sound$266                                                    000058 GR
-  0 A$sound$270                                                    00005A GR
-  0 A$sound$271                                                    00005C GR
-  0 A$sound$275                                                    00005E GR
-  0 A$sound$276                                                    000060 GR
-  0 A$sound$280                                                    000062 GR
-  0 A$sound$281                                                    000064 GR
-  0 A$sound$289                                                    000066 GR
-  0 A$sound$302                                                    000067 GR
-  0 A$sound$303                                                    000069 GR
-  0 A$sound$311                                                    00006B GR
-  0 A$sound$324                                                    00006C GR
-  0 A$sound$325                                                    00006E GR
-ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 2.
-Hexadecimal [24-Bits]
-
-Symbol Table
-
-  0 A$sound$329                                                    000070 GR
-  0 A$sound$330                                                    000072 GR
-  0 A$sound$334                                                    000074 GR
-  0 A$sound$335                                                    000076 GR
-  0 A$sound$339                                                    000078 GR
-  0 A$sound$340                                                    000079 GR
-  0 A$sound$344                                                    00007B GR
-  0 A$sound$345                                                    00007D GR
-  0 A$sound$353                                                    00007F GR
-  0 A$sound$63                                                     000000 GR
-  0 A$sound$64                                                     000002 GR
-  0 A$sound$68                                                     000004 GR
-  0 A$sound$69                                                     000006 GR
-  0 A$sound$73                                                     000008 GR
-  0 A$sound$74                                                     00000A GR
-  0 A$sound$82                                                     00000C GR
-  0 A$sound$95                                                     00000D GR
-  0 A$sound$96                                                     00000F GR
-  0 C$sound.c$20$0_0$117                                        =  000000 GR
-  0 C$sound.c$21$1_0$117                                        =  000000 GR
-  0 C$sound.c$22$1_0$117                                        =  000004 GR
-  0 C$sound.c$23$1_0$117                                        =  000008 GR
-  0 C$sound.c$24$1_0$117                                        =  00000C GR
-  0 C$sound.c$25$1_0$119                                        =  00000D GR
-  0 C$sound.c$26$1_0$119                                        =  00000D GR
-  0 C$sound.c$27$1_0$119                                        =  000011 GR
-  0 C$sound.c$29$1_0$121                                        =  000012 GR
-  0 C$sound.c$30$1_0$121                                        =  000012 GR
-  0 C$sound.c$31$1_0$121                                        =  000016 GR
-  0 C$sound.c$32$1_0$121                                        =  00001A GR
-  0 C$sound.c$33$1_0$121                                        =  00001E GR
-  0 C$sound.c$34$1_0$121                                        =  000022 GR
-  0 C$sound.c$35$1_0$121                                        =  000026 GR
-  0 C$sound.c$37$1_0$123                                        =  000027 GR
-  0 C$sound.c$38$1_0$123                                        =  000027 GR
-  0 C$sound.c$39$1_0$123                                        =  00002B GR
-  0 C$sound.c$41$1_0$125                                        =  00002C GR
-  0 C$sound.c$42$1_0$125                                        =  00002C GR
-  0 C$sound.c$43$1_0$125                                        =  000030 GR
-  0 C$sound.c$44$1_0$125                                        =  000034 GR
-  0 C$sound.c$45$1_0$125                                        =  000038 GR
-  0 C$sound.c$46$1_0$125                                        =  00003C GR
-  0 C$sound.c$47$1_0$125                                        =  000040 GR
-  0 C$sound.c$49$1_0$127                                        =  000041 GR
-  0 C$sound.c$50$1_0$127                                        =  000041 GR
-  0 C$sound.c$51$1_0$127                                        =  000045 GR
-  0 C$sound.c$52$1_0$127                                        =  000049 GR
-  0 C$sound.c$53$1_0$127                                        =  00004D GR
-  0 C$sound.c$54$1_0$127                                        =  000051 GR
-  0 C$sound.c$56$1_0$129                                        =  000052 GR
-  0 C$sound.c$57$1_0$129                                        =  000052 GR
-  0 C$sound.c$58$1_0$129                                        =  000056 GR
-  0 C$sound.c$59$1_0$129                                        =  00005A GR
-  0 C$sound.c$60$1_0$129                                        =  00005E GR
-  0 C$sound.c$61$1_0$129                                        =  000062 GR
-ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 3.
-Hexadecimal [24-Bits]
-
-Symbol Table
-
-  0 C$sound.c$62$1_0$129                                        =  000066 GR
-  0 C$sound.c$64$1_0$131                                        =  000067 GR
-  0 C$sound.c$65$1_0$131                                        =  000067 GR
-  0 C$sound.c$66$1_0$131                                        =  00006B GR
-  0 C$sound.c$68$1_0$133                                        =  00006C GR
-  0 C$sound.c$69$1_0$133                                        =  00006C GR
-  0 C$sound.c$70$1_0$133                                        =  000070 GR
-  0 C$sound.c$71$1_0$133                                        =  000074 GR
-  0 C$sound.c$72$1_0$133                                        =  000078 GR
-  0 C$sound.c$73$1_0$133                                        =  00007B GR
-  0 C$sound.c$74$1_0$133                                        =  00007F GR
-  0 G$play_boing_sfx$0$0                                        =  00006C GR
-  0 G$play_break_sfx$0$0                                        =  000041 GR
-  0 G$play_bump_sfx$0$0                                         =  00002C GR
-  0 G$play_hurt_sfx$0$0                                         =  000052 GR
-  0 G$play_jump_sfx$0$0                                         =  000012 GR
-  0 G$sound_init$0$0                                            =  000000 GR
-  0 G$stop_hurt_sfx$0$0                                         =  000067 GR
-  0 G$stop_jump_sfx$0$0                                         =  000027 GR
-  0 G$stop_sfx$0$0                                              =  00000D GR
-  0 XG$play_boing_sfx$0$0                                       =  00007F GR
-  0 XG$play_break_sfx$0$0                                       =  000051 GR
-  0 XG$play_bump_sfx$0$0                                        =  000040 GR
-  0 XG$play_hurt_sfx$0$0                                        =  000066 GR
-  0 XG$play_jump_sfx$0$0                                        =  000026 GR
-  0 XG$sound_init$0$0                                           =  00000C GR
-  0 XG$stop_hurt_sfx$0$0                                        =  00006B GR
-  0 XG$stop_jump_sfx$0$0                                        =  00002B GR
-  0 XG$stop_sfx$0$0                                             =  000011 GR
     _NR10_REG                                                      ****** GX
     _NR11_REG                                                      ****** GX
     _NR12_REG                                                      ****** GX
@@ -175,7 +30,7 @@ Symbol Table
   0 _stop_sfx                                                      00000D GR
 
 
-ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 4.
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
 Hexadecimal [24-Bits]
 
 Area Table

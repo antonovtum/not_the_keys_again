@@ -6,7 +6,7 @@
 #include "scene.h"
 #include "sound.h"
 #include "ending.h"
-#include "../res/hud_map.h"
+#include "director.h"
 
 uint8_t i; //iterator
 static char score_text[5];
@@ -33,7 +33,11 @@ void performant_delay(uint8_t frames){
 
 void main(void)
 {
-	init_gfx();
+    play_intro_cinematic();
+
+	fadeout();
+    init_gfx();
+    fadein();
     // Loop forever
     while(1) {
 

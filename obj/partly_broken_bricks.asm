@@ -1,9 +1,9 @@
 ;--------------------------------------------------------
-; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.1.6 #12539 (MINGW32)
+; File Created by SDCC : free open source ISO C Compiler 
+; Version 4.3.2 #14228 (Linux)
 ;--------------------------------------------------------
 	.module partly_broken_bricks
-	.optsdcc -mgbz80
+	.optsdcc -msm83
 	
 ;--------------------------------------------------------
 ; Public variables in this module
@@ -20,9 +20,6 @@
 ; ram data
 ;--------------------------------------------------------
 	.area _INITIALIZED
-G$partly_broken_bricks$0_0$0==.
-_partly_broken_bricks::
-	.ds 80
 ;--------------------------------------------------------
 ; absolute external ram data
 ;--------------------------------------------------------
@@ -44,9 +41,7 @@ _partly_broken_bricks::
 ;--------------------------------------------------------
 	.area _CODE
 	.area _CODE
-	.area _INITIALIZER
-Fpartly_broken_bricks$__xinit_partly_broken_bricks$0_0$0 == .
-__xinit__partly_broken_bricks:
+_partly_broken_bricks:
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0xff	; 255
@@ -127,4 +122,5 @@ __xinit__partly_broken_bricks:
 	.db #0x41	; 65	'A'
 	.db #0xfe	; 254
 	.db #0xff	; 255
+	.area _INITIALIZER
 	.area _CABS (ABS)

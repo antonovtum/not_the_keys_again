@@ -32,16 +32,16 @@ static uint8_t i; //iterator
 
 static uint8_t joy;
 static uint8_t x_force;
-static uint8_t x_speed;
-static bool is_facing_right; // bool
+static int16_t x_speed;
+bool is_facing_right; // bool
 static bool is_grounded;    // bool
 static bool is_jumping;     // bool
 static int8_t y_speed;
-static uint8_t player_x;
-static uint8_t player_y;
-static uint8_t last_x;
+uint16_t player_x;
+uint8_t player_y;
+static uint16_t last_x;
 static uint8_t last_y;
-static PlayerState current_state;
+PlayerState current_state;
 static uint8_t current_coyote_frames;
 
 uint16_t score;
@@ -54,20 +54,22 @@ static uint8_t highest_visited_floor;
 #define PREV_PLAYER_FLOOR (last_y >> 6)
 
 // hurt info
-#define HURT_FRAMES 21      //OLD 25
-#define HURT_X_SPEED 8      //OLD 10
-#define HURT_Y_SPEED -16    //OLD -20
-#define HURT_G 2            //OLD 2
+#define HURT_FRAMES 30      //OLD 25
+#define HURT_X_SPEED 0x0100      //OLD 8
+#define HURT_Y_SPEED -8    //OLD -16
+#define HURT_G 1            //OLD 2
 
 // forces
 const uint8_t jump_g = 2U;
-const uint8_t fall_g = 4U;
-const uint8_t impulse = 2U;
+const uint8_t fall_g = 4U; //it was 4
+const uint8_t impulse = 24U; //it was 2
 const int8_t jump_power = -35;
 #define COYOTE_FRAMES 4
 // clamp values
-const uint8_t clamp_x_velocity = 8U;
-const int8_t clamp_y_velocity = 25U;
+#define SUB_TO_PX(X) (X >> 8)
+#define PX_TO_SUB(X) (X << 8)
+const uint16_t clamp_x_velocity = 0x0200; //it was 8
+const int8_t clamp_y_velocity = 20U; //it was 25
 // misc
 #define PHYSICS_DAMPNER 2 // bits to shift right (scale down velocity)
 #define PLAYER_SPRITES 24U
@@ -86,9 +88,9 @@ static int8_t brick_y_speed;
 
 static void retrieve_input(void);
 static void calculate_physics(void);
-static void render_player(void);
+void render_player(void);
 static void hurt_frame(void);
-static void end_frame(void);
+void end_frame(void);
 static void update_score(void);
 static void calculate_final_score(void);
 
@@ -140,7 +142,7 @@ void player_init(void)
     x_force = 0U;
     x_speed = 0U;
     y_speed = 0;
-    player_x = last_x = 16U;
+    player_x = last_x = PX_TO_SUB(16U);
     player_y = last_y = 128U;
     is_facing_right = true;
     is_grounded = true;
@@ -151,7 +153,7 @@ void player_init(void)
     a_not_pressed = true;
     current_coyote_frames = 0;
     joy = 0;
-    move_metasprite(idle_metasprites[0], TILE_NUM_START, SPR_NUM_START, player_x, player_y);
+    move_metasprite(idle_metasprites[0], TILE_NUM_START, SPR_NUM_START, (uint8_t)SUB_TO_PX(player_x), player_y);
 
     set_sprite_data(0x1B, 2, brick_particle);
     set_sprite_tile(12, 0x1B);
@@ -254,10 +256,10 @@ static void calculate_physics(void){
     PHYSICS
     Based on VELOCITY VERLET simplified with constant acceleration assumption (it is not constant but error accumulation is acceptable)
     */
-    player_x = is_facing_right ? player_x + (x_speed >> PHYSICS_DAMPNER) /*+ (x_force >> 2)*/ : player_x - (x_speed >> PHYSICS_DAMPNER) /*- (x_force >> 2)*/;
-    if((uint8_t)(player_x - 10U) > 160U) {
-        if((uint8_t)(player_x - 10U) < 200) player_x = player_x - 160U; //right exit
-        else player_x = player_x + 160U; //left exit
+    player_x = is_facing_right ? player_x + (x_speed) /*+ (x_force >> 2)*/ : player_x - (x_speed) /*- (x_force >> 2)*/;
+    if((uint8_t)(SUB_TO_PX(player_x) - 10U) > 160U) {
+        if((uint8_t)(SUB_TO_PX(player_x) - 10U) < 200) player_x = player_x - (160U << 8); //right exit
+        else player_x = player_x + (160U << 8); //left exit
     }
     if (x_force)
     {
@@ -267,7 +269,7 @@ static void calculate_physics(void){
     else
     {
         // we should slow down
-        x_speed = x_speed <= 0 ? 0 : MAX(0, x_speed - impulse);
+        x_speed = x_speed <= 0 ? 0 : MAX(0, x_speed - (impulse<<1));
     }
 
     player_y += (y_speed >> (PHYSICS_DAMPNER + 1)) + ((is_jumping ? jump_g : fall_g) >> 2);
@@ -276,7 +278,7 @@ static void calculate_physics(void){
     y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + (is_jumping ? jump_g : fall_g);
 }
 
-static void render_player(void){
+void render_player(void){
     //TO RENDER THE SPRITE WE NEED THE PLAYER POS, DIRECTION, AND METASPRITE FRAME
     //current_frame = 0;
     //current_state = 4;
@@ -297,10 +299,10 @@ static void render_player(void){
         return;
     }
     //if(current_state == PLAYER_STATE_RUNNING && (current_frame == 1 || current_frame == 4)) play_step_sfx();
-    is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, player_x, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, player_x, (uint8_t)(player_y - camera_y));
-    if((uint8_t)(player_x) > 160U) {
-        if((uint8_t)(player_x) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x - 160, (uint8_t)(player_y - camera_y)); //right exit
-        else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x + 160, (uint8_t)(player_y - camera_y)); //left exit
+    is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
+    if((uint8_t)(SUB_TO_PX(player_x)) > 160U) {
+        if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
+        else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
     } else{
         hide_metasprite(metasprites_states[current_state][current_frame], 4);
     }
@@ -343,7 +345,7 @@ static void render_all_particles(void){
     set_sprite_tile(i, PLAYER_SPRITES);
     set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
     puff_frame[next_free_puff] = 4;
-    move_sprite(i, player_x + X_OFFSET, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+    move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET, (uint8_t)((player_y + Y_OFFSET) - camera_y));
     if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
     //go to next puff
     next_free_puff = (next_free_puff + 1) & 0x03;
@@ -355,7 +357,7 @@ static void instanciate_collision_puffs(void){
     set_sprite_tile(i, PLAYER_SPRITES);
     set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // remove flip
     puff_frame[next_free_puff] = 4;
-    move_sprite(i, player_x + X_OFFSET - 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+    move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET - 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
     //go to next puff
     next_free_puff = (next_free_puff + 1) & 0x03;
     
@@ -363,7 +365,7 @@ static void instanciate_collision_puffs(void){
     set_sprite_tile(i, PLAYER_SPRITES);
     set_sprite_prop(i, get_sprite_prop(i) | 0x20); // add flip
     puff_frame[next_free_puff] = 4;
-    move_sprite(i, player_x + X_OFFSET + 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+    move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET + 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
     //go to next puff
     next_free_puff = (next_free_puff + 1) & 0x03;
 }
@@ -386,12 +388,12 @@ static void hurt_frame(void){
         stop_hurt_sfx();
         return;
     }
-    player_x = is_facing_right ? player_x - (x_speed >> PHYSICS_DAMPNER) : player_x + (x_speed >> PHYSICS_DAMPNER);
+    player_x = is_facing_right ? player_x - (x_speed) : player_x + (x_speed);
     player_y += (y_speed >> PHYSICS_DAMPNER);
     y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + HURT_G;
 }
 
-static void end_frame(void){
+void end_frame(void){
     if(frame_counter == (uint8_t)(metasprites_speeds[current_state][current_frame])){
         frame_counter = 0;
         current_frame++;
@@ -429,7 +431,7 @@ static void check_collisions(void){
             // 1 -> right   / up
             // 2 -> left    / down
             // 3 -> center
-        external_point_area |= (last_x >= (r->x + r->size_x)) ? 0x10 : (last_x <= r->x) ? 0x20 : 0x30;        
+        external_point_area |= ((uint8_t)SUB_TO_PX(last_x) >= (r->x + r->size_x)) ? 0x10 : ((uint8_t)SUB_TO_PX(last_x) <= r->x) ? 0x20 : 0x30;        
         external_point_area |= (last_y <= (r->y - r->size_y)) ? 0x01 : (last_y >= r->y) ? 0x02 : 0x03;
 
         if((player_y > last_y) ? (player_y - last_y) > 50 : (last_y - player_y) > 50){
@@ -444,10 +446,10 @@ static void check_collisions(void){
         case RIGHT_UP: // RIGHT - UP
             rx = r->x + r->size_x;
             ry = r->y - r->size_y;
-            if((ry-player_y)*(last_x - player_x) < (last_y - player_y)*(rx-player_x)){
+            if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) < (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
                 //horizontal
-                player_x = r->x + r->size_x + 1;
-                x_speed = 0;
+                player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
+                //x_speed = 0;
             } else{
                 //vertical
                 player_y = r->y - r->size_y - 1;
@@ -460,10 +462,10 @@ static void check_collisions(void){
         case RIGHT_DOWN: // RIGHT - DOWN
             rx = r->x + r->size_x;
             ry = r->y;
-            if((ry-player_y)*(last_x - player_x) > (last_y - player_y)*(rx-player_x)){
+            if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) > (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
                 //horizontal
-                player_x = r->x + r->size_x + 1;
-                x_speed = 0;
+                player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
+                //x_speed = 0;
             } else{
                 //vertical
                 player_y = r->y + 1;
@@ -473,17 +475,17 @@ static void check_collisions(void){
             break;
 
         case RIGHT_CENTER: // RIGHT - CENTER
-            player_x = r->x + r->size_x + 1;
-            x_speed = 0;
+            player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
+            //x_speed = 0;
             break;
 
         case LEFT_UP: // LEFT - UP
             rx = r->x;
             ry = r->y - r->size_y;
-            if((ry-player_y)*(last_x - player_x) > (last_y - player_y)*(rx-player_x)){
+            if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) > (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
                 //horizontal
-                player_x = r->x - 1;
-                x_speed = 0;
+                player_x = (uint16_t)PX_TO_SUB(r->x - 1);
+                //x_speed = 0;
             } else{
                 //vertical
                 player_y = r->y - r->size_y - 1;
@@ -496,10 +498,10 @@ static void check_collisions(void){
         case LEFT_DOWN: // LEFT - DOWN
             rx = r->x;
             ry = r->y;
-            if((ry-player_y)*(last_x - player_x) < (last_y - player_y)*(rx-player_x)){
+            if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) < (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
                 //horizontal
-                player_x = r->x - 1;
-                x_speed = 0;
+                player_x = (uint16_t)PX_TO_SUB(r->x - 1);
+                //x_speed = 0;
             } else{
                 //vertical
                 player_y = r->y + 1;
@@ -509,8 +511,8 @@ static void check_collisions(void){
             break;
 
         case LEFT_CENTER: // LEFT - CENTER
-            player_x = r->x - 1;
-            x_speed = 0;
+            player_x = (uint16_t)PX_TO_SUB(r->x - 1);
+            //x_speed = 0;
             break;
 
         case CENTER_UP: // CENTER - UP
@@ -554,7 +556,7 @@ static void calculate_final_score(void){
 }
 
 static inline bool point_vs_rect(rect *r){
-    return (player_x >= r->x && player_y <= r->y && player_x <= (r->x + r->size_x) && player_y >= (r->y - r->size_y));
+    return ((uint8_t)SUB_TO_PX(player_x) >= r->x && player_y <= r->y && (uint8_t)SUB_TO_PX(player_x) <= (r->x + r->size_x) && player_y >= (r->y - r->size_y));
 }
 
 //-------------------------------------------------------
@@ -655,7 +657,7 @@ static void make_cloth_fall(uint8_t sprite_in_OAM){
 static bool r_shingled_function(uint8_t epa){
     if(epa == CENTER_UP){
         switch_state(PLAYER_STATE_HURT);
-        y_speed = 10;
+        //y_speed = 10;
         x_speed = 0;
         return true;
     }

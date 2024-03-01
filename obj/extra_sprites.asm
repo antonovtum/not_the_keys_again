@@ -1,9 +1,9 @@
 ;--------------------------------------------------------
-; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.1.6 #12539 (MINGW32)
+; File Created by SDCC : free open source ISO C Compiler 
+; Version 4.3.2 #14228 (Linux)
 ;--------------------------------------------------------
 	.module extra_sprites
-	.optsdcc -mgbz80
+	.optsdcc -msm83
 	
 ;--------------------------------------------------------
 ; Public variables in this module
@@ -20,9 +20,6 @@
 ; ram data
 ;--------------------------------------------------------
 	.area _INITIALIZED
-G$extra_sprites$0_0$0==.
-_extra_sprites::
-	.ds 128
 ;--------------------------------------------------------
 ; absolute external ram data
 ;--------------------------------------------------------
@@ -44,9 +41,7 @@ _extra_sprites::
 ;--------------------------------------------------------
 	.area _CODE
 	.area _CODE
-	.area _INITIALIZER
-Fextra_sprites$__xinit_extra_sprites$0_0$0 == .
-__xinit__extra_sprites:
+_extra_sprites:
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0x00	; 0
@@ -175,4 +170,5 @@ __xinit__extra_sprites:
 	.db #0x08	; 8
 	.db #0x08	; 8
 	.db #0x08	; 8
+	.area _INITIALIZER
 	.area _CABS (ABS)

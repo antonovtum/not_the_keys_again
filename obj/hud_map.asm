@@ -1,9 +1,9 @@
 ;--------------------------------------------------------
-; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.1.6 #12539 (MINGW32)
+; File Created by SDCC : free open source ISO C Compiler 
+; Version 4.3.2 #14228 (Linux)
 ;--------------------------------------------------------
 	.module hud_map
-	.optsdcc -mgbz80
+	.optsdcc -msm83
 	
 ;--------------------------------------------------------
 ; Public variables in this module
@@ -41,7 +41,6 @@
 ;--------------------------------------------------------
 	.area _CODE
 	.area _CODE
-G$hud_map$0_0$0 == .
 _hud_map:
 	.db #0x7f	; 127
 	.db #0x7b	; 123

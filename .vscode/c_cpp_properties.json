@@ -1,10 +1,10 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "c:/gbdk/include/**"
+                "/home/javier/Escritorio/gb_development/gbdk/include/**"
             ],
             "defines": [
                 "_DEBUG",

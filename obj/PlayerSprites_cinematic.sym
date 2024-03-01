@@ -1,0 +1,35 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 1
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    .__.$$$.                                                    =  002710 L
+    .__.ABS.                                                    =  000000 G
+    .__.CPU.                                                    =  000000 L
+    .__.H$L.                                                    =  000000 L
+  0 _fallen                                                        000118 GR
+  0 _key_left_0                                                    0000A0 GR
+  0 _key_left_1                                                    0000B4 GR
+  0 _key_right_0                                                   0000C8 GR
+  0 _key_right_1                                                   0000DC GR
+  0 _look_up                                                       000124 GR
+  0 _playerSprite_extra                                            000000 GR
+  0 _pull_0                                                        0000F0 GR
+  0 _pull_1                                                        000104 GR
+
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
+Hexadecimal [24-Bits]
+
+Area Table
+
+   0 _CODE                                      size    138   flags    0
+   1 _DATA                                      size      0   flags    0
+   2 _INITIALIZED                               size      0   flags    0
+   3 _DABS                                      size      0   flags    8
+   4 _HOME                                      size      0   flags    0
+   5 _GSINIT                                    size      0   flags    0
+   6 _GSFINAL                                   size      0   flags    0
+   7 _INITIALIZER                               size      0   flags    0
+   8 _CABS                                      size      0   flags    8
+

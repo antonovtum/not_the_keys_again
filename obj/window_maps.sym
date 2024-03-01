@@ -1,4 +1,4 @@
-ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 1.
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 1
 Hexadecimal [24-Bits]
 
 Symbol Table
@@ -7,20 +7,6 @@ Symbol Table
     .__.ABS.                                                    =  000000 G
     .__.CPU.                                                    =  000000 L
     .__.H$L.                                                    =  000000 L
-  0 G$base$0_0$0                                                =  000000 GR
-  0 G$bot_map_00$0_0$0                                          =  00000C GR
-  0 G$bot_map_01$0_0$0                                          =  000014 GR
-  0 G$bot_map_02$0_0$0                                          =  00001C GR
-  0 G$bot_map_02_broken$0_0$0                                   =  000058 GR
-  0 G$bot_map_03$0_0$0                                          =  000024 GR
-  0 G$bot_map_04$0_0$0                                          =  000030 GR
-  0 G$bot_map_05$0_0$0                                          =  000038 GR
-  0 G$top_map_00$0_0$0                                          =  000040 GR
-  0 G$top_map_01$0_0$0                                          =  000044 GR
-  0 G$top_map_02$0_0$0                                          =  000048 GR
-  0 G$top_map_02_broken$0_0$0                                   =  000060 GR
-  0 G$top_map_03$0_0$0                                          =  00004C GR
-  0 G$top_map_04$0_0$0                                          =  000054 GR
   0 _base                                                          000000 GR
   0 _bot_map_00                                                    00000C GR
   0 _bot_map_01                                                    000014 GR
@@ -36,8 +22,7 @@ Symbol Table
   0 _top_map_03                                                    00004C GR
   0 _top_map_04                                                    000054 GR
 
-
-ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 2.
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
 Hexadecimal [24-Bits]
 
 Area Table

@@ -1,9 +1,9 @@
 ;--------------------------------------------------------
-; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.1.6 #12539 (MINGW32)
+; File Created by SDCC : free open source ISO C Compiler 
+; Version 4.3.2 #14228 (Linux)
 ;--------------------------------------------------------
 	.module brick_particle
-	.optsdcc -mgbz80
+	.optsdcc -msm83
 	
 ;--------------------------------------------------------
 ; Public variables in this module
@@ -20,9 +20,6 @@
 ; ram data
 ;--------------------------------------------------------
 	.area _INITIALIZED
-G$brick_particle$0_0$0==.
-_brick_particle::
-	.ds 32
 ;--------------------------------------------------------
 ; absolute external ram data
 ;--------------------------------------------------------
@@ -44,9 +41,7 @@ _brick_particle::
 ;--------------------------------------------------------
 	.area _CODE
 	.area _CODE
-	.area _INITIALIZER
-Fbrick_particle$__xinit_brick_particle$0_0$0 == .
-__xinit__brick_particle:
+_brick_particle:
 	.db #0x00	; 0
 	.db #0x70	; 112	'p'
 	.db #0xf0	; 240
@@ -79,4 +74,5 @@ __xinit__brick_particle:
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0x00	; 0
+	.area _INITIALIZER
 	.area _CABS (ABS)

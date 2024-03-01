@@ -1,29 +1,23 @@
 XL3
-H 9 areas 4 global symbols
+H 9 areas 2 global symbols
 M brick_particle
-O -mgbz80
+O -msm83
 S .__.ABS. Def000000
-A _CODE size 0 flags 0 addr 0
-A _DATA size 0 flags 0 addr 0
-A _INITIALIZED size 20 flags 0 addr 0
+A _CODE size 20 flags 0 addr 0
 S _brick_particle Def000000
-S G$brick_particle$0_0$0 Def000000
+A _DATA size 0 flags 0 addr 0
+A _INITIALIZED size 0 flags 0 addr 0
 A _DABS size 0 flags 8 addr 0
 A _HOME size 0 flags 0 addr 0
 A _GSINIT size 0 flags 0 addr 0
 A _GSFINAL size 0 flags 0 addr 0
-A _INITIALIZER size 20 flags 0 addr 0
-S Fbrick_particle$__xinit_brick_particle$0_0$0 Def000000
+A _INITIALIZER size 0 flags 0 addr 0
 A _CABS size 0 flags 8 addr 0
 T 00 00 00
-R 00 00 02 00
-T 00 00 00
-R 00 00 02 00
-T 00 00 00
-R 00 00 07 00
+R 00 00 00 00
 T 00 00 00 00 70 F0 88 98 E8 88 F8 70 70 00 00 00
-R 00 00 07 00
+R 00 00 00 00
 T 0D 00 00 00 00 00 00 60 E0 90 90 F0 60 60 00 00
-R 00 00 07 00
+R 00 00 00 00
 T 1A 00 00 00 00 00 00 00 00
-R 00 00 07 00
+R 00 00 00 00

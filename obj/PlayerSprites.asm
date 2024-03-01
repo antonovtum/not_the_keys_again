@@ -1,9 +1,9 @@
 ;--------------------------------------------------------
-; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.1.6 #12539 (MINGW32)
+; File Created by SDCC : free open source ISO C Compiler 
+; Version 4.3.2 #14228 (Linux)
 ;--------------------------------------------------------
 	.module PlayerSprites
-	.optsdcc -mgbz80
+	.optsdcc -msm83
 	
 ;--------------------------------------------------------
 ; Public variables in this module
@@ -67,7 +67,6 @@
 ;--------------------------------------------------------
 	.area _CODE
 	.area _CODE
-G$playerSprites$0_0$0 == .
 _playerSprites:
 	.db #0x00	; 0
 	.db #0x00	; 0
@@ -453,7 +452,6 @@ _playerSprites:
 	.db #0xf0	; 240
 	.db #0x30	; 48	'0'
 	.db #0x70	; 112	'p'
-G$idle0$0_0$0 == .
 _idle0:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -475,7 +473,6 @@ _idle0:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$idle1$0_0$0 == .
 _idle1:
 	.db #0x01	;  1
 	.db #0xf8	; -8
@@ -497,7 +494,6 @@ _idle1:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$idle2$0_0$0 == .
 _idle2:
 	.db #0x01	;  1
 	.db #0xf8	; -8
@@ -519,7 +515,6 @@ _idle2:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$idle3$0_0$0 == .
 _idle3:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -541,19 +536,16 @@ _idle3:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$idle_metasprites$0_0$0 == .
 _idle_metasprites:
 	.dw _idle0
 	.dw _idle1
 	.dw _idle2
 	.dw _idle3
-G$idle_speed$0_0$0 == .
 _idle_speed:
 	.db #0x1e	; 30
 	.db #0x05	; 5
 	.db #0x05	; 5
 	.db #0x05	; 5
-G$run0$0_0$0 == .
 _run0:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -575,7 +567,6 @@ _run0:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$run1$0_0$0 == .
 _run1:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -597,7 +588,6 @@ _run1:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$run2$0_0$0 == .
 _run2:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -619,7 +609,6 @@ _run2:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$run3$0_0$0 == .
 _run3:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -641,7 +630,6 @@ _run3:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$run4$0_0$0 == .
 _run4:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -663,7 +651,6 @@ _run4:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$run5$0_0$0 == .
 _run5:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -685,7 +672,6 @@ _run5:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$run_metasprites$0_0$0 == .
 _run_metasprites:
 	.dw _run0
 	.dw _run1
@@ -693,7 +679,6 @@ _run_metasprites:
 	.dw _run3
 	.dw _run4
 	.dw _run5
-G$run_speed$0_0$0 == .
 _run_speed:
 	.db #0x05	; 5
 	.db #0x02	; 2
@@ -701,7 +686,6 @@ _run_speed:
 	.db #0x05	; 5
 	.db #0x02	; 2
 	.db #0x07	; 7
-G$jump0$0_0$0 == .
 _jump0:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -723,13 +707,10 @@ _jump0:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$jump_metasprites$0_0$0 == .
 _jump_metasprites:
 	.dw _jump0
-G$jump_speed$0_0$0 == .
 _jump_speed:
 	.db #0x64	; 100	'd'
-G$fall0$0_0$0 == .
 _fall0:
 	.db #0x00	;  0
 	.db #0xf8	; -8
@@ -751,13 +732,10 @@ _fall0:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$fall_metasprites$0_0$0 == .
 _fall_metasprites:
 	.dw _fall0
-G$fall_speed$0_0$0 == .
 _fall_speed:
 	.db #0x64	; 100	'd'
-G$hurt0$0_0$0 == .
 _hurt0:
 	.db #0x01	;  1
 	.db #0xf8	; -8
@@ -779,27 +757,22 @@ _hurt0:
 	.db #0x00	;  0
 	.db #0x00	; 0
 	.db #0x00	; 0
-G$hurt_metasprites$0_0$0 == .
 _hurt_metasprites:
 	.dw _fall0
-G$hurt_speed$0_0$0 == .
 _hurt_speed:
 	.db #0x64	; 100	'd'
-G$metasprites_states$0_0$0 == .
 _metasprites_states:
 	.dw _idle_metasprites
 	.dw _run_metasprites
 	.dw _jump_metasprites
 	.dw _fall_metasprites
 	.dw _hurt_metasprites
-G$metasprites_speeds$0_0$0 == .
 _metasprites_speeds:
 	.dw _idle_speed
 	.dw _run_speed
 	.dw _jump_speed
 	.dw _fall_speed
 	.dw _hurt_speed
-G$frames_in_state$0_0$0 == .
 _frames_in_state:
 	.db #0x04	; 4
 	.db #0x06	; 6

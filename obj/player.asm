@@ -1,9 +1,9 @@
 ;--------------------------------------------------------
-; File Created by SDCC : free open source ANSI-C Compiler
-; Version 4.1.6 #12539 (MINGW32)
+; File Created by SDCC : free open source ISO C Compiler 
+; Version 4.3.2 #14228 (Linux)
 ;--------------------------------------------------------
 	.module player
-	.optsdcc -mgbz80
+	.optsdcc -msm83
 	
 ;--------------------------------------------------------
 ; Public variables in this module
@@ -21,6 +21,10 @@
 	.globl _play_jump_sfx
 	.globl _stop_sfx
 	.globl _score
+	.globl _current_state
+	.globl _player_y
+	.globl _player_x
+	.globl _is_facing_right
 	.globl _a_not_pressed
 	.globl _player_dead_flag
 	.globl _clamp_y_velocity
@@ -31,6 +35,8 @@
 	.globl _jump_g
 	.globl _player_init
 	.globl _compute_player_frame
+	.globl _render_player
+	.globl _end_frame
 ;--------------------------------------------------------
 ; special function registers
 ;--------------------------------------------------------
@@ -38,89 +44,62 @@
 ; ram data
 ;--------------------------------------------------------
 	.area _DATA
-G$player_dead_flag$0_0$0==.
 _player_dead_flag::
 	.ds 1
-Fplayer$frame_counter$0_0$0==.
 _frame_counter:
 	.ds 1
-Fplayer$current_frame$0_0$0==.
 _current_frame:
 	.ds 1
-G$a_not_pressed$0_0$0==.
 _a_not_pressed::
 	.ds 1
-Fplayer$i$0_0$0==.
 _i:
 	.ds 1
-Fplayer$joy$0_0$0==.
 _joy:
 	.ds 1
-Fplayer$x_force$0_0$0==.
 _x_force:
 	.ds 1
-Fplayer$x_speed$0_0$0==.
 _x_speed:
+	.ds 2
+_is_facing_right::
 	.ds 1
-Fplayer$is_facing_right$0_0$0==.
-_is_facing_right:
-	.ds 1
-Fplayer$is_grounded$0_0$0==.
 _is_grounded:
 	.ds 1
-Fplayer$is_jumping$0_0$0==.
 _is_jumping:
 	.ds 1
-Fplayer$y_speed$0_0$0==.
 _y_speed:
 	.ds 1
-Fplayer$player_x$0_0$0==.
-_player_x:
+_player_x::
+	.ds 2
+_player_y::
 	.ds 1
-Fplayer$player_y$0_0$0==.
-_player_y:
-	.ds 1
-Fplayer$last_x$0_0$0==.
 _last_x:
-	.ds 1
-Fplayer$last_y$0_0$0==.
+	.ds 2
 _last_y:
 	.ds 1
-Fplayer$current_state$0_0$0==.
-_current_state:
+_current_state::
 	.ds 1
-Fplayer$current_coyote_frames$0_0$0==.
 _current_coyote_frames:
 	.ds 1
-G$score$0_0$0==.
 _score::
 	.ds 2
-Fplayer$max_player_y$0_0$0==.
 _max_player_y:
 	.ds 1
-Fplayer$test_max_player_y$0_0$0==.
 _test_max_player_y:
 	.ds 1
-Fplayer$highest_visited_floor$0_0$0==.
 _highest_visited_floor:
 	.ds 1
-Fplayer$next_free_puff$0_0$0==.
 _next_free_puff:
 	.ds 1
-Fplayer$brick_frame$0_0$0==.
 _brick_frame:
 	.ds 1
-Fplayer$brick_y_speed$0_0$0==.
 _brick_y_speed:
 	.ds 1
 ;--------------------------------------------------------
 ; ram data
 ;--------------------------------------------------------
 	.area _INITIALIZED
-Fplayer$puff_frame$0_0$0==.
 _puff_frame:
 	.ds 4
-Fplayer$rect_functions$0_0$0==.
 _rect_functions:
 	.ds 14
 ;--------------------------------------------------------
@@ -143,165 +122,126 @@ _rect_functions:
 ; code
 ;--------------------------------------------------------
 	.area _CODE
-	G$player_init$0$0	= .
-	.globl	G$player_init$0$0
-	C$player.c$127$0_0$153	= .
-	.globl	C$player.c$127$0_0$153
-;src/player.c:127: void player_init(void)
+;src/player.c:129: void player_init(void)
 ;	---------------------------------
 ; Function player_init
 ; ---------------------------------
 _player_init::
-	C$player.c$129$1_0$153	= .
-	.globl	C$player.c$129$1_0$153
-;src/player.c:129: player_dead_flag = false;
+;src/player.c:131: player_dead_flag = false;
 	ld	hl, #_player_dead_flag
 	ld	(hl), #0x00
-	C$player.c$131$1_0$153	= .
-	.globl	C$player.c$131$1_0$153
-;src/player.c:131: OBP0_REG = 0xE4; //11100100
+;src/player.c:133: OBP0_REG = 0xE4; //11100100
 	ld	a, #0xe4
 	ldh	(_OBP0_REG + 0), a
-	C$player.c$134$1_0$153	= .
-	.globl	C$player.c$134$1_0$153
-;src/player.c:134: set_sprite_data(TILE_NUM_START, PLAYER_SPRITES, playerSprites);
+;src/player.c:136: set_sprite_data(TILE_NUM_START, PLAYER_SPRITES, playerSprites);
 	ld	de, #_playerSprites
 	push	de
 	ld	hl, #0x1800
 	push	hl
 	call	_set_sprite_data
 	add	sp, #4
-	C$player.c$135$1_0$153	= .
-	.globl	C$player.c$135$1_0$153
-;src/player.c:135: set_sprite_data(PLAYER_SPRITES, 3, Sfx);
+;src/player.c:137: set_sprite_data(PLAYER_SPRITES, 3, Sfx);
 	ld	de, #_Sfx
 	push	de
 	ld	hl, #0x318
 	push	hl
 	call	_set_sprite_data
 	add	sp, #4
-	C$player.c$137$1_0$153	= .
-	.globl	C$player.c$137$1_0$153
-;src/player.c:137: frame_counter = 0;
+;src/player.c:139: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-	C$player.c$138$1_0$153	= .
-	.globl	C$player.c$138$1_0$153
-;src/player.c:138: current_frame = 0;
+;src/player.c:140: current_frame = 0;
 	ld	hl, #_current_frame
 	ld	(hl), #0x00
-	C$player.c$139$1_0$153	= .
-	.globl	C$player.c$139$1_0$153
-;src/player.c:139: current_state = PLAYER_STATE_IDLE;
+;src/player.c:141: current_state = PLAYER_STATE_IDLE;
 	ld	hl, #_current_state
 	ld	(hl), #0x00
-	C$player.c$140$1_0$153	= .
-	.globl	C$player.c$140$1_0$153
-;src/player.c:140: x_force = 0U;
+;src/player.c:142: x_force = 0U;
 	ld	hl, #_x_force
 	ld	(hl), #0x00
-	C$player.c$141$1_0$153	= .
-	.globl	C$player.c$141$1_0$153
-;src/player.c:141: x_speed = 0U;
+;src/player.c:143: x_speed = 0U;
+	xor	a, a
 	ld	hl, #_x_speed
-	ld	(hl), #0x00
-	C$player.c$142$1_0$153	= .
-	.globl	C$player.c$142$1_0$153
-;src/player.c:142: y_speed = 0;
+	ld	(hl+), a
+	ld	(hl), a
+;src/player.c:144: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-	C$player.c$143$1_0$153	= .
-	.globl	C$player.c$143$1_0$153
-;src/player.c:143: player_x = last_x = 16U;
+;src/player.c:145: player_x = last_x = PX_TO_SUB(16U);
 	ld	hl, #_last_x
+	xor	a, a
+	ld	(hl+), a
 	ld	(hl), #0x10
 	ld	hl, #_player_x
+	xor	a, a
+	ld	(hl+), a
 	ld	(hl), #0x10
-	C$player.c$144$1_0$153	= .
-	.globl	C$player.c$144$1_0$153
-;src/player.c:144: player_y = last_y = 128U;
+;src/player.c:146: player_y = last_y = 128U;
 	ld	hl, #_last_y
 	ld	(hl), #0x80
 	ld	hl, #_player_y
 	ld	(hl), #0x80
-	C$player.c$145$1_0$153	= .
-	.globl	C$player.c$145$1_0$153
-;src/player.c:145: is_facing_right = true;
+;src/player.c:147: is_facing_right = true;
 	ld	hl, #_is_facing_right
 	ld	(hl), #0x01
-	C$player.c$146$1_0$153	= .
-	.globl	C$player.c$146$1_0$153
-;src/player.c:146: is_grounded = true;
+;src/player.c:148: is_grounded = true;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x01
-	C$player.c$147$1_0$153	= .
-	.globl	C$player.c$147$1_0$153
-;src/player.c:147: next_free_puff = 0;
+;src/player.c:149: next_free_puff = 0;
 	ld	hl, #_next_free_puff
 	ld	(hl), #0x00
-	C$player.c$148$1_0$153	= .
-	.globl	C$player.c$148$1_0$153
-;src/player.c:148: score = 0;
+;src/player.c:150: score = 0;
 	xor	a, a
 	ld	hl, #_score
 	ld	(hl+), a
 	ld	(hl), a
-	C$player.c$149$1_0$153	= .
-	.globl	C$player.c$149$1_0$153
-;src/player.c:149: highest_visited_floor = 1;
+;src/player.c:151: highest_visited_floor = 1;
 	ld	hl, #_highest_visited_floor
 	ld	(hl), #0x01
-	C$player.c$150$1_0$153	= .
-	.globl	C$player.c$150$1_0$153
-;src/player.c:150: max_player_y = 0;
+;src/player.c:152: max_player_y = 0;
 	ld	hl, #_max_player_y
 	ld	(hl), #0x00
-	C$player.c$151$1_0$153	= .
-	.globl	C$player.c$151$1_0$153
-;src/player.c:151: a_not_pressed = true;
+;src/player.c:153: a_not_pressed = true;
 	ld	hl, #_a_not_pressed
 	ld	(hl), #0x01
-	C$player.c$152$1_0$153	= .
-	.globl	C$player.c$152$1_0$153
-;src/player.c:152: current_coyote_frames = 0;
+;src/player.c:154: current_coyote_frames = 0;
 	ld	hl, #_current_coyote_frames
 	ld	(hl), #0x00
-	C$player.c$153$1_0$153	= .
-	.globl	C$player.c$153$1_0$153
-;src/player.c:153: joy = 0;
+;src/player.c:155: joy = 0;
 	ld	hl, #_joy
 	ld	(hl), #0x00
-;src/player.c:154: move_metasprite(idle_metasprites[0], TILE_NUM_START, SPR_NUM_START, player_x, player_y);
+;src/player.c:156: move_metasprite(idle_metasprites[0], TILE_NUM_START, SPR_NUM_START, (uint8_t)SUB_TO_PX(player_x), player_y);
 	ld	hl, #_idle_metasprites
 	ld	a, (hl+)
 	ld	c, a
 	ld	a, (hl)
-;C:/gbdk/include/gb/metasprites.h:138: __current_metasprite = metasprite;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:160: __current_metasprite = metasprite;
 	ld	hl, #___current_metasprite
 	ld	(hl), c
 	inc	hl
 	ld	(hl), a
-;C:/gbdk/include/gb/metasprites.h:139: __current_base_tile = base_tile;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:161: __current_base_tile = base_tile;
 	ld	hl, #___current_base_tile
 	ld	(hl), #0x00
-;C:/gbdk/include/gb/metasprites.h:140: return __move_metasprite(base_sprite, x, y);
-	ld	hl, #0x8010
-	push	hl
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:162: __current_base_prop = 0;
+	ld	hl, #___current_base_prop
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:163: return __move_metasprite(base_sprite, (y << 8) | (uint8_t)x);
+	ld	de, #0x8010
 	xor	a, a
-	push	af
-	inc	sp
 	call	___move_metasprite
-	add	sp, #3
-	C$player.c$156$1_0$153	= .
-	.globl	C$player.c$156$1_0$153
-;src/player.c:156: set_sprite_data(0x1B, 2, brick_particle);
+;src/player.c:158: set_sprite_data(0x1B, 2, brick_particle);
 	ld	de, #_brick_particle
 	push	de
-	ld	hl, #0x21b
-	push	hl
+	ld	a, #0x02
+	push	af
+	inc	sp
+	ld	a, #0x1b
+	push	af
+	inc	sp
 	call	_set_sprite_data
 	add	sp, #4
-;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
 	ld	hl, #(_shadow_OAM + 50)
 	ld	(hl), #0x1b
 	ld	hl, #(_shadow_OAM + 54)
@@ -310,124 +250,81 @@ _player_init::
 	ld	(hl), #0x1c
 	ld	hl, #(_shadow_OAM + 62)
 	ld	(hl), #0x1c
-	C$player.c$161$1_0$153	= .
-	.globl	C$player.c$161$1_0$153
-;src/player.c:161: brick_frame = 0;
+;src/player.c:163: brick_frame = 0;
 	ld	hl, #_brick_frame
 	ld	(hl), #0x00
-	C$player.c$162$1_0$153	= .
-	.globl	C$player.c$162$1_0$153
-;src/player.c:162: }
-	C$player.c$162$1_0$153	= .
-	.globl	C$player.c$162$1_0$153
-	XG$player_init$0$0	= .
-	.globl	XG$player_init$0$0
+;src/player.c:164: }
 	ret
-G$jump_g$0_0$0 == .
 _jump_g:
 	.db #0x02	; 2
-G$fall_g$0_0$0 == .
 _fall_g:
 	.db #0x04	; 4
-G$impulse$0_0$0 == .
 _impulse:
-	.db #0x02	; 2
-G$jump_power$0_0$0 == .
+	.db #0x18	; 24
 _jump_power:
 	.db #0xdd	; -35
-G$clamp_x_velocity$0_0$0 == .
 _clamp_x_velocity:
-	.db #0x08	; 8
-G$clamp_y_velocity$0_0$0 == .
+	.dw #0x0200
 _clamp_y_velocity:
-	.db #0x19	;  25
-	G$compute_player_frame$0$0	= .
-	.globl	G$compute_player_frame$0$0
-	C$player.c$164$1_0$170	= .
-	.globl	C$player.c$164$1_0$170
-;src/player.c:164: void compute_player_frame(void)
+	.db #0x14	;  20
+;src/player.c:166: void compute_player_frame(void)
 ;	---------------------------------
 ; Function compute_player_frame
 ; ---------------------------------
 _compute_player_frame::
-	C$player.c$166$1_0$170	= .
-	.globl	C$player.c$166$1_0$170
-;src/player.c:166: if(current_state == PLAYER_STATE_HURT){
+;src/player.c:168: if(current_state == PLAYER_STATE_HURT){
 	ld	a, (#_current_state)
 	sub	a, #0x04
 	jr	NZ, 00104$
-	C$player.c$167$2_0$171	= .
-	.globl	C$player.c$167$2_0$171
-;src/player.c:167: hurt_frame();
+;src/player.c:169: hurt_frame();
 	call	_hurt_frame
 	jr	00105$
 00104$:
-	C$player.c$170$2_0$172	= .
-	.globl	C$player.c$170$2_0$172
-;src/player.c:170: retrieve_input();
+;src/player.c:172: retrieve_input();
 	call	_retrieve_input
-	C$player.c$172$2_0$172	= .
-	.globl	C$player.c$172$2_0$172
-;src/player.c:172: if(player_dead_flag) return;
+;src/player.c:174: if(player_dead_flag) return;
 	ld	hl, #_player_dead_flag
 	bit	0, (hl)
 	ret	NZ
-	C$player.c$174$2_0$172	= .
-	.globl	C$player.c$174$2_0$172
-;src/player.c:174: calculate_physics();
+;src/player.c:176: calculate_physics();
 	call	_calculate_physics
 00105$:
-	C$player.c$180$1_0$170	= .
-	.globl	C$player.c$180$1_0$170
-;src/player.c:180: check_collisions();
+;src/player.c:182: check_collisions();
 	call	_check_collisions
-	C$player.c$181$1_0$170	= .
-	.globl	C$player.c$181$1_0$170
-;src/player.c:181: if(y_speed > 0 && (current_state != PLAYER_STATE_HURT && current_state != PLAYER_STATE_FALLING)){
+;src/player.c:183: if(y_speed > 0 && (current_state != PLAYER_STATE_HURT && current_state != PLAYER_STATE_FALLING)){
 	ld	hl, #_y_speed
 	ld	e, (hl)
 	xor	a, a
 	ld	d, a
 	sub	a, (hl)
 	bit	7, e
-	jr	Z, 00152$
+	jr	Z, 00166$
 	bit	7, d
-	jr	NZ, 00153$
+	jr	NZ, 00167$
 	cp	a, a
-	jr	00153$
-00152$:
+	jr	00167$
+00166$:
 	bit	7, d
-	jr	Z, 00153$
+	jr	Z, 00167$
 	scf
-00153$:
+00167$:
 	jr	NC, 00107$
 	ld	a,(#_current_state)
 	cp	a,#0x04
 	jr	Z, 00107$
 	sub	a, #0x03
 	jr	Z, 00107$
-	C$player.c$182$2_0$173	= .
-	.globl	C$player.c$182$2_0$173
-;src/player.c:182: switch_state(PLAYER_STATE_FALLING);
+;src/player.c:184: switch_state(PLAYER_STATE_FALLING);
 	ld	a, #0x03
-	push	af
-	inc	sp
 	call	_switch_state
-	inc	sp
-	C$player.c$183$2_0$173	= .
-	.globl	C$player.c$183$2_0$173
-;src/player.c:183: is_grounded = false;
+;src/player.c:185: is_grounded = false;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x00
-	C$player.c$184$2_0$173	= .
-	.globl	C$player.c$184$2_0$173
-;src/player.c:184: is_jumping = false;
+;src/player.c:186: is_jumping = false;
 	ld	hl, #_is_jumping
 	ld	(hl), #0x00
 00107$:
-	C$player.c$187$1_0$170	= .
-	.globl	C$player.c$187$1_0$170
-;src/player.c:187: if(current_state == PLAYER_STATE_FALLING && current_coyote_frames < COYOTE_FRAMES) current_coyote_frames++;
+;src/player.c:189: if(current_state == PLAYER_STATE_FALLING && current_coyote_frames < COYOTE_FRAMES) current_coyote_frames++;
 	ld	a, (#_current_state)
 	sub	a, #0x03
 	jr	NZ, 00111$
@@ -437,177 +334,112 @@ _compute_player_frame::
 	jr	NC, 00111$
 	inc	(hl)
 00111$:
-	C$player.c$189$1_0$170	= .
-	.globl	C$player.c$189$1_0$170
-;src/player.c:189: update_score();
+;src/player.c:191: update_score();
 	call	_update_score
-	C$player.c$191$1_0$170	= .
-	.globl	C$player.c$191$1_0$170
-;src/player.c:191: last_x = player_x;
+;src/player.c:193: last_x = player_x;
 	ld	a, (#_player_x)
 	ld	(#_last_x),a
-	C$player.c$192$1_0$170	= .
-	.globl	C$player.c$192$1_0$170
-;src/player.c:192: last_y = player_y;
+	ld	a, (#_player_x + 1)
+	ld	(#_last_x + 1),a
+;src/player.c:194: last_y = player_y;
 	ld	a, (#_player_y)
 	ld	(#_last_y),a
-	C$player.c$194$1_0$170	= .
-	.globl	C$player.c$194$1_0$170
-;src/player.c:194: render_all_particles();
+;src/player.c:196: render_all_particles();
 	call	_render_all_particles
-	C$player.c$196$1_0$170	= .
-	.globl	C$player.c$196$1_0$170
-;src/player.c:196: render_player();
+;src/player.c:198: render_player();
 	call	_render_player
-	C$player.c$198$1_0$170	= .
-	.globl	C$player.c$198$1_0$170
-;src/player.c:198: end_frame();
-	C$player.c$199$1_0$170	= .
-	.globl	C$player.c$199$1_0$170
-;src/player.c:199: }
-	C$player.c$199$1_0$170	= .
-	.globl	C$player.c$199$1_0$170
-	XG$compute_player_frame$0$0	= .
-	.globl	XG$compute_player_frame$0$0
+;src/player.c:200: end_frame();
+;src/player.c:201: }
 	jp	_end_frame
-	Fplayer$retrieve_input$0$0	= .
-	.globl	Fplayer$retrieve_input$0$0
-	C$player.c$201$1_0$175	= .
-	.globl	C$player.c$201$1_0$175
-;src/player.c:201: static void retrieve_input(void){
+;src/player.c:203: static void retrieve_input(void){
 ;	---------------------------------
 ; Function retrieve_input
 ; ---------------------------------
 _retrieve_input:
-	C$player.c$202$1_0$175	= .
-	.globl	C$player.c$202$1_0$175
-;src/player.c:202: joy = joypad();
+;src/player.c:204: joy = joypad();
 	call	_joypad
-	ld	hl, #_joy
-	ld	(hl), e
-	C$player.c$203$1_0$175	= .
-	.globl	C$player.c$203$1_0$175
-;src/player.c:203: if (joy & J_RIGHT)
-	ld	a, (hl)
+;src/player.c:205: if (joy & J_RIGHT)
+	ld	(#_joy),a
 	bit	0, a
 	jr	Z, 00120$
-	C$player.c$205$2_0$176	= .
-	.globl	C$player.c$205$2_0$176
-;src/player.c:205: if(is_grounded)switch_state(PLAYER_STATE_RUNNING);
+;src/player.c:207: if(is_grounded)switch_state(PLAYER_STATE_RUNNING);
 	ld	hl, #_is_grounded
 	bit	0, (hl)
 	jr	Z, 00102$
 	ld	a, #0x01
-	push	af
-	inc	sp
 	call	_switch_state
-	inc	sp
 00102$:
-	C$player.c$206$2_0$176	= .
-	.globl	C$player.c$206$2_0$176
-;src/player.c:206: if (!is_facing_right && x_speed)
+;src/player.c:208: if (!is_facing_right && x_speed)
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
 	jr	NZ, 00104$
-	ld	a, (#_x_speed)
-	or	a, a
+	ld	hl, #_x_speed + 1
+	ld	a, (hl-)
+	or	a, (hl)
 	jr	Z, 00104$
-	C$player.c$208$3_0$177	= .
-	.globl	C$player.c$208$3_0$177
-;src/player.c:208: x_force = 0;
+;src/player.c:210: x_force = 0;
 	ld	hl, #_x_force
 	ld	(hl), #0x00
 	jr	00121$
 00104$:
-	C$player.c$212$3_0$178	= .
-	.globl	C$player.c$212$3_0$178
-;src/player.c:212: is_facing_right = true;
+;src/player.c:214: is_facing_right = true;
 	ld	hl, #_is_facing_right
 	ld	(hl), #0x01
-	C$player.c$213$3_0$178	= .
-	.globl	C$player.c$213$3_0$178
-;src/player.c:213: x_force = impulse;
-	ld	a, (#_impulse)
-	ld	(#_x_force),a
+;src/player.c:215: x_force = impulse;
+	ld	hl, #_x_force
+	ld	(hl), #0x18
 	jr	00121$
 00120$:
-	C$player.c$216$1_0$175	= .
-	.globl	C$player.c$216$1_0$175
-;src/player.c:216: else if (joy & J_LEFT)
+;src/player.c:218: else if (joy & J_LEFT)
 	bit	1, a
 	jr	Z, 00117$
-	C$player.c$218$2_0$179	= .
-	.globl	C$player.c$218$2_0$179
-;src/player.c:218: if(is_grounded)switch_state(PLAYER_STATE_RUNNING);
+;src/player.c:220: if(is_grounded)switch_state(PLAYER_STATE_RUNNING);
 	ld	hl, #_is_grounded
 	bit	0, (hl)
 	jr	Z, 00108$
 	ld	a, #0x01
-	push	af
-	inc	sp
 	call	_switch_state
-	inc	sp
 00108$:
-	C$player.c$219$2_0$179	= .
-	.globl	C$player.c$219$2_0$179
-;src/player.c:219: if (is_facing_right && x_speed)
+;src/player.c:221: if (is_facing_right && x_speed)
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
 	jr	Z, 00110$
-	ld	a, (#_x_speed)
-	or	a, a
+	ld	hl, #_x_speed + 1
+	ld	a, (hl-)
+	or	a, (hl)
 	jr	Z, 00110$
-	C$player.c$221$3_0$180	= .
-	.globl	C$player.c$221$3_0$180
-;src/player.c:221: x_force = 0;
+;src/player.c:223: x_force = 0;
 	ld	hl, #_x_force
 	ld	(hl), #0x00
 	jr	00121$
 00110$:
-	C$player.c$225$3_0$181	= .
-	.globl	C$player.c$225$3_0$181
-;src/player.c:225: is_facing_right = false;
+;src/player.c:227: is_facing_right = false;
 	ld	hl, #_is_facing_right
 	ld	(hl), #0x00
-	C$player.c$226$3_0$181	= .
-	.globl	C$player.c$226$3_0$181
-;src/player.c:226: x_force = impulse;
-	ld	a, (#_impulse)
-	ld	(#_x_force),a
+;src/player.c:228: x_force = impulse;
+	ld	hl, #_x_force
+	ld	(hl), #0x18
 	jr	00121$
 00117$:
-	C$player.c$231$2_0$182	= .
-	.globl	C$player.c$231$2_0$182
-;src/player.c:231: x_force = 0;
+;src/player.c:233: x_force = 0;
 	ld	hl, #_x_force
 	ld	(hl), #0x00
-	C$player.c$232$2_0$182	= .
-	.globl	C$player.c$232$2_0$182
-;src/player.c:232: if((!x_speed) && (!y_speed)) switch_state(PLAYER_STATE_IDLE);
-	ld	a, (#_x_speed)
-	or	a, a
+;src/player.c:234: if((!x_speed) && (!y_speed)) switch_state(PLAYER_STATE_IDLE);
+	ld	hl, #_x_speed + 1
+	ld	a, (hl-)
+	or	a, (hl)
 	jr	NZ, 00121$
 	ld	a, (#_y_speed)
-	or	a, a
+	or	a,a
 	jr	NZ, 00121$
-	xor	a, a
-	push	af
-	inc	sp
 	call	_switch_state
-	inc	sp
 00121$:
-	C$player.c$203$1_0$175	= .
-	.globl	C$player.c$203$1_0$175
-;src/player.c:203: if (joy & J_RIGHT)
+;src/player.c:205: if (joy & J_RIGHT)
 	ld	a, (#_joy)
-	C$player.c$234$1_0$175	= .
-	.globl	C$player.c$234$1_0$175
-;src/player.c:234: if ((joy & J_A && a_not_pressed) && (is_grounded || current_coyote_frames < COYOTE_FRAMES) && (y_speed >= 0))
+;src/player.c:236: if ((joy & J_A && a_not_pressed) && (is_grounded || current_coyote_frames < COYOTE_FRAMES) && (y_speed >= 0))
 	and	a, #0x10
 	ld	c, a
-	ld	b, #0x00
-	ld	a, b
-	or	a, c
+	or	a, a
 	jr	Z, 00127$
 	ld	hl, #_a_not_pressed
 	bit	0, (hl)
@@ -622,45 +454,28 @@ _retrieve_input:
 	ld	a, (#_y_speed)
 	bit	7, a
 	jr	NZ, 00127$
-	C$player.c$236$2_0$183	= .
-	.globl	C$player.c$236$2_0$183
-;src/player.c:236: switch_state(PLAYER_STATE_JUMPING);
+;src/player.c:238: switch_state(PLAYER_STATE_JUMPING);
 	ld	a, #0x02
-	push	af
-	inc	sp
 	call	_switch_state
-	inc	sp
-	C$player.c$237$2_0$183	= .
-	.globl	C$player.c$237$2_0$183
-;src/player.c:237: play_jump_sfx();
+;src/player.c:239: play_jump_sfx();
 	call	_play_jump_sfx
-	C$player.c$238$2_0$183	= .
-	.globl	C$player.c$238$2_0$183
-;src/player.c:238: a_not_pressed = false;
+;src/player.c:240: a_not_pressed = false;
 	ld	hl, #_a_not_pressed
 	ld	(hl), #0x00
-	C$player.c$239$2_0$183	= .
-	.globl	C$player.c$239$2_0$183
-;src/player.c:239: y_speed = jump_power;
-	ld	a, (#_jump_power)
-	ld	(#_y_speed),a
-	C$player.c$240$2_0$183	= .
-	.globl	C$player.c$240$2_0$183
-;src/player.c:240: is_grounded = false;
+;src/player.c:241: y_speed = jump_power;
+	ld	hl, #_y_speed
+	ld	(hl), #0xdd
+;src/player.c:242: is_grounded = false;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x00
-	C$player.c$241$2_0$183	= .
-	.globl	C$player.c$241$2_0$183
-;src/player.c:241: is_jumping = true;
+;src/player.c:243: is_jumping = true;
 	ld	hl, #_is_jumping
 	ld	(hl), #0x01
 	jr	00128$
 00127$:
-	C$player.c$243$1_0$175	= .
-	.globl	C$player.c$243$1_0$175
-;src/player.c:243: else if ((!(joy & J_A) || y_speed > 0) && !is_grounded)
-	ld	a, b
-	or	a, c
+;src/player.c:245: else if ((!(joy & J_A) || y_speed > 0) && !is_grounded)
+	ld	a, c
+	or	a, a
 	jr	Z, 00125$
 	ld	hl, #_y_speed
 	ld	e, (hl)
@@ -668,196 +483,200 @@ _retrieve_input:
 	ld	d, a
 	sub	a, (hl)
 	bit	7, e
-	jr	Z, 00224$
+	jr	Z, 00258$
 	bit	7, d
-	jr	NZ, 00225$
+	jr	NZ, 00259$
 	cp	a, a
-	jr	00225$
-00224$:
+	jr	00259$
+00258$:
 	bit	7, d
-	jr	Z, 00225$
+	jr	Z, 00259$
 	scf
-00225$:
+00259$:
 	jr	NC, 00128$
 00125$:
 	ld	hl, #_is_grounded
 	bit	0, (hl)
 	jr	NZ, 00128$
-	C$player.c$245$2_0$184	= .
-	.globl	C$player.c$245$2_0$184
-;src/player.c:245: switch_state(PLAYER_STATE_FALLING);
+;src/player.c:247: switch_state(PLAYER_STATE_FALLING);
 	ld	a, #0x03
-	push	af
-	inc	sp
 	call	_switch_state
-	inc	sp
-	C$player.c$246$2_0$184	= .
-	.globl	C$player.c$246$2_0$184
-;src/player.c:246: stop_jump_sfx();
+;src/player.c:248: stop_jump_sfx();
 	call	_stop_jump_sfx
-	C$player.c$247$2_0$184	= .
-	.globl	C$player.c$247$2_0$184
-;src/player.c:247: is_jumping = false;
+;src/player.c:249: is_jumping = false;
 	ld	hl, #_is_jumping
 	ld	(hl), #0x00
 00128$:
-	C$player.c$249$1_0$175	= .
-	.globl	C$player.c$249$1_0$175
-;src/player.c:249: if(!(joy & J_A)) a_not_pressed = true;
+;src/player.c:251: if(!(joy & J_A)) a_not_pressed = true;
 	ld	a, (#_joy)
 	bit	4, a
 	ret	NZ
 	ld	hl, #_a_not_pressed
 	ld	(hl), #0x01
-	C$player.c$250$1_0$175	= .
-	.globl	C$player.c$250$1_0$175
-;src/player.c:250: }
-	C$player.c$250$1_0$175	= .
-	.globl	C$player.c$250$1_0$175
-	XFplayer$retrieve_input$0$0	= .
-	.globl	XFplayer$retrieve_input$0$0
+;src/player.c:252: }
 	ret
-	Fplayer$calculate_physics$0$0	= .
-	.globl	Fplayer$calculate_physics$0$0
-	C$player.c$252$1_0$186	= .
-	.globl	C$player.c$252$1_0$186
-;src/player.c:252: static void calculate_physics(void){
+;src/player.c:254: static void calculate_physics(void){
 ;	---------------------------------
 ; Function calculate_physics
 ; ---------------------------------
 _calculate_physics:
-	add	sp, #-3
-	C$player.c$257$1_0$186	= .
-	.globl	C$player.c$257$1_0$186
-;src/player.c:257: player_x = is_facing_right ? player_x + (x_speed >> PHYSICS_DAMPNER) /*+ (x_force >> 2)*/ : player_x - (x_speed >> PHYSICS_DAMPNER) /*- (x_force >> 2)*/;
-	ld	hl, #_x_speed
-	ld	c, (hl)
-	srl	c
-	srl	c
+	dec	sp
+	dec	sp
+;src/player.c:259: player_x = is_facing_right ? player_x + (x_speed) /*+ (x_force >> 2)*/ : player_x - (x_speed) /*- (x_force >> 2)*/;
+	ld	a, (#_x_speed)
+	ldhl	sp,	#0
+	ld	(hl), a
+	ld	a, (#_x_speed + 1)
+	ldhl	sp,	#1
+	ld	(hl), a
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
 	jr	Z, 00111$
-	ld	a, (#_player_x)
-	add	a, c
+	pop	de
+	push	de
+	ld	hl, #_player_x
+	ld	a,	(hl+)
+	ld	h, (hl)
+	ld	l, a
+	add	hl, de
+	ld	c, l
+	ld	b, h
 	jr	00112$
 00111$:
-	ld	a, (#_player_x)
-	sub	a, c
+	ld	hl, #_player_x
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	pop	hl
+	push	hl
+	ld	a, e
+	sub	a, l
+	ld	e, a
+	ld	a, d
+	sbc	a, h
+	ld	b, a
+	ld	c, e
 00112$:
 	ld	hl, #_player_x
-	C$player.c$258$1_0$186	= .
-	.globl	C$player.c$258$1_0$186
-;src/player.c:258: if((uint8_t)(player_x - 10U) > 160U) {
-	ld	(hl), a
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
+;src/player.c:260: if((uint8_t)(SUB_TO_PX(player_x) - 10U) > 160U) {
+	ld	a, (hl)
 	add	a, #0xf6
 	ld	c, a
 	ld	a, #0xa0
 	sub	a, c
 	jr	NC, 00105$
-	C$player.c$259$2_0$187	= .
-	.globl	C$player.c$259$2_0$187
-;src/player.c:259: if((uint8_t)(player_x - 10U) < 200) player_x = player_x - 160U; //right exit
+;src/player.c:261: if((uint8_t)(SUB_TO_PX(player_x) - 10U) < 200) player_x = player_x - (160U << 8); //right exit
+	dec	hl
+	ld	a, (hl+)
+	ld	e, a
+	ld	b, (hl)
 	ld	a, c
 	sub	a, #0xc8
 	jr	NC, 00102$
-	ld	a, (hl)
-	add	a, #0x60
+	dec	hl
+	ld	c, e
+	ld	a,b
+	add	a,#0x60
+	ld	(hl), c
+	inc	hl
 	ld	(hl), a
 	jr	00105$
 00102$:
-	C$player.c$260$2_0$187	= .
-	.globl	C$player.c$260$2_0$187
-;src/player.c:260: else player_x = player_x + 160U; //left exit
-	ld	hl, #_player_x
-	ld	a, (hl)
+;src/player.c:262: else player_x = player_x + (160U << 8); //left exit
+	ld	a, b
 	add	a, #0xa0
+	ld	hl, #_player_x
+	ld	(hl), e
+	inc	hl
 	ld	(hl), a
 00105$:
-	C$player.c$262$1_0$186	= .
-	.globl	C$player.c$262$1_0$186
-;src/player.c:262: if (x_force)
+;src/player.c:267: x_speed = x_speed >= clamp_x_velocity ? clamp_x_velocity : x_speed + x_force;
+	ld	hl, #_x_speed
+	ld	a, (hl+)
+	ld	c, a
+	ld	b, (hl)
+;src/player.c:264: if (x_force)
 	ld	a, (#_x_force)
 	or	a, a
 	jr	Z, 00107$
-	C$player.c$265$2_0$188	= .
-	.globl	C$player.c$265$2_0$188
-;src/player.c:265: x_speed = x_speed >= clamp_x_velocity ? clamp_x_velocity : x_speed + x_force;
-	ld	hl, #_clamp_x_velocity
-	ld	c, (hl)
-	ld	a, (#_x_speed)
-	sub	a, c
+;src/player.c:267: x_speed = x_speed >= clamp_x_velocity ? clamp_x_velocity : x_speed + x_force;
+	ldhl	sp,	#0
+	ld	a, (hl+)
+	sub	a, #0x00
+	ld	a, (hl)
+	sbc	a, #0x02
 	jr	C, 00113$
-	ld	a, c
+	ld	bc, #0x0200
 	jr	00114$
 00113$:
-	ld	a, (#_x_speed)
 	ld	hl, #_x_force
-	add	a, (hl)
-00114$:
-	ld	(#_x_speed),a
-	jr	00108$
-00107$:
-	C$player.c$270$2_0$189	= .
-	.globl	C$player.c$270$2_0$189
-;src/player.c:270: x_speed = x_speed <= 0 ? 0 : MAX(0, x_speed - impulse);
-	ld	a, (#_x_speed)
-	or	a,a
-;	spillPairReg hl
-;	spillPairReg hl
-	jr	Z, 00116$
-	ld	a, (#_x_speed)
-	ld	e, #0x00
-	ld	hl, #_impulse
-	ld	c, (hl)
-	ld	l, c
+	ld	l, (hl)
 ;	spillPairReg hl
 ;	spillPairReg hl
 	ld	h, #0x00
 ;	spillPairReg hl
 ;	spillPairReg hl
-	sub	a, l
-	ld	a, e
-	sbc	a, h
-;	spillPairReg hl
-;	spillPairReg hl
-	bit	7,a
-	jr	Z, 00117$
+	add	hl, bc
+	ld	c, l
+	ld	b, h
+00114$:
+	ld	hl, #_x_speed
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
+	jr	00108$
+00107$:
+;src/player.c:272: x_speed = x_speed <= 0 ? 0 : MAX(0, x_speed - (impulse<<1));
+	ld	e, b
 	xor	a, a
-;	spillPairReg hl
-;	spillPairReg hl
-	jr	00118$
+	ld	d, a
+	cp	a, c
+	sbc	a, b
+	bit	7, e
+	jr	Z, 00195$
+	bit	7, d
+	jr	NZ, 00196$
+	cp	a, a
+	jr	00196$
+00195$:
+	bit	7, d
+	jr	Z, 00196$
+	scf
+00196$:
+	jr	C, 00115$
+	ld	bc, #0x0000
+	jr	00116$
+00115$:
+	ld	a, c
+	add	a, #0xd0
+	ld	c, a
+	ld	a, b
+	adc	a, #0xff
+	ld	b, a
+	bit	7, b
+	jr	Z, 00117$
+	ld	bc, #0x0000
 00117$:
-	ld	a, (#_x_speed)
-	sub	a, c
-;	spillPairReg hl
-;	spillPairReg hl
-00118$:
 00116$:
-	ld	(_x_speed), a
+	ld	hl, #_x_speed
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
 00108$:
-	C$player.c$273$1_0$186	= .
-	.globl	C$player.c$273$1_0$186
-;src/player.c:273: player_y += (y_speed >> (PHYSICS_DAMPNER + 1)) + ((is_jumping ? jump_g : fall_g) >> 2);
+;src/player.c:275: player_y += (y_speed >> (PHYSICS_DAMPNER + 1)) + ((is_jumping ? jump_g : fall_g) >> 2);
 	ld	hl, #_y_speed
 	ld	c, (hl)
 	sra	c
 	sra	c
 	sra	c
-	ld	a, (#_jump_g)
-	ldhl	sp,	#0
-	ld	(hl), a
-	ld	a, (#_fall_g)
-	ldhl	sp,	#2
-	ld	(hl), a
 	ld	hl, #_is_jumping
 	bit	0, (hl)
-	jr	Z, 00119$
-	ldhl	sp,	#0
-	ld	a, (hl)
-	jr	00120$
-00119$:
-	ldhl	sp,	#2
-	ld	a, (hl)
+	ld	a, #0x02
+	jr	NZ, 00120$
+	ld	a, #0x04
 00120$:
 	rrca
 	rrca
@@ -867,69 +686,35 @@ _calculate_physics:
 	ld	c, (hl)
 	add	a, c
 	ld	(hl), a
-	C$player.c$276$1_0$186	= .
-	.globl	C$player.c$276$1_0$186
-;src/player.c:276: y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + (is_jumping ? jump_g : fall_g);
-	ld	a, (#_clamp_y_velocity)
-	ldhl	sp,	#1
-	ld	(hl), a
-	ld	e, (hl)
+;src/player.c:278: y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + (is_jumping ? jump_g : fall_g);
 	ld	a, (#_y_speed)
-	ld	d,a
-	ldhl	sp,	#1
-	sub	a, (hl)
-	bit	7, e
-	jr	Z, 00175$
-	bit	7, d
-	jr	NZ, 00176$
-	cp	a, a
-	jr	00176$
-00175$:
-	bit	7, d
-	jr	Z, 00176$
-	scf
-00176$:
+	xor	a, #0x80
+	sub	a, #0x94
 	jr	C, 00121$
-	ldhl	sp,	#1
-	ld	a, (hl)
+	ld	a, #0x14
 	jr	00122$
 00121$:
 	ld	hl, #_is_jumping
 	bit	0, (hl)
-	jr	Z, 00123$
-	ldhl	sp,	#0
-	ld	a, (hl+)
-	inc	hl
-	ld	(hl), a
-00123$:
-	ldhl	sp,	#2
-	ld	a, (hl)
+	ld	a, #0x02
+	jr	NZ, 00124$
+	ld	a, #0x04
+00124$:
 	ld	hl, #_y_speed
 	add	a, (hl)
 00122$:
 	ld	(#_y_speed),a
-	C$player.c$277$1_0$186	= .
-	.globl	C$player.c$277$1_0$186
-;src/player.c:277: }
-	add	sp, #3
-	C$player.c$277$1_0$186	= .
-	.globl	C$player.c$277$1_0$186
-	XFplayer$calculate_physics$0$0	= .
-	.globl	XFplayer$calculate_physics$0$0
+;src/player.c:279: }
+	inc	sp
+	inc	sp
 	ret
-	Fplayer$render_player$0$0	= .
-	.globl	Fplayer$render_player$0$0
-	C$player.c$279$1_0$191	= .
-	.globl	C$player.c$279$1_0$191
-;src/player.c:279: static void render_player(void){
+;src/player.c:281: void render_player(void){
 ;	---------------------------------
 ; Function render_player
 ; ---------------------------------
-_render_player:
+_render_player::
 	add	sp, #-8
-	C$player.c$283$1_0$191	= .
-	.globl	C$player.c$283$1_0$191
-;src/player.c:283: if(!player_dead_flag && (uint8_t)(player_y - camera_y) > 160U) {
+;src/player.c:285: if(!player_dead_flag && (uint8_t)(player_y - camera_y) > 160U) {
 	ld	a, (#_player_y)
 	ld	hl, #_camera_y
 	sub	a, (hl)
@@ -942,39 +727,24 @@ _render_player:
 	ldhl	sp,	#7
 	sub	a, (hl)
 	jr	NC, 00102$
-	C$player.c$284$2_0$192	= .
-	.globl	C$player.c$284$2_0$192
-;src/player.c:284: player_dead_flag = true;
+;src/player.c:286: player_dead_flag = true;
 	ld	hl, #_player_dead_flag
 	ld	(hl), #0x01
-	C$player.c$285$2_0$192	= .
-	.globl	C$player.c$285$2_0$192
-;src/player.c:285: game_ended_flag = true;
+;src/player.c:287: game_ended_flag = true;
 	ld	hl, #_game_ended_flag
 	ld	(hl), #0x01
-	C$player.c$286$2_0$192	= .
-	.globl	C$player.c$286$2_0$192
-;src/player.c:286: calculate_final_score();
+;src/player.c:288: calculate_final_score();
 	call	_calculate_final_score
-	C$player.c$287$2_0$192	= .
-	.globl	C$player.c$287$2_0$192
-;src/player.c:287: stop_sfx();
+;src/player.c:289: stop_sfx();
 	call	_stop_sfx
-	C$player.c$290$2_0$192	= .
-	.globl	C$player.c$290$2_0$192
-;src/player.c:290: hide_sprites_range(0, 20);
-	ld	hl, #0x1400
-	push	hl
+;src/player.c:292: hide_sprites_range(0, 20);
+	ld	e, #0x14
+	xor	a, a
 	call	_hide_sprites_range
-	pop	hl
-	C$player.c$291$2_0$192	= .
-	.globl	C$player.c$291$2_0$192
-;src/player.c:291: return;
+;src/player.c:293: return;
 	jp	00127$
 00102$:
-	C$player.c$294$1_0$191	= .
-	.globl	C$player.c$294$1_0$191
-;src/player.c:294: hide_metasprite(metasprites_states[current_state][current_frame], 0);
+;src/player.c:296: hide_metasprite(metasprites_states[current_state][current_frame], 0);
 	ld	hl, #_current_state
 	ld	b, (hl)
 	ld	e, #0x00
@@ -982,52 +752,47 @@ _render_player:
 	ld	c, #0x00
 	sla	b
 	rl	e
-	ldhl	sp,	#0
+	ldhl	sp,	#4
 	ld	(hl), b
 	inc	hl
 	ld	(hl), e
-	inc	hl
 	add	a, a
 	rl	c
+	ldhl	sp,	#0
 	ld	(hl+), a
 	ld	(hl), c
-	C$player.c$293$1_0$191	= .
-	.globl	C$player.c$293$1_0$191
-;src/player.c:293: if(current_state == PLAYER_STATE_HURT && (frame_counter & 0x02)){
+;src/player.c:295: if(current_state == PLAYER_STATE_HURT && (frame_counter & 0x02)){
 	ld	a, (#_current_state)
 	sub	a, #0x04
 	jr	NZ, 00107$
 	ld	a, (#_frame_counter)
 	bit	1, a
 	jr	Z, 00107$
-;src/player.c:294: hide_metasprite(metasprites_states[current_state][current_frame], 0);
+;src/player.c:296: hide_metasprite(metasprites_states[current_state][current_frame], 0);
 	ld	de, #_metasprites_states
-	pop	hl
-	push	hl
+	ldhl	sp,	#4
+	ld	a,	(hl+)
+	ld	h, (hl)
+	ld	l, a
 	add	hl, de
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
-	ldhl	sp,	#2
-	ld	a,	(hl+)
-	ld	h, (hl)
-	ld	l, a
+	pop	hl
+	push	hl
 	add	hl, bc
 	ld	a, (hl+)
 	ld	c, a
 	ld	a, (hl)
-;C:/gbdk/include/gb/metasprites.h:241: __current_metasprite = metasprite;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:297: __current_metasprite = metasprite;
 	ld	hl, #___current_metasprite
 	ld	(hl), c
 	inc	hl
 	ld	(hl), a
-;C:/gbdk/include/gb/metasprites.h:242: __hide_metasprite(base_sprite);
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:298: __hide_metasprite(base_sprite);
 	xor	a, a
-	push	af
-	inc	sp
 	call	___hide_metasprite
-	inc	sp
-;src/player.c:295: hide_metasprite(metasprites_states[current_state][current_frame], 4);
+;src/player.c:297: hide_metasprite(metasprites_states[current_state][current_frame], 4);
 	ld	hl, #_current_state
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -1052,83 +817,524 @@ _render_player:
 	add	hl, bc
 	ld	a, (hl+)
 	ld	c, (hl)
-;C:/gbdk/include/gb/metasprites.h:241: __current_metasprite = metasprite;
 	ld	hl, #___current_metasprite
 	ld	(hl+), a
 	ld	(hl), c
-;C:/gbdk/include/gb/metasprites.h:242: __hide_metasprite(base_sprite);
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:298: __hide_metasprite(base_sprite);
 	ld	a, #0x04
-	push	af
-	inc	sp
 	call	___hide_metasprite
-	inc	sp
-	C$player.c$296$2_0$193	= .
-	.globl	C$player.c$296$2_0$193
-;src/player.c:296: if(frame_counter & 0x01)play_hurt_sfx();
 	ld	a, (#_frame_counter)
 	rrca
 	jp	NC,00127$
 	call	_play_hurt_sfx
-	C$player.c$297$2_0$193	= .
-	.globl	C$player.c$297$2_0$193
-;src/player.c:297: return;
+;src/player.c:299: return;
 	jp	00127$
 00107$:
-	C$player.c$300$1_0$191	= .
-	.globl	C$player.c$300$1_0$191
-;src/player.c:300: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, player_x, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, player_x, (uint8_t)(player_y - camera_y));
-	ld	a, (#_player_x)
-	ldhl	sp,	#4
-	ld	(hl), a
+;src/player.c:302: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
-	jr	Z, 00129$
-	ld	de, #_metasprites_states
+	jp	Z, 00129$
+	ldhl	sp,	#7
+	ld	a, (hl)
+	ldhl	sp,	#2
+	ld	(hl), a
+	ld	a, (#_player_x + 1)
+	ldhl	sp,	#3
+	ld	(hl+), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	hl, #_metasprites_states
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#8
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#7
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, (de)
+	ldhl	sp,	#4
+	ld	(hl+), a
+	inc	de
+	ld	a, (de)
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
 	pop	hl
 	push	hl
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#8
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#7
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	a, (hl-)
+	ld	d, a
+	ld	a, (de)
+	ld	(hl+), a
+	inc	de
+	ld	a, (de)
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:160: __current_metasprite = metasprite;
+	ld	(hl-), a
+	ld	a, (hl)
+	ld	(#___current_metasprite),a
+	ldhl	sp,	#7
+	ld	a, (hl)
+	ld	(#___current_metasprite + 1),a
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:161: __current_base_tile = base_tile;
+	ld	hl, #___current_base_tile
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:162: __current_base_prop = 0;
+	ld	hl, #___current_base_prop
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:163: return __move_metasprite(base_sprite, (y << 8) | (uint8_t)x);
+	ldhl	sp,	#2
+	ld	a, (hl)
+	ldhl	sp,	#6
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	(hl-), a
+	ld	(hl), #0x00
+	ldhl	sp,	#3
+	ld	a, (hl+)
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl+), a
+	ld	a, (hl-)
+	dec	hl
+	or	a, (hl)
+	dec	hl
+	dec	hl
+	ld	(hl), a
+	ldhl	sp,	#7
+	ld	a, (hl)
+	ldhl	sp,	#3
+	ld	(hl-), a
+	ld	a, (hl)
+	ldhl	sp,	#6
+	ld	(hl), a
+	ldhl	sp,	#3
+	ld	a, (hl)
+	ldhl	sp,	#7
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	xor	a, a
+	call	___move_metasprite
+;src/player.c:302: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
+	jr	00130$
+00129$:
+	ld	a, (#_player_x + 1)
+	ldhl	sp,	#6
+	ld	(hl-), a
+	ld	de, #_metasprites_states
+	ld	a, (hl-)
+	ld	l, (hl)
+	ld	h, a
 	add	hl, de
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
-	ldhl	sp,	#2
-	ld	a,	(hl+)
-	ld	h, (hl)
-	ld	l, a
+	pop	hl
+	push	hl
+	add	hl, bc
+	ld	a, (hl+)
+	ld	c, a
+	ld	a, (hl)
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:200: __current_metasprite = metasprite;
+	ld	hl, #___current_metasprite
+	ld	(hl), c
+	inc	hl
+	ld	(hl), a
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:201: __current_base_tile = base_tile;
+	ld	hl, #___current_base_tile
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:202: __current_base_prop = 0;
+	ld	hl, #___current_base_prop
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:203: return __move_metasprite_vflip(base_sprite, (y << 8) | (uint8_t)(x - 8u));
+	ldhl	sp,	#7
+	ld	a, (hl-)
+	ld	d, a
+	ld	e, #0x00
+	ld	a, (hl)
+	add	a, #0xf8
+	or	a,e
+	ld	e, a
+	xor	a, a
+	call	___move_metasprite_vflip
+;src/player.c:302: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
+00130$:
+;src/player.c:303: if((uint8_t)(SUB_TO_PX(player_x)) > 160U) {
+	ld	a, (#_player_x + 1)
+	ldhl	sp,	#3
+	ld	(hl), a
+;src/player.c:296: hide_metasprite(metasprites_states[current_state][current_frame], 0);
+	ld	hl, #_current_state
+	ld	e, (hl)
+	ld	d, #0x00
+	ld	hl, #_current_frame
+	ld	c, (hl)
+	ld	b, #0x00
+	sla	e
+	rl	d
+	ldhl	sp,	#4
+	ld	a, e
+	ld	(hl+), a
+;src/player.c:303: if((uint8_t)(SUB_TO_PX(player_x)) > 160U) {
+	ld	a, d
+	ld	(hl-), a
+	dec	hl
+	sla	c
+	rl	b
+	inc	sp
+	inc	sp
+	push	bc
+	ld	a, #0xa0
+	sub	a, (hl)
+	jp	NC, 00113$
+;src/player.c:285: if(!player_dead_flag && (uint8_t)(player_y - camera_y) > 160U) {
+	ld	a, (#_player_y)
+	ld	hl, #_camera_y
+	sub	a, (hl)
+	ldhl	sp,	#6
+	ld	(hl), a
+;src/player.c:304: if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
+	ldhl	sp,	#3
+	ld	a, (hl)
+	ldhl	sp,	#7
+	ld	(hl), a
+	ldhl	sp,	#3
+	ld	a, (hl)
+	sub	a, #0xc8
+	jp	NC, 00110$
+	ld	hl, #_is_facing_right
+	bit	0, (hl)
+	jr	Z, 00131$
+	ldhl	sp,	#6
+	ld	a, (hl+)
+	ld	(hl), a
+	ldhl	sp,	#3
+	ld	a, (hl)
+	add	a, #0x60
+	ldhl	sp,	#6
+	ld	(hl-), a
+	ld	de, #_metasprites_states
+	ld	a, (hl-)
+	ld	l, (hl)
+	ld	h, a
+	add	hl, de
+	ld	a, (hl+)
+	ld	c, a
+	ld	b, (hl)
+	pop	hl
+	push	hl
 	add	hl, bc
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
-;C:/gbdk/include/gb/metasprites.h:138: __current_metasprite = metasprite;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:160: __current_metasprite = metasprite;
 	ld	hl, #___current_metasprite
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;C:/gbdk/include/gb/metasprites.h:139: __current_base_tile = base_tile;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:161: __current_base_tile = base_tile;
 	ld	hl, #___current_base_tile
 	ld	(hl), #0x00
-;C:/gbdk/include/gb/metasprites.h:140: return __move_metasprite(base_sprite, x, y);
-	ldhl	sp,	#7
-	ld	a, (hl)
-	push	af
-	inc	sp
-	ldhl	sp,	#5
-	ld	h, (hl)
-	ld	l, #0x00
-	push	hl
-	call	___move_metasprite
-	add	sp, #3
-	C$player.c$300$3_0$204	= .
-	.globl	C$player.c$300$3_0$204
-;src/player.c:300: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, player_x, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, player_x, (uint8_t)(player_y - camera_y));
-	jr	00130$
-00129$:
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:162: __current_base_prop = 0;
+	ld	hl, #___current_base_prop
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:163: return __move_metasprite(base_sprite, (y << 8) | (uint8_t)x);
 	ldhl	sp,	#7
 	ld	a, (hl-)
-	dec	hl
+	ld	d, a
+	ld	e, #0x00
+	ld	c, (hl)
+	ld	a, e
+	or	a, c
+	ld	e, a
+	ld	a, #0x04
+	call	___move_metasprite
+;src/player.c:304: if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
+	jp	00114$
+00131$:
+	ldhl	sp,	#7
+	ld	a, (hl)
+	add	a, #0x60
 	ld	(hl), a
 	ld	de, #_metasprites_states
+	ldhl	sp,	#4
+	ld	a,	(hl+)
+	ld	h, (hl)
+	ld	l, a
+	add	hl, de
+	ld	a, (hl+)
+	ld	c, a
+	ld	b, (hl)
 	pop	hl
 	push	hl
+	add	hl, bc
+	ld	a, (hl+)
+	ld	c, a
+	ld	b, (hl)
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:200: __current_metasprite = metasprite;
+	ld	hl, #___current_metasprite
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:201: __current_base_tile = base_tile;
+	ld	hl, #___current_base_tile
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:202: __current_base_prop = 0;
+	ld	hl, #___current_base_prop
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:203: return __move_metasprite_vflip(base_sprite, (y << 8) | (uint8_t)(x - 8u));
+	ldhl	sp,	#6
+	ld	a, (hl+)
+	ld	d, a
+	ld	e, #0x00
+	ld	a, (hl)
+	add	a, #0xf8
+	or	a, e
+	ld	e, a
+	ld	a, #0x04
+	call	___move_metasprite_vflip
+;src/player.c:304: if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
+	jp	00114$
+00110$:
+;src/player.c:305: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
+	ld	hl, #_is_facing_right
+	bit	0, (hl)
+	jr	Z, 00133$
+	ldhl	sp,	#6
+	ld	a, (hl+)
+	ld	(hl), a
+	ldhl	sp,	#3
+	ld	a, (hl)
+	add	a, #0xa0
+	ldhl	sp,	#6
+	ld	(hl-), a
+	dec	hl
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	hl, #_metasprites_states
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#4
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#3
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	a, (hl+)
+	ld	d, a
+	ld	a, (de)
+	ld	(hl+), a
+	inc	de
+	ld	a, (de)
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	pop	hl
+	push	hl
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#4
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#3
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	a, (hl+)
+	ld	d, a
+	ld	a, (de)
+	ld	(hl+), a
+	inc	de
+	ld	a, (de)
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:160: __current_metasprite = metasprite;
+	ld	(hl-), a
+	ld	a, (hl)
+	ld	(#___current_metasprite),a
+	ldhl	sp,	#5
+	ld	a, (hl)
+	ld	(#___current_metasprite + 1),a
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:161: __current_base_tile = base_tile;
+	ld	hl, #___current_base_tile
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:162: __current_base_prop = 0;
+	ld	hl, #___current_base_prop
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:163: return __move_metasprite(base_sprite, (y << 8) | (uint8_t)x);
+	ldhl	sp,	#7
+	ld	a, (hl)
+	ldhl	sp,	#4
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	(hl-), a
+	xor	a, a
+	ld	(hl+), a
+	inc	hl
+	ld	a, (hl)
+	ldhl	sp,	#2
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl+), a
+	ld	a, (hl-)
+	dec	hl
+	or	a, (hl)
+	ldhl	sp,	#6
+	ld	(hl-), a
+	ld	a, (hl+)
+	inc	hl
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, #0x04
+	call	___move_metasprite
+;src/player.c:305: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
+	jp	00114$
+00133$:
+	ldhl	sp,	#6
+	ld	a, (hl)
+	ldhl	sp,	#2
+	ld	(hl), a
+	ldhl	sp,	#7
+	ld	a, (hl)
+	add	a, #0xa0
+	ldhl	sp,	#3
+	ld	(hl+), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	hl, #_metasprites_states
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#8
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#7
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, (de)
+	ldhl	sp,	#4
+	ld	(hl+), a
+	inc	de
+	ld	a, (de)
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	pop	hl
+	push	hl
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#8
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#7
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	a, (hl-)
+	ld	d, a
+	ld	a, (de)
+	ld	(hl+), a
+	inc	de
+	ld	a, (de)
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:200: __current_metasprite = metasprite;
+	ld	(hl-), a
+	ld	a, (hl)
+	ld	(#___current_metasprite),a
+	ldhl	sp,	#7
+	ld	a, (hl)
+	ld	(#___current_metasprite + 1),a
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:201: __current_base_tile = base_tile;
+	ld	hl, #___current_base_tile
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:202: __current_base_prop = 0;
+	ld	hl, #___current_base_prop
+	ld	(hl), #0x00
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:203: return __move_metasprite_vflip(base_sprite, (y << 8) | (uint8_t)(x - 8u));
+	ldhl	sp,	#2
+	ld	a, (hl)
+	ldhl	sp,	#6
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	(hl-), a
+	ld	(hl), #0x00
+	ldhl	sp,	#3
+	ld	a, (hl+)
+	inc	hl
+	add	a, #0xf8
+	ld	(hl), a
+	ld	a, (hl-)
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl+), a
+	ld	a, (hl-)
+	dec	hl
+	or	a, (hl)
+	dec	hl
+	dec	hl
+	ld	(hl), a
+	ldhl	sp,	#7
+	ld	a, (hl)
+	ldhl	sp,	#3
+	ld	(hl-), a
+	ld	a, (hl)
+	ldhl	sp,	#6
+	ld	(hl), a
+	ldhl	sp,	#3
+	ld	a, (hl)
+	ldhl	sp,	#7
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, #0x04
+	call	___move_metasprite_vflip
+;src/player.c:305: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
+	jr	00114$
+00113$:
+;src/player.c:307: hide_metasprite(metasprites_states[current_state][current_frame], 4);
+	ld	de, #_metasprites_states
+	ldhl	sp,	#4
+	ld	a,	(hl+)
+	ld	h, (hl)
+	ld	l, a
 	add	hl, de
 	push	hl
 	ld	a, l
@@ -1150,272 +1356,38 @@ _render_player:
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	ldhl	sp,	#2
-	ld	a,	(hl+)
-	ld	h, (hl)
-	ld	l, a
-	add	hl, de
-	ld	a, (hl+)
-	ld	c, a
-	ld	a, (hl)
-;C:/gbdk/include/gb/metasprites.h:167: __current_metasprite = metasprite;
-	ld	hl, #___current_metasprite
-	ld	(hl), c
-	inc	hl
-	ld	(hl), a
-;C:/gbdk/include/gb/metasprites.h:168: __current_base_tile = base_tile;
-	ld	hl, #___current_base_tile
-	ld	(hl), #0x00
-;C:/gbdk/include/gb/metasprites.h:169: return __move_metasprite_vflip(base_sprite, x - 8, y);
-	ldhl	sp,	#4
-	ld	a, (hl+)
-	add	a, #0xf8
-	ld	h, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
+	pop	hl
 	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x00
-	push	hl
-	call	___move_metasprite_vflip
-	add	sp, #3
-	C$player.c$300$3_0$207	= .
-	.globl	C$player.c$300$3_0$207
-;src/player.c:300: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, player_x, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, player_x, (uint8_t)(player_y - camera_y));
-00130$:
-	C$player.c$294$1_0$191	= .
-	.globl	C$player.c$294$1_0$191
-;src/player.c:294: hide_metasprite(metasprites_states[current_state][current_frame], 0);
-	ld	hl, #_current_state
-	ld	e, (hl)
-	ld	d, #0x00
-	ld	hl, #_current_frame
-	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	sla	e
-	rl	d
-	add	hl, hl
-	ld	c, l
-	ld	b, h
-	C$player.c$301$1_0$191	= .
-	.globl	C$player.c$301$1_0$191
-;src/player.c:301: if((uint8_t)(player_x) > 160U) {
-	ld	a, #0xa0
-	ld	hl, #_player_x
-	sub	a, (hl)
-	jp	NC, 00113$
-	C$player.c$283$1_0$191	= .
-	.globl	C$player.c$283$1_0$191
-;src/player.c:283: if(!player_dead_flag && (uint8_t)(player_y - camera_y) > 160U) {
-	ld	a, (#_player_y)
-	ld	hl, #_camera_y
-	sub	a, (hl)
-	ldhl	sp,	#6
-	ld	(hl), a
-	C$player.c$302$1_0$191	= .
-	.globl	C$player.c$302$1_0$191
-;src/player.c:302: if((uint8_t)(player_x) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x - 160, (uint8_t)(player_y - camera_y)); //right exit
-	ld	a, (#_player_x)
-	ldhl	sp,	#7
-	ld	(hl), a
-	ld	a, (#_player_x)
-	sub	a, #0xc8
-	jr	NC, 00110$
-	ld	hl, #_is_facing_right
-	bit	0, (hl)
-	jr	Z, 00131$
-	ldhl	sp,	#6
-	ld	a, (hl+)
-	ld	(hl), a
-	ld	a, (#_player_x)
-	add	a, #0x60
-	ldhl	sp,	#6
-	ld	(hl), a
-	ld	hl, #_metasprites_states
 	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#6
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#5
+	ld	(hl-), a
 	ld	a, (hl+)
-	ld	h, (hl)
-;	spillPairReg hl
-	ld	l, a
-	add	hl, bc
+	ld	e, a
 	ld	a, (hl+)
-	ld	c, (hl)
-;C:/gbdk/include/gb/metasprites.h:138: __current_metasprite = metasprite;
-	ld	hl, #___current_metasprite
+	ld	d, a
+	ld	a, (de)
 	ld	(hl+), a
-	ld	(hl), c
-;C:/gbdk/include/gb/metasprites.h:139: __current_base_tile = base_tile;
-	ld	hl, #___current_base_tile
-	ld	(hl), #0x00
-;C:/gbdk/include/gb/metasprites.h:140: return __move_metasprite(base_sprite, x, y);
-	ldhl	sp,	#7
-	ld	a, (hl-)
-	push	af
-	inc	sp
-	ld	h, (hl)
-	ld	l, #0x04
-	push	hl
-	call	___move_metasprite
-	add	sp, #3
-	C$player.c$302$4_0$210	= .
-	.globl	C$player.c$302$4_0$210
-;src/player.c:302: if((uint8_t)(player_x) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x - 160, (uint8_t)(player_y - camera_y)); //right exit
-	jp	00114$
-00131$:
+	inc	de
+	ld	a, (de)
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:297: __current_metasprite = metasprite;
+	ld	(hl-), a
+	ld	a, (hl)
+	ld	(#___current_metasprite),a
 	ldhl	sp,	#7
 	ld	a, (hl)
-	add	a, #0x60
-	ld	(hl), a
-	ld	hl, #_metasprites_states
-	add	hl, de
-	ld	a, (hl+)
-	ld	h, (hl)
-;	spillPairReg hl
-	ld	l, a
-	add	hl, bc
-	ld	a, (hl+)
-	ld	c, (hl)
-;C:/gbdk/include/gb/metasprites.h:167: __current_metasprite = metasprite;
-	ld	hl, #___current_metasprite
-	ld	(hl+), a
-	ld	(hl), c
-;C:/gbdk/include/gb/metasprites.h:168: __current_base_tile = base_tile;
-	ld	hl, #___current_base_tile
-	ld	(hl), #0x00
-;C:/gbdk/include/gb/metasprites.h:169: return __move_metasprite_vflip(base_sprite, x - 8, y);
-	ldhl	sp,	#7
-	ld	a, (hl-)
-	add	a, #0xf8
-	ld	h, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x04
-	push	hl
-	call	___move_metasprite_vflip
-	add	sp, #3
-	C$player.c$302$2_0$194	= .
-	.globl	C$player.c$302$2_0$194
-;src/player.c:302: if((uint8_t)(player_x) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x - 160, (uint8_t)(player_y - camera_y)); //right exit
-	jr	00114$
-00110$:
-	C$player.c$303$2_0$194	= .
-	.globl	C$player.c$303$2_0$194
-;src/player.c:303: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x + 160, (uint8_t)(player_y - camera_y)); //left exit
-	ld	hl, #_is_facing_right
-	bit	0, (hl)
-	jr	Z, 00133$
-	ldhl	sp,	#6
-	ld	a, (hl+)
-	ld	(hl), a
-	ld	a, (#_player_x)
-	add	a, #0xa0
-	ldhl	sp,	#6
-	ld	(hl), a
-	ld	hl, #_metasprites_states
-	add	hl, de
-	ld	a, (hl+)
-	ld	h, (hl)
-;	spillPairReg hl
-	ld	l, a
-	add	hl, bc
-	ld	a, (hl+)
-	ld	c, (hl)
-;C:/gbdk/include/gb/metasprites.h:138: __current_metasprite = metasprite;
-	ld	hl, #___current_metasprite
-	ld	(hl+), a
-	ld	(hl), c
-;C:/gbdk/include/gb/metasprites.h:139: __current_base_tile = base_tile;
-	ld	hl, #___current_base_tile
-	ld	(hl), #0x00
-;C:/gbdk/include/gb/metasprites.h:140: return __move_metasprite(base_sprite, x, y);
-	ldhl	sp,	#7
-	ld	a, (hl-)
-	push	af
-	inc	sp
-	ld	h, (hl)
-	ld	l, #0x04
-	push	hl
-	call	___move_metasprite
-	add	sp, #3
-	C$player.c$303$4_0$216	= .
-	.globl	C$player.c$303$4_0$216
-;src/player.c:303: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x + 160, (uint8_t)(player_y - camera_y)); //left exit
-	jr	00114$
-00133$:
-	ldhl	sp,	#7
-	ld	a, (hl)
-	add	a, #0xa0
-	ld	(hl), a
-	ld	hl, #_metasprites_states
-	add	hl, de
-	ld	a, (hl+)
-	ld	h, (hl)
-;	spillPairReg hl
-	ld	l, a
-	add	hl, bc
-	ld	a, (hl+)
-	ld	c, (hl)
-;C:/gbdk/include/gb/metasprites.h:167: __current_metasprite = metasprite;
-	ld	hl, #___current_metasprite
-	ld	(hl+), a
-	ld	(hl), c
-;C:/gbdk/include/gb/metasprites.h:168: __current_base_tile = base_tile;
-	ld	hl, #___current_base_tile
-	ld	(hl), #0x00
-;C:/gbdk/include/gb/metasprites.h:169: return __move_metasprite_vflip(base_sprite, x - 8, y);
-	ldhl	sp,	#7
-	ld	a, (hl-)
-	add	a, #0xf8
-	ld	h, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	push	hl
-	inc	sp
-	ld	h, a
-	ld	l, #0x04
-	push	hl
-	call	___move_metasprite_vflip
-	add	sp, #3
-	C$player.c$303$1_0$191	= .
-	.globl	C$player.c$303$1_0$191
-;src/player.c:303: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, player_x + 160, (uint8_t)(player_y - camera_y)); //left exit
-	jr	00114$
-00113$:
-;src/player.c:305: hide_metasprite(metasprites_states[current_state][current_frame], 4);
-	ld	hl, #_metasprites_states
-	add	hl, de
-	ld	a, (hl+)
-	ld	h, (hl)
-;	spillPairReg hl
-	ld	l, a
-	add	hl, bc
-	ld	a, (hl+)
-	ld	c, (hl)
-;C:/gbdk/include/gb/metasprites.h:241: __current_metasprite = metasprite;
-	ld	hl, #___current_metasprite
-	ld	(hl+), a
-	ld	(hl), c
-;C:/gbdk/include/gb/metasprites.h:242: __hide_metasprite(base_sprite);
+	ld	(#___current_metasprite + 1),a
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:298: __hide_metasprite(base_sprite);
 	ld	a, #0x04
-	push	af
-	inc	sp
 	call	___hide_metasprite
-	inc	sp
-	C$player.c$305$1_0$191	= .
-	.globl	C$player.c$305$1_0$191
-;src/player.c:305: hide_metasprite(metasprites_states[current_state][current_frame], 4);
+;src/player.c:307: hide_metasprite(metasprites_states[current_state][current_frame], 4);
 00114$:
-	C$player.c$308$1_0$191	= .
-	.globl	C$player.c$308$1_0$191
-;src/player.c:308: if((uint8_t)(player_y - camera_y) < MAX_SPRITE_HEIGHT && !player_dead_flag){
+;src/player.c:310: if((uint8_t)(player_y - camera_y) < MAX_SPRITE_HEIGHT && !player_dead_flag){
 	ld	a, (#_player_y)
 	ld	hl, #_camera_y
 	sub	a, (hl)
@@ -1425,9 +1397,7 @@ _render_player:
 	ld	hl, #_player_dead_flag
 	bit	0, (hl)
 	jr	NZ, 00127$
-	C$player.c$309$2_0$196	= .
-	.globl	C$player.c$309$2_0$196
-;src/player.c:309: camera_y -= MAX_SPRITE_HEIGHT - ((uint8_t)(player_y - camera_y));
+;src/player.c:311: camera_y -= MAX_SPRITE_HEIGHT - ((uint8_t)(player_y - camera_y));
 	ld	a, #0x1a
 	sub	a, c
 	ld	c, a
@@ -1436,34 +1406,20 @@ _render_player:
 	sub	a, c
 	ld	(hl), a
 00127$:
-	C$player.c$311$1_0$191	= .
-	.globl	C$player.c$311$1_0$191
-;src/player.c:311: }
+;src/player.c:313: }
 	add	sp, #8
-	C$player.c$311$1_0$191	= .
-	.globl	C$player.c$311$1_0$191
-	XFplayer$render_player$0$0	= .
-	.globl	XFplayer$render_player$0$0
 	ret
-	Fplayer$render_all_particles$0$0	= .
-	.globl	Fplayer$render_all_particles$0$0
-	C$player.c$313$1_0$225	= .
-	.globl	C$player.c$313$1_0$225
-;src/player.c:313: static void render_all_particles(void){
+;src/player.c:315: static void render_all_particles(void){
 ;	---------------------------------
 ; Function render_all_particles
 ; ---------------------------------
 _render_all_particles:
 	add	sp, #-6
-	C$player.c$315$2_0$226	= .
-	.globl	C$player.c$315$2_0$226
-;src/player.c:315: for(i = 0; i < MAX_PUFF; i++){
+;src/player.c:317: for(i = 0; i < MAX_PUFF; i++){
 	ld	hl, #_i
 	ld	(hl), #0x00
 00127$:
-	C$player.c$316$3_0$227	= .
-	.globl	C$player.c$316$3_0$227
-;src/player.c:316: if(puff_frame[i] == 0){
+;src/player.c:318: if(puff_frame[i] == 0){
 	ld	a, #<(_puff_frame)
 	ld	hl, #_i
 	add	a, (hl)
@@ -1473,20 +1429,16 @@ _render_all_particles:
 	ld	b, a
 	ld	a, (bc)
 	ld	c, a
-	C$player.c$317$1_0$225	= .
-	.globl	C$player.c$317$1_0$225
-;src/player.c:317: hide_sprite(FIRST_PUFF + i);
+;src/player.c:319: hide_sprite(FIRST_PUFF + i);
 	ld	a, (hl)
 	add	a, #0x08
 	ld	b, a
-	C$player.c$316$3_0$227	= .
-	.globl	C$player.c$316$3_0$227
-;src/player.c:316: if(puff_frame[i] == 0){
+;src/player.c:318: if(puff_frame[i] == 0){
 	ld	a, c
 	or	a, a
 	jr	NZ, 00102$
-;src/player.c:317: hide_sprite(FIRST_PUFF + i);
-;C:/gbdk/include/gb/gb.h:1546: shadow_OAM[nb].y = 0;
+;src/player.c:319: hide_sprite(FIRST_PUFF + i);
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1905: shadow_OAM[nb].y = 0;
 	ld	de, #_shadow_OAM+0
 	ld	l, b
 ;	spillPairReg hl
@@ -1498,19 +1450,17 @@ _render_all_particles:
 	add	hl, hl
 	add	hl, de
 	ld	(hl), #0x00
-	C$player.c$318$4_0$228	= .
-	.globl	C$player.c$318$4_0$228
-;src/player.c:318: continue;
+;src/player.c:320: continue;
 	jr	00103$
 00102$:
-;src/player.c:320: set_sprite_tile(FIRST_PUFF + i, PLAYER_SPRITES - 1 + (puff_frame[i] >> 2));
+;src/player.c:322: set_sprite_tile(FIRST_PUFF + i, PLAYER_SPRITES - 1 + (puff_frame[i] >> 2));
 	ld	a, c
 	rrca
 	rrca
 	and	a, #0x3f
 	add	a, #0x17
 	ld	c, a
-;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
 	ld	l, b
 ;	spillPairReg hl
 ;	spillPairReg hl
@@ -1524,9 +1474,7 @@ _render_all_particles:
 	inc	hl
 	inc	hl
 	ld	(hl), c
-	C$player.c$321$3_0$227	= .
-	.globl	C$player.c$321$3_0$227
-;src/player.c:321: puff_frame[i] = (puff_frame[i] + 1) & 0x0f; //puff_frame[i]++ mod 16 
+;src/player.c:323: puff_frame[i] = (puff_frame[i] + 1) & 0x0f; //puff_frame[i]++ mod 16 
 	ld	a, #<(_puff_frame)
 	ld	hl, #_i
 	add	a, (hl)
@@ -1539,41 +1487,32 @@ _render_all_particles:
 	and	a, #0x0f
 	ld	(bc), a
 00103$:
-	C$player.c$315$2_0$226	= .
-	.globl	C$player.c$315$2_0$226
-;src/player.c:315: for(i = 0; i < MAX_PUFF; i++){
+;src/player.c:317: for(i = 0; i < MAX_PUFF; i++){
 	ld	hl, #_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x04
 	jr	C, 00127$
-	C$player.c$325$1_0$225	= .
-	.globl	C$player.c$325$1_0$225
-;src/player.c:325: if(brick_frame == 0){
+;src/player.c:327: if(brick_frame == 0){
 	ld	a, (#_brick_frame)
 	or	a, a
 	jr	NZ, 00106$
-	C$player.c$326$2_0$229	= .
-	.globl	C$player.c$326$2_0$229
-;src/player.c:326: hide_sprites_range(12, 16);
-	ld	hl, #0x100c
-	push	hl
+;src/player.c:328: hide_sprites_range(12, 16);
+	ld	e, #0x10
+	ld	a, #0x0c
 	call	_hide_sprites_range
-	pop	hl
 	jr	00107$
 00106$:
-	C$player.c$329$2_0$230	= .
-	.globl	C$player.c$329$2_0$230
-;src/player.c:329: brick_frame--;
+;src/player.c:331: brick_frame--;
 	ld	hl, #_brick_frame
 	dec	(hl)
-;src/player.c:330: scroll_sprite(12, 1, brick_y_speed>>1);
+;src/player.c:332: scroll_sprite(12, 1, brick_y_speed>>1);
 	ld	hl, #_brick_y_speed
 	ld	e, (hl)
 	sra	e
-;C:/gbdk/include/gb/gb.h:1536: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1893: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	bc, #_shadow_OAM+48
-;C:/gbdk/include/gb/gb.h:1537: itm->y+=y, itm->x+=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1894: itm->y+=y, itm->x+=x;
 	ld	a, (bc)
 	add	a, e
 	ld	(bc), a
@@ -1581,12 +1520,12 @@ _render_all_particles:
 	ld	a, (bc)
 	inc	a
 	ld	(bc), a
-;src/player.c:331: scroll_sprite(13, -1, brick_y_speed>>1);
+;src/player.c:333: scroll_sprite(13, -1, brick_y_speed>>1);
 	ld	e, (hl)
 	sra	e
-;C:/gbdk/include/gb/gb.h:1536: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1893: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	bc, #_shadow_OAM+52
-;C:/gbdk/include/gb/gb.h:1537: itm->y+=y, itm->x+=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1894: itm->y+=y, itm->x+=x;
 	ld	a, (bc)
 	add	a, e
 	ld	(bc), a
@@ -1594,9 +1533,9 @@ _render_all_particles:
 	ld	a, (bc)
 	dec	a
 	ld	(bc), a
-;C:/gbdk/include/gb/gb.h:1536: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1893: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	bc, #_shadow_OAM+56
-;C:/gbdk/include/gb/gb.h:1537: itm->y+=y, itm->x+=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1894: itm->y+=y, itm->x+=x;
 	ld	a, (bc)
 	inc	a
 	ld	(bc), a
@@ -1604,9 +1543,9 @@ _render_all_particles:
 	ld	a, (bc)
 	inc	a
 	ld	(bc), a
-;C:/gbdk/include/gb/gb.h:1536: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1893: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	bc, #_shadow_OAM+60
-;C:/gbdk/include/gb/gb.h:1537: itm->y+=y, itm->x+=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1894: itm->y+=y, itm->x+=x;
 	ld	a, (bc)
 	inc	a
 	ld	(bc), a
@@ -1614,20 +1553,14 @@ _render_all_particles:
 	ld	a, (bc)
 	dec	a
 	ld	(bc), a
-	C$player.c$334$2_0$230	= .
-	.globl	C$player.c$334$2_0$230
-;src/player.c:334: brick_y_speed++;
+;src/player.c:336: brick_y_speed++;
 	inc	(hl)
 00107$:
-	C$player.c$338$1_0$225	= .
-	.globl	C$player.c$338$1_0$225
-;src/player.c:338: if(current_state != PLAYER_STATE_RUNNING) return;
+;src/player.c:340: if(current_state != PLAYER_STATE_RUNNING) return;
 	ld	a, (#_current_state)
 	dec	a
 	jp	NZ,00128$
-	C$player.c$339$1_0$225	= .
-	.globl	C$player.c$339$1_0$225
-;src/player.c:339: if((frame_counter != 0) || (!(current_frame == 0 || current_frame == 3))) return;
+;src/player.c:341: if((frame_counter != 0) || (!(current_frame == 0 || current_frame == 3))) return;
 	ld	a, (#_frame_counter)
 	or	a, a
 	jp	NZ,00128$
@@ -1639,16 +1572,14 @@ _render_all_particles:
 	sub	a, #0x03
 	jp	NZ,00128$
 00111$:
-	C$player.c$342$1_0$225	= .
-	.globl	C$player.c$342$1_0$225
-;src/player.c:342: i = FIRST_PUFF + next_free_puff;
+;src/player.c:344: i = FIRST_PUFF + next_free_puff;
 	ld	a, (#_next_free_puff)
 	add	a, #0x08
 	ld	hl, #_i
 	ld	(hl), a
-;src/player.c:343: set_sprite_tile(i, PLAYER_SPRITES);
+;src/player.c:345: set_sprite_tile(i, PLAYER_SPRITES);
 	ld	c, (hl)
-;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
 	ld	h, #0x00
 ;	spillPairReg hl
 ;	spillPairReg hl
@@ -1660,10 +1591,10 @@ _render_all_particles:
 	inc	hl
 	inc	hl
 	ld	(hl), #0x18
-;src/player.c:344: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
+;src/player.c:346: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
 	ld	hl, #_i
 	ld	c, (hl)
-;C:/gbdk/include/gb/gb.h:1503: return shadow_OAM[nb].prop;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1860: return shadow_OAM[nb].prop;
 	ld	h, #0x00
 ;	spillPairReg hl
 ;	spillPairReg hl
@@ -1676,10 +1607,10 @@ _render_all_particles:
 	inc	hl
 	inc	hl
 	ld	c, (hl)
-;src/player.c:344: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
+;src/player.c:346: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
 	res	5, c
 	ld	hl, #_i
-;C:/gbdk/include/gb/gb.h:1493: shadow_OAM[nb].prop=prop;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
 	ld	l, (hl)
 ;	spillPairReg hl
 ;	spillPairReg hl
@@ -1694,9 +1625,7 @@ _render_all_particles:
 	inc	hl
 	inc	hl
 	ld	(hl), c
-	C$player.c$345$1_0$225	= .
-	.globl	C$player.c$345$1_0$225
-;src/player.c:345: puff_frame[next_free_puff] = 4;
+;src/player.c:347: puff_frame[next_free_puff] = 4;
 	ld	a, #<(_puff_frame)
 	ld	hl, #_next_free_puff
 	add	a, (hl)
@@ -1706,7 +1635,7 @@ _render_all_particles:
 	ld	b, a
 	ld	a, #0x04
 	ld	(bc), a
-;src/player.c:346: move_sprite(i, player_x + X_OFFSET, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+;src/player.c:348: move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET, (uint8_t)((player_y + Y_OFFSET) - camera_y));
 	ld	a, (#_player_y)
 	add	a, #0x08
 	ld	hl, #_camera_y
@@ -1714,13 +1643,13 @@ _render_all_particles:
 	sub	a, c
 	ldhl	sp,	#2
 	ld	(hl), a
-	ld	a, (#_player_x)
+	ld	a, (#_player_x + 1)
 	add	a, #0xfc
 	ldhl	sp,	#3
 	ld	(hl), a
 	ld	hl, #_i
 	ld	c, (hl)
-;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
 	xor	a, a
 	sla	c
 	adc	a, a
@@ -1741,7 +1670,7 @@ _render_all_particles:
 	pop	hl
 	ld	a, h
 	ldhl	sp,	#5
-;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
 	ld	(hl-), a
 	ld	a, (hl+)
 	ld	e, a
@@ -1758,16 +1687,15 @@ _render_all_particles:
 	inc	bc
 	ld	a, (hl)
 	ld	(bc), a
-	C$player.c$347$1_0$225	= .
-	.globl	C$player.c$347$1_0$225
-;src/player.c:347: if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
+;src/player.c:349: if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
 	jr	NZ, 00115$
 	ld	hl, #_i
-;C:/gbdk/include/gb/gb.h:1493: shadow_OAM[nb].prop=prop;
-	ld	l, (hl)
+	ld	e, (hl)
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
 	ld	bc, #_shadow_OAM+0
+	ld	l, e
 ;	spillPairReg hl
 ;	spillPairReg hl
 	ld	h, #0x00
@@ -1780,44 +1708,28 @@ _render_all_particles:
 	inc	hl
 	inc	hl
 	ld	(hl), #0x20
-	C$player.c$347$1_0$225	= .
-	.globl	C$player.c$347$1_0$225
-;src/player.c:347: if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
+;src/player.c:349: if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
 00115$:
-	C$player.c$349$1_0$225	= .
-	.globl	C$player.c$349$1_0$225
-;src/player.c:349: next_free_puff = (next_free_puff + 1) & 0x03;
+;src/player.c:351: next_free_puff = (next_free_puff + 1) & 0x03;
 	ld	hl, #_next_free_puff
 	ld	a, (hl)
 	inc	a
 	and	a, #0x03
 	ld	(hl), a
 00128$:
-	C$player.c$350$1_0$225	= .
-	.globl	C$player.c$350$1_0$225
-;src/player.c:350: }
+;src/player.c:352: }
 	add	sp, #6
-	C$player.c$350$1_0$225	= .
-	.globl	C$player.c$350$1_0$225
-	XFplayer$render_all_particles$0$0	= .
-	.globl	XFplayer$render_all_particles$0$0
 	ret
-	Fplayer$instanciate_collision_puffs$0$0	= .
-	.globl	Fplayer$instanciate_collision_puffs$0$0
-	C$player.c$352$1_0$265	= .
-	.globl	C$player.c$352$1_0$265
-;src/player.c:352: static void instanciate_collision_puffs(void){
+;src/player.c:354: static void instanciate_collision_puffs(void){
 ;	---------------------------------
 ; Function instanciate_collision_puffs
 ; ---------------------------------
 _instanciate_collision_puffs:
-	C$player.c$354$1_0$265	= .
-	.globl	C$player.c$354$1_0$265
-;src/player.c:354: uint8_t i = FIRST_PUFF + next_free_puff;
+;src/player.c:356: uint8_t i = FIRST_PUFF + next_free_puff;
 	ld	a, (#_next_free_puff)
 	add	a, #0x08
 	ld	c, a
-;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
 	ld	de, #_shadow_OAM+0
 	ld	l, c
 ;	spillPairReg hl
@@ -1831,7 +1743,7 @@ _instanciate_collision_puffs:
 	inc	hl
 	inc	hl
 	ld	(hl), #0x18
-;C:/gbdk/include/gb/gb.h:1503: return shadow_OAM[nb].prop;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1860: return shadow_OAM[nb].prop;
 	ld	l, c
 ;	spillPairReg hl
 ;	spillPairReg hl
@@ -1847,17 +1759,15 @@ _instanciate_collision_puffs:
 	inc	hl
 	inc	hl
 	ld	c, (hl)
-;src/player.c:356: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // remove flip
+;src/player.c:358: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // remove flip
 	res	5, c
-;C:/gbdk/include/gb/gb.h:1493: shadow_OAM[nb].prop=prop;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
 	ld	hl,#_shadow_OAM + 1
 	add	hl,de
 	inc	hl
 	inc	hl
 	ld	(hl), c
-	C$player.c$357$1_0$265	= .
-	.globl	C$player.c$357$1_0$265
-;src/player.c:357: puff_frame[next_free_puff] = 4;
+;src/player.c:359: puff_frame[next_free_puff] = 4;
 	ld	a, #<(_puff_frame)
 	ld	hl, #_next_free_puff
 	add	a, (hl)
@@ -1867,38 +1777,34 @@ _instanciate_collision_puffs:
 	ld	b, a
 	ld	a, #0x04
 	ld	(bc), a
-;src/player.c:358: move_sprite(i, player_x + X_OFFSET - 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+;src/player.c:360: move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET - 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
 	ld	a, (#_player_y)
 	add	a, #0x08
 	ld	hl, #_camera_y
 	ld	c, (hl)
 	sub	a, c
 	ld	b, a
-	ld	a, (#_player_x)
+	ld	a, (#_player_x + 1)
 	add	a, #0xf4
 	ld	c, a
-;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	hl, #_shadow_OAM
 	add	hl, de
-;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
 	ld	a, b
 	ld	(hl+), a
 	ld	(hl), c
-	C$player.c$360$1_0$265	= .
-	.globl	C$player.c$360$1_0$265
-;src/player.c:360: next_free_puff = (next_free_puff + 1) & 0x03;
+;src/player.c:362: next_free_puff = (next_free_puff + 1) & 0x03;
 	ld	hl, #_next_free_puff
 	ld	a, (hl)
 	inc	a
 	and	a, #0x03
 	ld	(hl), a
-	C$player.c$362$1_0$265	= .
-	.globl	C$player.c$362$1_0$265
-;src/player.c:362: i = FIRST_PUFF + next_free_puff;
+;src/player.c:364: i = FIRST_PUFF + next_free_puff;
 	ld	a, (hl)
 	add	a, #0x08
 	ld	c, a
-;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
 	ld	de, #_shadow_OAM+0
 	ld	l, c
 ;	spillPairReg hl
@@ -1912,7 +1818,7 @@ _instanciate_collision_puffs:
 	inc	hl
 	inc	hl
 	ld	(hl), #0x18
-;C:/gbdk/include/gb/gb.h:1503: return shadow_OAM[nb].prop;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1860: return shadow_OAM[nb].prop;
 	ld	l, c
 ;	spillPairReg hl
 ;	spillPairReg hl
@@ -1928,17 +1834,15 @@ _instanciate_collision_puffs:
 	inc	hl
 	inc	hl
 	ld	c, (hl)
-;src/player.c:364: set_sprite_prop(i, get_sprite_prop(i) | 0x20); // add flip
+;src/player.c:366: set_sprite_prop(i, get_sprite_prop(i) | 0x20); // add flip
 	set	5, c
-;C:/gbdk/include/gb/gb.h:1493: shadow_OAM[nb].prop=prop;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
 	ld	hl,#_shadow_OAM + 1
 	add	hl,de
 	inc	hl
 	inc	hl
 	ld	(hl), c
-	C$player.c$365$1_0$265	= .
-	.globl	C$player.c$365$1_0$265
-;src/player.c:365: puff_frame[next_free_puff] = 4;
+;src/player.c:367: puff_frame[next_free_puff] = 4;
 	ld	a, #<(_puff_frame)
 	ld	hl, #_next_free_puff
 	add	a, (hl)
@@ -1948,51 +1852,37 @@ _instanciate_collision_puffs:
 	ld	b, a
 	ld	a, #0x04
 	ld	(bc), a
-;src/player.c:366: move_sprite(i, player_x + X_OFFSET + 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+;src/player.c:368: move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET + 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
 	ld	a, (#_player_y)
 	add	a, #0x08
 	ld	hl, #_camera_y
 	ld	c, (hl)
 	sub	a, c
 	ld	b, a
-	ld	a, (#_player_x)
+	ld	a, (#_player_x + 1)
 	add	a, #0x04
 	ld	c, a
-;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	hl, #_shadow_OAM
 	add	hl, de
-;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
 	ld	a, b
 	ld	(hl+), a
 	ld	(hl), c
-	C$player.c$368$1_0$265	= .
-	.globl	C$player.c$368$1_0$265
-;src/player.c:368: next_free_puff = (next_free_puff + 1) & 0x03;
+;src/player.c:370: next_free_puff = (next_free_puff + 1) & 0x03;
 	ld	hl, #_next_free_puff
 	ld	a, (hl)
 	inc	a
 	and	a, #0x03
 	ld	(hl), a
-	C$player.c$369$1_0$265	= .
-	.globl	C$player.c$369$1_0$265
-;src/player.c:369: }
-	C$player.c$369$1_0$265	= .
-	.globl	C$player.c$369$1_0$265
-	XFplayer$instanciate_collision_puffs$0$0	= .
-	.globl	XFplayer$instanciate_collision_puffs$0$0
+;src/player.c:371: }
 	ret
-	Fplayer$instanciate_brick_particles$0$0	= .
-	.globl	Fplayer$instanciate_brick_particles$0$0
-	C$player.c$371$1_0$291	= .
-	.globl	C$player.c$371$1_0$291
-;src/player.c:371: static void instanciate_brick_particles(void){
+;src/player.c:373: static void instanciate_brick_particles(void){
 ;	---------------------------------
 ; Function instanciate_brick_particles
 ; ---------------------------------
 _instanciate_brick_particles:
-	C$player.c$373$1_0$291	= .
-	.globl	C$player.c$373$1_0$291
-;src/player.c:373: uint8_t particle_x = ((3 + (i<<1 & 0x0C)) << 3) + 14u;
+;src/player.c:375: uint8_t particle_x = ((3 + (i<<1 & 0x0C)) << 3) + 14u;
 	ld	a, (#_i)
 	add	a, a
 	and	a, #0x0c
@@ -2002,9 +1892,7 @@ _instanciate_brick_particles:
 	add	a, a
 	add	a, #0x0e
 	ld	c, a
-	C$player.c$374$1_0$291	= .
-	.globl	C$player.c$374$1_0$291
-;src/player.c:374: uint8_t particle_y = (((PLAYER_FLOOR << 3) + 1 + ((~i & 0x01) << 2)) << 3) - camera_y + 16u;
+;src/player.c:376: uint8_t particle_y = (((PLAYER_FLOOR << 3) + 1 + ((~i & 0x01) << 2)) << 3) - camera_y + 16u;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -2028,102 +1916,87 @@ _instanciate_brick_particles:
 	sub	a, b
 	add	a, #0x10
 	ld	b, a
-;src/player.c:375: move_sprite(12, particle_x, particle_y);
+;src/player.c:377: move_sprite(12, particle_x, particle_y);
 	ld	e, c
-;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	hl, #(_shadow_OAM + 48)
-;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
 	ld	(hl), b
 	inc	hl
 	ld	(hl), e
-;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	hl, #(_shadow_OAM + 52)
-;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
 	ld	(hl), b
 	inc	hl
 	ld	(hl), c
-;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	hl, #(_shadow_OAM + 56)
-;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
 	ld	(hl), b
 	inc	hl
 	ld	(hl), c
-;C:/gbdk/include/gb/gb.h:1520: OAM_item_t * itm = &shadow_OAM[nb];
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	hl, #(_shadow_OAM + 60)
-;C:/gbdk/include/gb/gb.h:1521: itm->y=y, itm->x=x;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
 	ld	(hl), b
 	inc	hl
 	ld	(hl), c
-	C$player.c$379$1_0$291	= .
-	.globl	C$player.c$379$1_0$291
-;src/player.c:379: brick_frame = 10;
+;src/player.c:381: brick_frame = 10;
 	ld	hl, #_brick_frame
 	ld	(hl), #0x0a
-	C$player.c$380$1_0$291	= .
-	.globl	C$player.c$380$1_0$291
-;src/player.c:380: brick_y_speed = -5;
+;src/player.c:382: brick_y_speed = -5;
 	ld	hl, #_brick_y_speed
 	ld	(hl), #0xfb
-	C$player.c$381$1_0$291	= .
-	.globl	C$player.c$381$1_0$291
-;src/player.c:381: }
-	C$player.c$381$1_0$291	= .
-	.globl	C$player.c$381$1_0$291
-	XFplayer$instanciate_brick_particles$0$0	= .
-	.globl	XFplayer$instanciate_brick_particles$0$0
+;src/player.c:383: }
 	ret
-	Fplayer$hurt_frame$0$0	= .
-	.globl	Fplayer$hurt_frame$0$0
-	C$player.c$383$1_0$305	= .
-	.globl	C$player.c$383$1_0$305
-;src/player.c:383: static void hurt_frame(void){
+;src/player.c:385: static void hurt_frame(void){
 ;	---------------------------------
 ; Function hurt_frame
 ; ---------------------------------
 _hurt_frame:
-	C$player.c$384$1_0$305	= .
-	.globl	C$player.c$384$1_0$305
-;src/player.c:384: if(frame_counter >= HURT_FRAMES){
+;src/player.c:386: if(frame_counter >= HURT_FRAMES){
 	ld	a, (#_frame_counter)
-	sub	a, #0x15
+	sub	a, #0x1e
 	jr	C, 00102$
-	C$player.c$385$2_0$306	= .
-	.globl	C$player.c$385$2_0$306
-;src/player.c:385: switch_state(PLAYER_STATE_FALLING);
+;src/player.c:387: switch_state(PLAYER_STATE_FALLING);
 	ld	a, #0x03
-	push	af
-	inc	sp
 	call	_switch_state
-	inc	sp
-	C$player.c$386$2_0$306	= .
-	.globl	C$player.c$386$2_0$306
-;src/player.c:386: stop_hurt_sfx();
-	C$player.c$387$2_0$306	= .
-	.globl	C$player.c$387$2_0$306
-;src/player.c:387: return;
+;src/player.c:388: stop_hurt_sfx();
+;src/player.c:389: return;
 	jp	_stop_hurt_sfx
 00102$:
-	C$player.c$389$1_0$305	= .
-	.globl	C$player.c$389$1_0$305
-;src/player.c:389: player_x = is_facing_right ? player_x - (x_speed >> PHYSICS_DAMPNER) : player_x + (x_speed >> PHYSICS_DAMPNER);
+;src/player.c:391: player_x = is_facing_right ? player_x - (x_speed) : player_x + (x_speed);
 	ld	hl, #_x_speed
-	ld	c, (hl)
-	srl	c
-	srl	c
+	ld	a, (hl+)
+	ld	c, a
+	ld	b, (hl)
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
 	jr	Z, 00105$
-	ld	a, (#_player_x)
+	ld	hl, #_player_x
+	ld	a, (hl+)
 	sub	a, c
+	ld	c, a
+	ld	a, (hl)
+	sbc	a, b
+	ld	b, a
 	jr	00106$
 00105$:
-	ld	a, (#_player_x)
-	add	a, c
+	ld	a, c
+	ld	hl, #_player_x
+	add	a, (hl)
+	inc	hl
+	ld	c, a
+	ld	a, b
+	adc	a, (hl)
+	ld	b, a
 00106$:
-	ld	(#_player_x),a
-	C$player.c$390$1_0$305	= .
-	.globl	C$player.c$390$1_0$305
-;src/player.c:390: player_y += (y_speed >> PHYSICS_DAMPNER);
+	ld	hl, #_player_x
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
+;src/player.c:392: player_y += (y_speed >> PHYSICS_DAMPNER);
 	ld	a, (#_y_speed)
 	sra	a
 	sra	a
@@ -2131,54 +2004,26 @@ _hurt_frame:
 	ld	c, (hl)
 	add	a, c
 	ld	(hl), a
-	C$player.c$391$1_0$305	= .
-	.globl	C$player.c$391$1_0$305
-;src/player.c:391: y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + HURT_G;
-	ld	hl, #_clamp_y_velocity
-	ld	c, (hl)
-	ld	e, c
+;src/player.c:393: y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + HURT_G;
 	ld	a, (#_y_speed)
-	ld	d,a
-	sub	a, c
-	bit	7, e
-	jr	Z, 00124$
-	bit	7, d
-	jr	NZ, 00125$
-	cp	a, a
-	jr	00125$
-00124$:
-	bit	7, d
-	jr	Z, 00125$
-	scf
-00125$:
-	jr	NC, 00108$
-	ld	hl, #_y_speed
-	ld	c, (hl)
-	inc	c
-	inc	c
+	xor	a, #0x80
+	sub	a, #0x94
+	jr	C, 00107$
+	ld	a, #0x14
+	jr	00108$
+00107$:
+	ld	a, (#_y_speed)
+	inc	a
 00108$:
-	ld	hl, #_y_speed
-	ld	(hl), c
-	C$player.c$392$1_0$305	= .
-	.globl	C$player.c$392$1_0$305
-;src/player.c:392: }
-	C$player.c$392$1_0$305	= .
-	.globl	C$player.c$392$1_0$305
-	XFplayer$hurt_frame$0$0	= .
-	.globl	XFplayer$hurt_frame$0$0
+	ld	(#_y_speed),a
+;src/player.c:394: }
 	ret
-	Fplayer$end_frame$0$0	= .
-	.globl	Fplayer$end_frame$0$0
-	C$player.c$394$1_0$308	= .
-	.globl	C$player.c$394$1_0$308
-;src/player.c:394: static void end_frame(void){
+;src/player.c:396: void end_frame(void){
 ;	---------------------------------
 ; Function end_frame
 ; ---------------------------------
-_end_frame:
-	C$player.c$395$1_0$308	= .
-	.globl	C$player.c$395$1_0$308
-;src/player.c:395: if(frame_counter == (uint8_t)(metasprites_speeds[current_state][current_frame])){
+_end_frame::
+;src/player.c:397: if(frame_counter == (uint8_t)(metasprites_speeds[current_state][current_frame])){
 	ld	bc, #_metasprites_speeds+0
 	ld	hl, #_current_state
 	ld	l, (hl)
@@ -2196,35 +2041,29 @@ _end_frame:
 	ld	hl, #_current_frame
 	add	a, (hl)
 	ld	c, a
-	jr	NC, 00125$
+	jr	NC, 00131$
 	inc	b
-00125$:
+00131$:
 	ld	a, (bc)
 	ld	c, a
 	ld	a, (#_frame_counter)
 	sub	a, c
 	jr	NZ, 00104$
-	C$player.c$396$2_0$309	= .
-	.globl	C$player.c$396$2_0$309
-;src/player.c:396: frame_counter = 0;
+;src/player.c:398: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-	C$player.c$397$2_0$309	= .
-	.globl	C$player.c$397$2_0$309
-;src/player.c:397: current_frame++;
+;src/player.c:399: current_frame++;
 	ld	hl, #_current_frame
 	inc	(hl)
-	C$player.c$398$2_0$309	= .
-	.globl	C$player.c$398$2_0$309
-;src/player.c:398: if(current_frame == frames_in_state[current_state]){current_frame = 0;}
+;src/player.c:400: if(current_frame == frames_in_state[current_state]){current_frame = 0;}
 	ld	bc, #_frames_in_state+0
 	ld	a, c
 	ld	hl, #_current_state
 	add	a, (hl)
 	ld	c, a
-	jr	NC, 00128$
+	jr	NC, 00134$
 	inc	b
-00128$:
+00134$:
 	ld	a, (bc)
 	ld	c, a
 	ld	a, (#_current_frame)
@@ -2234,21 +2073,15 @@ _end_frame:
 	ld	(hl), #0x00
 	jr	00105$
 00104$:
-	C$player.c$400$2_0$311	= .
-	.globl	C$player.c$400$2_0$311
-;src/player.c:400: frame_counter++;
+;src/player.c:402: frame_counter++;
 	ld	hl, #_frame_counter
 	inc	(hl)
 00105$:
-	C$player.c$403$1_0$308	= .
-	.globl	C$player.c$403$1_0$308
-;src/player.c:403: if(!rand_init){
+;src/player.c:405: if(!rand_init){
 	ld	hl, #_rand_init
 	bit	0, (hl)
 	ret	NZ
-	C$player.c$404$2_0$312	= .
-	.globl	C$player.c$404$2_0$312
-;src/player.c:404: r = r ^ DIV_REG ^ (current_frame << frame_counter);
+;src/player.c:406: r = r ^ DIV_REG ^ (current_frame << frame_counter);
 	ldh	a, (_DIV_REG + 0)
 	ld	hl, #_r
 	xor	a, (hl)
@@ -2257,91 +2090,55 @@ _end_frame:
 	ld	hl, #_current_frame
 	ld	c, (hl)
 	inc	b
-	jr	00132$
-00131$:
+	jr	00138$
+00137$:
 	sla	c
-00132$:
+00138$:
 	dec	b
-	jr	NZ,00131$
+	jr	NZ,00137$
 	xor	a, c
 	ld	(#_r),a
-	C$player.c$406$1_0$308	= .
-	.globl	C$player.c$406$1_0$308
-;src/player.c:406: }
-	C$player.c$406$1_0$308	= .
-	.globl	C$player.c$406$1_0$308
-	XFplayer$end_frame$0$0	= .
-	.globl	XFplayer$end_frame$0$0
+;src/player.c:408: }
 	ret
-	Fplayer$switch_state$0$0	= .
-	.globl	Fplayer$switch_state$0$0
-	C$player.c$408$1_0$314	= .
-	.globl	C$player.c$408$1_0$314
-;src/player.c:408: static inline void switch_state(PlayerState state){
+;src/player.c:410: static inline void switch_state(PlayerState state){
 ;	---------------------------------
 ; Function switch_state
 ; ---------------------------------
 _switch_state:
-	C$player.c$409$1_0$314	= .
-	.globl	C$player.c$409$1_0$314
-;src/player.c:409: if(current_state == state) {return;}
-	ld	a, (#_current_state)
-	ldhl	sp,	#2
-	sub	a, (hl)
+	ld	c, a
+;src/player.c:411: if(current_state == state) {return;}
+;src/player.c:412: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
+	ld	a,(#_current_state)
+	cp	a,c
 	ret	Z
-	jr	00102$
-00102$:
-	C$player.c$410$1_0$314	= .
-	.globl	C$player.c$410$1_0$314
-;src/player.c:410: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
-	ld	a, (#_current_state)
 	sub	a, #0x03
 	jr	NZ, 00104$
+	push	bc
 	call	_instanciate_collision_puffs
+	pop	bc
 00104$:
-	C$player.c$411$1_0$314	= .
-	.globl	C$player.c$411$1_0$314
-;src/player.c:411: frame_counter = 0;
+;src/player.c:413: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-	C$player.c$412$1_0$314	= .
-	.globl	C$player.c$412$1_0$314
-;src/player.c:412: current_frame = 0;
+;src/player.c:414: current_frame = 0;
 	ld	hl, #_current_frame
 	ld	(hl), #0x00
-	C$player.c$413$1_0$314	= .
-	.globl	C$player.c$413$1_0$314
-;src/player.c:413: current_state = state;
-	ldhl	sp,	#2
-	ld	a, (hl)
-	ld	(#_current_state),a
-	C$player.c$414$1_0$314	= .
-	.globl	C$player.c$414$1_0$314
-;src/player.c:414: }
-	C$player.c$414$1_0$314	= .
-	.globl	C$player.c$414$1_0$314
-	XFplayer$switch_state$0$0	= .
-	.globl	XFplayer$switch_state$0$0
+;src/player.c:415: current_state = state;
+	ld	hl, #_current_state
+	ld	(hl), c
+;src/player.c:416: }
 	ret
-	Fplayer$check_collisions$0$0	= .
-	.globl	Fplayer$check_collisions$0$0
-	C$player.c$418$1_0$319	= .
-	.globl	C$player.c$418$1_0$319
-;src/player.c:418: static void check_collisions(void){
+;src/player.c:420: static void check_collisions(void){
 ;	---------------------------------
 ; Function check_collisions
 ; ---------------------------------
 _check_collisions:
-	add	sp, #-15
-	C$player.c$420$2_0$319	= .
-	.globl	C$player.c$420$2_0$319
-;src/player.c:420: for(i=0; i<8; i++){
+	add	sp, #-16
+;src/player.c:422: for(i=0; i<8; i++){
 	ld	hl, #_i
 	ld	(hl), #0x00
 00133$:
-	C$player.c$421$3_0$320	= .
-	.globl	C$player.c$421$3_0$320
-;src/player.c:421: r = &rect_list[PLAYER_FLOOR][i];
+;src/player.c:423: r = &rect_list[PLAYER_FLOOR][i];
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -2369,12 +2166,10 @@ _check_collisions:
 	ld	c, a
 	ld	a, #0x00
 	adc	a, b
-	ldhl	sp,	#2
+	ldhl	sp,	#1
 	ld	(hl), c
 	inc	hl
-	C$player.c$422$3_0$320	= .
-	.globl	C$player.c$422$3_0$320
-;src/player.c:422: if(r->type == INACTIVE) continue;
+;src/player.c:424: if(r->type == INACTIVE) continue;
 	ld	(hl-), a
 	ld	a, (hl+)
 	ld	e, a
@@ -2386,36 +2181,30 @@ _check_collisions:
 	ld	a, (bc)
 	sub	a, #0x02
 	jp	Z,00131$
-	C$player.c$423$3_0$320	= .
-	.globl	C$player.c$423$3_0$320
-;src/player.c:423: if(!point_vs_rect(r)) {
-	ldhl	sp,	#2
-	ld	a, (hl+)
-	ld	e, a
+;src/player.c:425: if(!point_vs_rect(r)) {
+	ldhl	sp,	#1
+	ld	e, (hl)
+	inc	hl
 	ld	d, (hl)
-	push	de
 	call	_point_vs_rect
-	pop	hl
-	bit	0, e
+	ld	c, a
+	bit	0, c
 	jp	Z, 00131$
-	C$player.c$427$4_0$322	= .
-	.globl	C$player.c$427$4_0$322
-;src/player.c:427: uint8_t external_point_area = 0x00;
-	ld	c, #0x00
-	C$player.c$432$3_1$322	= .
-	.globl	C$player.c$432$3_1$322
-;src/player.c:432: external_point_area |= (last_x >= (r->x + r->size_x)) ? 0x10 : (last_x <= r->x) ? 0x20 : 0x30;        
-	ldhl	sp,#2
+;src/player.c:434: external_point_area |= ((uint8_t)SUB_TO_PX(last_x) >= (r->x + r->size_x)) ? 0x10 : ((uint8_t)SUB_TO_PX(last_x) <= r->x) ? 0x20 : 0x30;        
+	ld	a, (#_last_x + 1)
+	ldhl	sp,	#6
+	ld	(hl), a
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	ld	b, a
-	ldhl	sp,	#13
-	ld	a, b
+	ldhl	sp,	#7
+	ld	(hl), a
+	ld	a, (hl+)
 	ld	(hl+), a
 	ld	(hl), #0x00
-	ldhl	sp,#2
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
@@ -2423,80 +2212,82 @@ _check_collisions:
 	add	hl, de
 	push	hl
 	ld	a, l
-	ldhl	sp,	#11
+	ldhl	sp,	#12
 	ld	(hl), a
 	pop	hl
 	ld	a, h
-	ldhl	sp,	#10
+	ldhl	sp,	#11
 	ld	(hl-), a
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	ld	d, #0x00
+	ldhl	sp,	#15
+	ld	(hl), a
+	ldhl	sp,	#12
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl-), a
+	ld	a, (hl+)
 	ld	e, a
-	ldhl	sp,	#13
+	ld	d, (hl)
+	ldhl	sp,	#8
 	ld	a,	(hl+)
 	ld	h, (hl)
 	ld	l, a
 	add	hl, de
 	push	hl
 	ld	a, l
-	ldhl	sp,	#13
+	ldhl	sp,	#16
 	ld	(hl), a
 	pop	hl
 	ld	a, h
-	ldhl	sp,	#12
+	ldhl	sp,	#15
 	ld	(hl), a
-	ld	a, (#_last_x)
-	ldhl	sp,	#13
-	ld	(hl+), a
-	ld	(hl), #0x00
-	ldhl	sp,	#13
-	ld	e, l
-	ld	d, h
-	ldhl	sp,	#11
-	ld	a, (de)
-	inc	de
+	ldhl	sp,	#6
+	ld	c, (hl)
+	ld	b, #0x00
+	ldhl	sp,	#14
+	ld	a, c
 	sub	a, (hl)
 	inc	hl
-	ld	a, (de)
+	ld	a, b
 	sbc	a, (hl)
-	ld	a, (de)
+	ld	a, b
 	ld	d, a
 	bit	7, (hl)
-	jr	Z, 00257$
+	jr	Z, 00301$
 	bit	7, d
-	jr	NZ, 00258$
+	jr	NZ, 00302$
 	cp	a, a
-	jr	00258$
-00257$:
+	jr	00302$
+00301$:
 	bit	7, d
-	jr	Z, 00258$
+	jr	Z, 00302$
 	scf
-00258$:
+00302$:
 	jr	C, 00136$
-	ld	de, #0x0010
+	ldhl	sp,	#15
+	ld	(hl), #0x10
 	jr	00137$
 00136$:
-	ld	a, b
-	ld	hl, #_last_x
+	ldhl	sp,	#7
+	ld	a, (hl-)
 	sub	a, (hl)
 	jr	C, 00138$
-	ld	de, #0x0020
+	ld	a, #0x20
 	jr	00139$
 00138$:
-	ld	de, #0x0030
+	ld	a, #0x30
 00139$:
+	ldhl	sp,	#15
+	ld	(hl), a
 00137$:
-	ld	a, e
-	or	a, c
-	ldhl	sp,	#4
-	C$player.c$433$3_1$322	= .
-	.globl	C$player.c$433$3_1$322
-;src/player.c:433: external_point_area |= (last_y <= (r->y - r->size_y)) ? 0x01 : (last_y >= r->y) ? 0x02 : 0x03;
-	ld	(hl-), a
-	dec	hl
+	ldhl	sp,	#15
+	ld	a, (hl)
+	ldhl	sp,	#0
+;src/player.c:435: external_point_area |= (last_y <= (r->y - r->size_y)) ? 0x01 : (last_y >= r->y) ? 0x02 : 0x03;
+	ld	(hl+), a
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
@@ -2505,22 +2296,22 @@ _check_collisions:
 	inc	hl
 	push	hl
 	ld	a, l
-	ldhl	sp,	#15
+	ldhl	sp,	#16
 	ld	(hl), a
 	pop	hl
 	ld	a, h
-	ldhl	sp,	#14
+	ldhl	sp,	#15
 	ld	(hl-), a
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	ld	c, a
-	ldhl	sp,	#0
-	ld	a, c
+	ldhl	sp,	#3
+	ld	(hl), a
+	ld	a, (hl+)
 	ld	(hl+), a
-	xor	a, a
-	ld	(hl+), a
+	ld	(hl), #0x00
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
@@ -2528,88 +2319,84 @@ _check_collisions:
 	add	hl, de
 	push	hl
 	ld	a, l
-	ldhl	sp,	#13
+	ldhl	sp,	#14
 	ld	(hl), a
 	pop	hl
 	ld	a, h
-	ldhl	sp,	#12
+	ldhl	sp,	#13
 	ld	(hl-), a
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	ldhl	sp,	#5
+	ldhl	sp,	#9
+	ld	(hl), a
+	ldhl	sp,	#6
 	ld	(hl+), a
-	ld	(hl), #0x00
-	pop	de
-	push	de
-	ld	a, (hl-)
-	ld	l, (hl)
-	ld	h, a
+	xor	a, a
+	ld	(hl-), a
+	dec	hl
+	dec	hl
+	ld	a, (hl+)
+	ld	e, a
+	ld	a, (hl+)
+	ld	d, a
+	ld	a,	(hl+)
+	ld	h, (hl)
+	ld	l, a
 	ld	a, e
 	sub	a, l
 	ld	e, a
 	ld	a, d
 	sbc	a, h
-	ldhl	sp,	#8
+	ldhl	sp,	#9
 	ld	(hl-), a
 	ld	(hl), e
-	ld	a, (#_last_y)
-	ldhl	sp,	#5
-	ld	(hl+), a
-	ld	(hl), #0x00
-	ldhl	sp,	#7
-	ld	e, l
-	ld	d, h
-	ldhl	sp,	#5
-	ld	a, (de)
-	inc	de
-	sub	a, (hl)
-	inc	hl
-	ld	a, (de)
-	sbc	a, (hl)
-	ld	a, (de)
-	ld	d, a
-	bit	7, (hl)
-	jr	Z, 00259$
+	ld	hl, #_last_y
+	ld	c, (hl)
+	ld	b, #0x00
+	ldhl	sp,	#8
+	ld	a, (hl+)
+	sub	a, c
+	ld	a, (hl)
+	sbc	a, b
+	ld	d, (hl)
+	ld	a, b
+	bit	7,a
+	jr	Z, 00303$
 	bit	7, d
-	jr	NZ, 00260$
+	jr	NZ, 00304$
 	cp	a, a
-	jr	00260$
-00259$:
+	jr	00304$
+00303$:
 	bit	7, d
-	jr	Z, 00260$
+	jr	Z, 00304$
 	scf
-00260$:
+00304$:
 	jr	C, 00140$
-	ld	a, #0x01
+	ldhl	sp,	#9
+	ld	(hl), #0x01
 	jr	00141$
 00140$:
 	ld	a, (#_last_y)
-	sub	a, c
+	ldhl	sp,	#3
+	sub	a, (hl)
 	jr	C, 00142$
-	ldhl	sp,	#7
 	ld	a, #0x02
-	ld	(hl+), a
-	xor	a, a
-	ld	(hl), a
 	jr	00143$
 00142$:
-	ldhl	sp,	#7
 	ld	a, #0x03
-	ld	(hl+), a
-	xor	a, a
-	ld	(hl), a
 00143$:
-	ldhl	sp,	#7
-	ld	a, (hl+)
+	ldhl	sp,	#9
+	ld	(hl), a
 00141$:
-	ldhl	sp,	#4
-	or	a, (hl)
+	ldhl	sp,	#9
+	ld	b, (hl)
+	ldhl	sp,	#0
+	ld	a, (hl)
+	or	a, b
 	ld	c, a
-	C$player.c$435$3_1$322	= .
-	.globl	C$player.c$435$3_1$322
-;src/player.c:435: if((player_y > last_y) ? (player_y - last_y) > 50 : (last_y - player_y) > 50){
+;src/player.c:437: if((player_y > last_y) ? (player_y - last_y) > 50 : (last_y - player_y) > 50){
 	ld	a, (#_last_y)
 	ld	hl, #_player_y
 	sub	a, (hl)
@@ -2635,16 +2422,16 @@ _check_collisions:
 	ld	a, #0x00
 	sbc	a, h
 	bit	7, e
-	jr	Z, 00261$
+	jr	Z, 00305$
 	bit	7, d
-	jr	NZ, 00262$
+	jr	NZ, 00306$
 	cp	a, a
-	jr	00262$
-00261$:
+	jr	00306$
+00305$:
 	bit	7, d
-	jr	Z, 00262$
+	jr	Z, 00306$
 	scf
-00262$:
+00306$:
 	ld	a, #0x00
 	rla
 	jr	00145$
@@ -2674,33 +2461,29 @@ _check_collisions:
 	ld	a, #0x00
 	sbc	a, b
 	bit	7, e
-	jr	Z, 00263$
+	jr	Z, 00307$
 	bit	7, d
-	jr	NZ, 00264$
+	jr	NZ, 00308$
 	cp	a, a
-	jr	00264$
-00263$:
+	jr	00308$
+00307$:
 	bit	7, d
-	jr	Z, 00264$
+	jr	Z, 00308$
 	scf
-00264$:
+00308$:
 	ld	a, #0x00
 	rla
 00145$:
 	or	a, a
 	jr	Z, 00106$
-	C$player.c$436$4_1$323	= .
-	.globl	C$player.c$436$4_1$323
-;src/player.c:436: external_point_area = (external_point_area & 0xF0) + 0x02; //check for overflow height
+;src/player.c:438: external_point_area = (external_point_area & 0xF0) + 0x02; //check for overflow height
 	ld	a, c
 	and	a, #0xf0
 	add	a, #0x02
 	ld	c, a
 00106$:
-	C$player.c$439$3_1$322	= .
-	.globl	C$player.c$439$3_1$322
-;src/player.c:439: if(rect_functions[r->type](external_point_area)) continue;
-	ldhl	sp,#2
+;src/player.c:441: if(rect_functions[r->type](external_point_area)) continue;
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
@@ -2722,22 +2505,17 @@ _check_collisions:
 ;	spillPairReg hl
 	push	bc
 	ld	a, c
-	push	af
-	inc	sp
 	ld	l, b
 ;	spillPairReg hl
 ;	spillPairReg hl
 	call	___sdcc_call_hl
-	inc	sp
-	ld	l, e
+	ld	l, a
 ;	spillPairReg hl
 ;	spillPairReg hl
 	pop	bc
 	bit	0, l
 	jp	NZ, 00131$
-	C$player.c$442$3_2$324	= .
-	.globl	C$player.c$442$3_2$324
-;src/player.c:442: switch (external_point_area)
+;src/player.c:444: switch (external_point_area)
 	ld	a,c
 	cp	a,#0x11
 	jr	Z, 00109$
@@ -2756,34 +2534,28 @@ _check_collisions:
 	sub	a, #0x32
 	jp	Z,00128$
 	jp	00131$
-	C$player.c$444$4_2$325	= .
-	.globl	C$player.c$444$4_2$325
-;src/player.c:444: case RIGHT_UP: // RIGHT - UP
+;src/player.c:446: case RIGHT_UP: // RIGHT - UP
 00109$:
-	C$player.c$445$4_2$325	= .
-	.globl	C$player.c$445$4_2$325
-;src/player.c:445: rx = r->x + r->size_x;
-	ldhl	sp,#2
+;src/player.c:447: rx = r->x + r->size_x;
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	ldhl	sp,#9
+	ldhl	sp,#10
 	ld	e, (hl)
 	inc	hl
 	ld	d, (hl)
 	push	af
 	ld	a, (de)
-	ldhl	sp,	#6
+	ldhl	sp,	#5
 	ld	(hl), a
 	pop	af
 	add	a, (hl)
 	inc	hl
 	ld	(hl), a
-	C$player.c$446$4_2$325	= .
-	.globl	C$player.c$446$4_2$325
-;src/player.c:446: ry = r->y - r->size_y;
-	ldhl	sp,#13
+;src/player.c:448: ry = r->y - r->size_y;
+	ldhl	sp,#14
 	ld	a, (hl+)
 	ld	e, a
 	ld	a, (hl-)
@@ -2799,15 +2571,13 @@ _check_collisions:
 	ld	c, a
 	pop	af
 	sub	a, c
-	ldhl	sp,	#6
+	ldhl	sp,	#5
 	ld	(hl), a
 	ld	c, (hl)
-	C$player.c$447$4_2$325	= .
-	.globl	C$player.c$447$4_2$325
-;src/player.c:447: if((ry-player_y)*(last_x - player_x) < (last_y - player_y)*(rx-player_x)){
+;src/player.c:449: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) < (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
 	ld	b, #0x00
 	ld	a, (#_player_y)
-	ldhl	sp,	#7
+	ldhl	sp,	#6
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl-), a
@@ -2819,46 +2589,47 @@ _check_collisions:
 	ld	e, a
 	ld	a, b
 	sbc	a, d
-	ldhl	sp,	#14
+	ldhl	sp,	#15
 	ld	(hl-), a
 	ld	(hl), e
-	ld	a, (#_last_x)
-	ld	e, #0x00
-	ld	hl, #_player_x
-	ld	c, (hl)
+	ld	a, (#_last_x + 1)
 	ld	b, #0x00
-	sub	a, c
-	ld	l, a
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	a, e
-	sbc	a, b
+	ld	hl, #_player_x + 1
+	ld	c, (hl)
+	ldhl	sp,	#8
+	ld	(hl), c
+	inc	hl
+	ld	(hl), #0x00
+	ld	e, a
+	ld	d, b
+	ld	a, (hl-)
+	ld	l, (hl)
 	ld	h, a
-;	spillPairReg hl
-;	spillPairReg hl
-	push	bc
-	push	hl
-	ldhl	sp,	#17
+	ld	a, e
+	sub	a, l
+	ld	e, a
+	ld	a, d
+	sbc	a, h
+	ld	b, a
+	ld	c, e
+	ldhl	sp,	#14
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	push	de
 	call	__mulint
-	add	sp, #4
-	ldhl	sp,	#11
-	ld	a, e
+	ldhl	sp,	#10
+	ld	a, c
 	ld	(hl+), a
-	ld	(hl), d
-	pop	bc
+	ld	(hl), b
 	ld	a, (#_last_y)
-	ldhl	sp,	#11
+	ldhl	sp,	#12
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl-), a
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	ldhl	sp,	#7
+	ldhl	sp,	#6
 	ld	a,	(hl+)
 	ld	h, (hl)
 	ld	l, a
@@ -2867,133 +2638,122 @@ _check_collisions:
 	ld	e, a
 	ld	a, d
 	sbc	a, h
-	ldhl	sp,	#14
+	ldhl	sp,	#15
 	ld	(hl-), a
 	ld	(hl), e
-	ldhl	sp,	#5
-	ld	e, (hl)
-	ld	d, #0x00
-	ld	a, e
-	sub	a, c
-	ld	c, a
-	ld	a, d
-	sbc	a, b
-	ld	b, a
-	push	bc
-	ldhl	sp,	#15
+	ldhl	sp,	#4
+	ld	c, (hl)
+	ld	b, #0x00
+	ldhl	sp,#8
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	push	de
-	call	__mulint
-	add	sp, #4
+	ld	a, c
+	sub	a, e
+	ld	e, a
+	ld	a, b
+	sbc	a, d
+	ld	b, a
 	ld	c, e
-	ld	b, d
-	ldhl	sp,	#9
+	ldhl	sp,	#14
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	call	__mulint
+	ldhl	sp,	#10
 	ld	a, (hl+)
 	sub	a, c
 	ld	a, (hl)
 	sbc	a, b
 	ld	d, (hl)
 	ld	a, b
-	bit	7,a
-	jr	Z, 00273$
+	ld	e, a
+	bit	7, e
+	jr	Z, 00317$
 	bit	7, d
-	jr	NZ, 00274$
+	jr	NZ, 00318$
 	cp	a, a
-	jr	00274$
-00273$:
+	jr	00318$
+00317$:
 	bit	7, d
-	jr	Z, 00274$
+	jr	Z, 00318$
 	scf
-00274$:
+00318$:
 	jr	NC, 00111$
-	C$player.c$449$5_2$326	= .
-	.globl	C$player.c$449$5_2$326
-;src/player.c:449: player_x = r->x + r->size_x + 1;
-	ldhl	sp,#2
+;src/player.c:451: player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	a, (hl+)
 	ld	d, a
 	ld	a, (de)
-	add	a, (hl)
-	inc	a
-	ld	(#_player_x),a
-	C$player.c$450$5_2$326	= .
-	.globl	C$player.c$450$5_2$326
-;src/player.c:450: x_speed = 0;
-	ld	hl, #_x_speed
-	ld	(hl), #0x00
+	ld	c, a
+	ld	b, #0x00
+	ld	a, (hl)
+	ld	e, #0x00
+	add	a, c
+	ld	c, a
+	ld	a, e
+	adc	a, b
+	ld	b, a
+	inc	bc
+	ld	b, c
+	ld	c, #0x00
+	ld	hl, #_player_x
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
 	jp	00131$
 00111$:
-	C$player.c$453$5_2$327	= .
-	.globl	C$player.c$453$5_2$327
-;src/player.c:453: player_y = r->y - r->size_y - 1;
-	ldhl	sp,	#6
+;src/player.c:455: player_y = r->y - r->size_y - 1;
+	ldhl	sp,	#5
 	ld	a, (hl)
 	dec	a
 	ld	(#_player_y),a
-	C$player.c$454$5_2$327	= .
-	.globl	C$player.c$454$5_2$327
-;src/player.c:454: is_grounded = true;
+;src/player.c:456: is_grounded = true;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x01
-	C$player.c$455$5_2$327	= .
-	.globl	C$player.c$455$5_2$327
-;src/player.c:455: current_coyote_frames = 0;
+;src/player.c:457: current_coyote_frames = 0;
 	ld	hl, #_current_coyote_frames
 	ld	(hl), #0x00
-	C$player.c$456$5_2$327	= .
-	.globl	C$player.c$456$5_2$327
-;src/player.c:456: y_speed = 0;
+;src/player.c:458: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-	C$player.c$458$4_2$325	= .
-	.globl	C$player.c$458$4_2$325
-;src/player.c:458: break;
+;src/player.c:460: break;
 	jp	00131$
-	C$player.c$460$4_2$325	= .
-	.globl	C$player.c$460$4_2$325
-;src/player.c:460: case RIGHT_DOWN: // RIGHT - DOWN
+;src/player.c:462: case RIGHT_DOWN: // RIGHT - DOWN
 00113$:
-	C$player.c$461$4_2$325	= .
-	.globl	C$player.c$461$4_2$325
-;src/player.c:461: rx = r->x + r->size_x;
-	ldhl	sp,#2
+;src/player.c:463: rx = r->x + r->size_x;
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	ldhl	sp,#9
+	ldhl	sp,#10
 	ld	e, (hl)
 	inc	hl
 	ld	d, (hl)
 	push	af
 	ld	a, (de)
-	ldhl	sp,	#6
+	ldhl	sp,	#5
 	ld	(hl), a
 	pop	af
 	add	a, (hl)
 	inc	hl
 	ld	(hl), a
-	C$player.c$462$4_2$325	= .
-	.globl	C$player.c$462$4_2$325
-;src/player.c:462: ry = r->y;
-	ldhl	sp,#13
+;src/player.c:464: ry = r->y;
+	ldhl	sp,#14
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	ldhl	sp,	#6
+	ldhl	sp,	#5
 	ld	(hl), a
 	ld	c, (hl)
-	C$player.c$463$4_2$325	= .
-	.globl	C$player.c$463$4_2$325
-;src/player.c:463: if((ry-player_y)*(last_x - player_x) > (last_y - player_y)*(rx-player_x)){
+;src/player.c:465: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) > (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
 	ld	b, #0x00
 	ld	a, (#_player_y)
-	ldhl	sp,	#7
+	ldhl	sp,	#6
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl-), a
@@ -3005,46 +2765,47 @@ _check_collisions:
 	ld	e, a
 	ld	a, b
 	sbc	a, d
-	ldhl	sp,	#14
+	ldhl	sp,	#15
 	ld	(hl-), a
 	ld	(hl), e
-	ld	a, (#_last_x)
-	ld	e, #0x00
-	ld	hl, #_player_x
-	ld	c, (hl)
+	ld	a, (#_last_x + 1)
 	ld	b, #0x00
-	sub	a, c
-	ld	l, a
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	a, e
-	sbc	a, b
+	ld	hl, #_player_x + 1
+	ld	c, (hl)
+	ldhl	sp,	#8
+	ld	(hl), c
+	inc	hl
+	ld	(hl), #0x00
+	ld	e, a
+	ld	d, b
+	ld	a, (hl-)
+	ld	l, (hl)
 	ld	h, a
-;	spillPairReg hl
-;	spillPairReg hl
-	push	bc
-	push	hl
-	ldhl	sp,	#17
+	ld	a, e
+	sub	a, l
+	ld	e, a
+	ld	a, d
+	sbc	a, h
+	ld	b, a
+	ld	c, e
+	ldhl	sp,	#14
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	push	de
 	call	__mulint
-	add	sp, #4
-	ldhl	sp,	#11
-	ld	a, e
+	ldhl	sp,	#10
+	ld	a, c
 	ld	(hl+), a
-	ld	(hl), d
-	pop	bc
+	ld	(hl), b
 	ld	a, (#_last_y)
-	ldhl	sp,	#11
+	ldhl	sp,	#12
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl-), a
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	ldhl	sp,	#7
+	ldhl	sp,	#6
 	ld	a,	(hl+)
 	ld	h, (hl)
 	ld	l, a
@@ -3053,28 +2814,228 @@ _check_collisions:
 	ld	e, a
 	ld	a, d
 	sbc	a, h
-	ldhl	sp,	#14
+	ldhl	sp,	#15
 	ld	(hl-), a
 	ld	(hl), e
-	ldhl	sp,	#5
-	ld	e, (hl)
-	ld	d, #0x00
-	ld	a, e
-	sub	a, c
-	ld	c, a
-	ld	a, d
-	sbc	a, b
-	ld	b, a
-	push	bc
-	ldhl	sp,	#15
+	ldhl	sp,	#4
+	ld	c, (hl)
+	ld	b, #0x00
+	ldhl	sp,#8
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	push	de
-	call	__mulint
-	add	sp, #4
+	ld	a, c
+	sub	a, e
+	ld	e, a
+	ld	a, b
+	sbc	a, d
+	ld	b, a
 	ld	c, e
-	ld	b, d
+	ldhl	sp,	#14
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	call	__mulint
+	ldhl	sp,	#10
+	ld	a, c
+	sub	a, (hl)
+	inc	hl
+	ld	a, b
+	sbc	a, (hl)
+	ld	a, b
+	ld	d, a
+	ld	e, (hl)
+	bit	7, e
+	jr	Z, 00319$
+	bit	7, d
+	jr	NZ, 00320$
+	cp	a, a
+	jr	00320$
+00319$:
+	bit	7, d
+	jr	Z, 00320$
+	scf
+00320$:
+	jr	NC, 00115$
+;src/player.c:467: player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
+	ldhl	sp,#1
+	ld	a, (hl+)
+	ld	e, a
+	ld	a, (hl+)
+	ld	d, a
+	ld	a, (de)
+	ld	c, a
+	ld	b, #0x00
+	ld	a, (hl)
+	ld	e, #0x00
+	add	a, c
+	ld	c, a
+	ld	a, e
+	adc	a, b
+	ld	b, a
+	inc	bc
+	ld	b, c
+	ld	c, #0x00
+	ld	hl, #_player_x
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
+	jp	00131$
+00115$:
+;src/player.c:471: player_y = r->y + 1;
+	ldhl	sp,	#5
+	ld	a, (hl)
+	inc	a
+	ld	(#_player_y),a
+;src/player.c:472: y_speed = 0;
+	ld	hl, #_y_speed
+	ld	(hl), #0x00
+;src/player.c:475: break;
+	jp	00131$
+;src/player.c:477: case RIGHT_CENTER: // RIGHT - CENTER
+00117$:
+;src/player.c:478: player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
+	ldhl	sp,#1
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, (de)
+	ld	c, a
+	ld	b, #0x00
+	ldhl	sp,#10
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, (de)
+	ld	h, #0x00
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	l, a
+	add	hl, bc
+	inc	hl
+	ld	c, l
+	xor	a, a
+	ld	hl, #_player_x
+	ld	(hl+), a
+	ld	(hl), c
+;src/player.c:480: break;
+	jp	00131$
+;src/player.c:482: case LEFT_UP: // LEFT - UP
+00118$:
+;src/player.c:483: rx = r->x;
+	ldhl	sp,#1
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, (de)
+	ldhl	sp,	#11
+	ld	(hl), a
+;src/player.c:484: ry = r->y - r->size_y;
+	ldhl	sp,#14
+	ld	a, (hl+)
+	ld	e, a
+	ld	a, (hl-)
+	dec	hl
+	dec	hl
+	ld	d, a
+	ld	a, (de)
+	ld	e, (hl)
+	inc	hl
+	ld	d, (hl)
+	push	af
+	ld	a, (de)
+	ld	c, a
+	pop	af
+	sub	a, c
+	ldhl	sp,	#4
+	ld	(hl), a
+	ld	c, (hl)
+;src/player.c:485: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) > (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
+	ld	b, #0x00
+	ld	a, (#_player_y)
+	ldhl	sp,	#5
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, c
+	sub	a, e
+	ld	e, a
+	ld	a, b
+	sbc	a, d
+	ldhl	sp,	#15
+	ld	(hl-), a
+	ld	(hl), e
+	ld	a, (#_last_x + 1)
+	ld	b, #0x00
+	ld	hl, #_player_x + 1
+	ld	c, (hl)
+	ldhl	sp,	#7
+	ld	(hl), c
+	inc	hl
+	ld	(hl), #0x00
+	ld	e, a
+	ld	d, b
+	ld	a, (hl-)
+	ld	l, (hl)
+	ld	h, a
+	ld	a, e
+	sub	a, l
+	ld	e, a
+	ld	a, d
+	sbc	a, h
+	ld	b, a
+	ld	c, e
+	ldhl	sp,	#14
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	call	__mulint
+	ldhl	sp,	#9
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
+	ld	a, (#_last_y)
+	ldhl	sp,	#12
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl-), a
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ldhl	sp,	#5
+	ld	a,	(hl+)
+	ld	h, (hl)
+	ld	l, a
+	ld	a, e
+	sub	a, l
+	ld	e, a
+	ld	a, d
+	sbc	a, h
+	ldhl	sp,	#15
+	ld	(hl-), a
+	ld	(hl), e
+	ldhl	sp,	#11
+	ld	c, (hl)
+	ld	b, #0x00
+	ldhl	sp,#7
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	ld	a, c
+	sub	a, e
+	ld	e, a
+	ld	a, b
+	sbc	a, d
+	ld	b, a
+	ld	c, e
+	ldhl	sp,	#14
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	call	__mulint
 	ldhl	sp,	#9
 	ld	a, c
 	sub	a, (hl)
@@ -3083,285 +3044,62 @@ _check_collisions:
 	sbc	a, (hl)
 	ld	a, b
 	ld	d, a
-	bit	7, (hl)
-	jr	Z, 00275$
-	bit	7, d
-	jr	NZ, 00276$
-	cp	a, a
-	jr	00276$
-00275$:
-	bit	7, d
-	jr	Z, 00276$
-	scf
-00276$:
-	jr	NC, 00115$
-	C$player.c$465$5_2$328	= .
-	.globl	C$player.c$465$5_2$328
-;src/player.c:465: player_x = r->x + r->size_x + 1;
-	ldhl	sp,#2
-	ld	a, (hl+)
-	ld	e, a
-	ld	a, (hl+)
-	ld	d, a
-	ld	a, (de)
-	add	a, (hl)
-	inc	a
-	ld	(#_player_x),a
-	C$player.c$466$5_2$328	= .
-	.globl	C$player.c$466$5_2$328
-;src/player.c:466: x_speed = 0;
-	ld	hl, #_x_speed
-	ld	(hl), #0x00
-	jp	00131$
-00115$:
-	C$player.c$469$5_2$329	= .
-	.globl	C$player.c$469$5_2$329
-;src/player.c:469: player_y = r->y + 1;
-	ldhl	sp,	#6
-	ld	a, (hl)
-	inc	a
-	ld	(#_player_y),a
-	C$player.c$470$5_2$329	= .
-	.globl	C$player.c$470$5_2$329
-;src/player.c:470: y_speed = 0;
-	ld	hl, #_y_speed
-	ld	(hl), #0x00
-	C$player.c$473$4_2$325	= .
-	.globl	C$player.c$473$4_2$325
-;src/player.c:473: break;
-	jp	00131$
-	C$player.c$475$4_2$325	= .
-	.globl	C$player.c$475$4_2$325
-;src/player.c:475: case RIGHT_CENTER: // RIGHT - CENTER
-00117$:
-	C$player.c$476$4_2$325	= .
-	.globl	C$player.c$476$4_2$325
-;src/player.c:476: player_x = r->x + r->size_x + 1;
-	ldhl	sp,#2
-	ld	a, (hl+)
-	ld	e, a
-	ld	d, (hl)
-	ld	a, (de)
-	ld	c, a
-	ldhl	sp,#9
-	ld	a, (hl+)
-	ld	e, a
-	ld	d, (hl)
-	ld	a, (de)
-	add	a, c
-	inc	a
-	ld	(#_player_x),a
-	C$player.c$477$4_2$325	= .
-	.globl	C$player.c$477$4_2$325
-;src/player.c:477: x_speed = 0;
-	ld	hl, #_x_speed
-	ld	(hl), #0x00
-	C$player.c$478$4_2$325	= .
-	.globl	C$player.c$478$4_2$325
-;src/player.c:478: break;
-	jp	00131$
-	C$player.c$480$4_2$325	= .
-	.globl	C$player.c$480$4_2$325
-;src/player.c:480: case LEFT_UP: // LEFT - UP
-00118$:
-	C$player.c$481$4_2$325	= .
-	.globl	C$player.c$481$4_2$325
-;src/player.c:481: rx = r->x;
-	ldhl	sp,#2
-	ld	a, (hl+)
-	ld	e, a
-	ld	d, (hl)
-	ld	a, (de)
-	ldhl	sp,	#10
-	ld	(hl), a
-	C$player.c$482$4_2$325	= .
-	.globl	C$player.c$482$4_2$325
-;src/player.c:482: ry = r->y - r->size_y;
-	ldhl	sp,#13
-	ld	a, (hl+)
-	ld	e, a
-	ld	a, (hl-)
-	dec	hl
-	dec	hl
-	ld	d, a
-	ld	a, (de)
 	ld	e, (hl)
-	inc	hl
-	ld	d, (hl)
-	push	af
-	ld	a, (de)
-	ld	c, a
-	pop	af
-	sub	a, c
-	ldhl	sp,	#5
-	ld	(hl), a
-	ld	c, (hl)
-	C$player.c$483$4_2$325	= .
-	.globl	C$player.c$483$4_2$325
-;src/player.c:483: if((ry-player_y)*(last_x - player_x) > (last_y - player_y)*(rx-player_x)){
-	ld	b, #0x00
-	ld	a, (#_player_y)
-	ldhl	sp,	#6
-	ld	(hl+), a
-	xor	a, a
-	ld	(hl-), a
-	ld	a, (hl+)
-	ld	e, a
-	ld	d, (hl)
-	ld	a, c
-	sub	a, e
-	ld	e, a
-	ld	a, b
-	sbc	a, d
-	ldhl	sp,	#14
-	ld	(hl-), a
-	ld	(hl), e
-	ld	a, (#_last_x)
-	ld	e, #0x00
-	ld	hl, #_player_x
-	ld	c, (hl)
-	ld	b, #0x00
-	sub	a, c
-	ld	l, a
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	a, e
-	sbc	a, b
-	ld	h, a
-;	spillPairReg hl
-;	spillPairReg hl
-	push	bc
-	push	hl
-	ldhl	sp,	#17
-	ld	a, (hl+)
-	ld	e, a
-	ld	d, (hl)
-	push	de
-	call	__mulint
-	add	sp, #4
-	ldhl	sp,	#10
-	ld	a, e
-	ld	(hl+), a
-	ld	(hl), d
-	pop	bc
-	ld	a, (#_last_y)
-	ldhl	sp,	#11
-	ld	(hl+), a
-	xor	a, a
-	ld	(hl-), a
-	ld	a, (hl+)
-	ld	e, a
-	ld	d, (hl)
-	ldhl	sp,	#6
-	ld	a,	(hl+)
-	ld	h, (hl)
-	ld	l, a
-	ld	a, e
-	sub	a, l
-	ld	e, a
-	ld	a, d
-	sbc	a, h
-	ldhl	sp,	#14
-	ld	(hl-), a
-	ld	(hl), e
-	ldhl	sp,	#10
-	ld	e, (hl)
-	ld	d, #0x00
-	ld	a, e
-	sub	a, c
-	ld	c, a
-	ld	a, d
-	sbc	a, b
-	ld	b, a
-	push	bc
-	ldhl	sp,	#15
-	ld	a, (hl+)
-	ld	e, a
-	ld	d, (hl)
-	push	de
-	call	__mulint
-	add	sp, #4
-	ld	c, e
-	ld	b, d
-	ldhl	sp,	#8
-	ld	a, c
-	sub	a, (hl)
-	inc	hl
-	ld	a, b
-	sbc	a, (hl)
-	ld	a, b
-	ld	d, a
-	bit	7, (hl)
-	jr	Z, 00277$
+	bit	7, e
+	jr	Z, 00321$
 	bit	7, d
-	jr	NZ, 00278$
+	jr	NZ, 00322$
 	cp	a, a
-	jr	00278$
-00277$:
+	jr	00322$
+00321$:
 	bit	7, d
-	jr	Z, 00278$
+	jr	Z, 00322$
 	scf
-00278$:
+00322$:
 	jr	NC, 00120$
-	C$player.c$485$5_2$330	= .
-	.globl	C$player.c$485$5_2$330
-;src/player.c:485: player_x = r->x - 1;
-	ldhl	sp,#2
+;src/player.c:487: player_x = (uint16_t)PX_TO_SUB(r->x - 1);
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	dec	a
-	ld	(#_player_x),a
-	C$player.c$486$5_2$330	= .
-	.globl	C$player.c$486$5_2$330
-;src/player.c:486: x_speed = 0;
-	ld	hl, #_x_speed
-	ld	(hl), #0x00
+	ld	b, #0x00
+	ld	c, a
+	dec	bc
+	ld	b, c
+	ld	c, #0x00
+	ld	hl, #_player_x
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
 	jp	00131$
 00120$:
-	C$player.c$489$5_2$331	= .
-	.globl	C$player.c$489$5_2$331
-;src/player.c:489: player_y = r->y - r->size_y - 1;
-	ldhl	sp,	#5
+;src/player.c:491: player_y = r->y - r->size_y - 1;
+	ldhl	sp,	#4
 	ld	a, (hl)
 	dec	a
 	ld	(#_player_y),a
-	C$player.c$490$5_2$331	= .
-	.globl	C$player.c$490$5_2$331
-;src/player.c:490: is_grounded = true;
+;src/player.c:492: is_grounded = true;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x01
-	C$player.c$491$5_2$331	= .
-	.globl	C$player.c$491$5_2$331
-;src/player.c:491: current_coyote_frames = 0;
+;src/player.c:493: current_coyote_frames = 0;
 	ld	hl, #_current_coyote_frames
 	ld	(hl), #0x00
-	C$player.c$492$5_2$331	= .
-	.globl	C$player.c$492$5_2$331
-;src/player.c:492: y_speed = 0;
+;src/player.c:494: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-	C$player.c$494$4_2$325	= .
-	.globl	C$player.c$494$4_2$325
-;src/player.c:494: break;
+;src/player.c:496: break;
 	jp	00131$
-	C$player.c$496$4_2$325	= .
-	.globl	C$player.c$496$4_2$325
-;src/player.c:496: case LEFT_DOWN: // LEFT - DOWN
+;src/player.c:498: case LEFT_DOWN: // LEFT - DOWN
 00122$:
-	C$player.c$497$4_2$325	= .
-	.globl	C$player.c$497$4_2$325
-;src/player.c:497: rx = r->x;
-	ldhl	sp,#2
+;src/player.c:499: rx = r->x;
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	ldhl	sp,	#12
-	C$player.c$498$4_2$325	= .
-	.globl	C$player.c$498$4_2$325
-;src/player.c:498: ry = r->y;
+	ldhl	sp,	#13
+;src/player.c:500: ry = r->y;
 	ld	(hl+), a
 	ld	a, (hl+)
 	ld	e, a
@@ -3369,12 +3107,10 @@ _check_collisions:
 	ld	a, (de)
 	ld	(hl), a
 	ld	c, (hl)
-	C$player.c$499$4_2$325	= .
-	.globl	C$player.c$499$4_2$325
-;src/player.c:499: if((ry-player_y)*(last_x - player_x) < (last_y - player_y)*(rx-player_x)){
+;src/player.c:501: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) < (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
 	ld	b, #0x00
 	ld	a, (#_player_y)
-	ldhl	sp,	#4
+	ldhl	sp,	#3
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl-), a
@@ -3386,46 +3122,47 @@ _check_collisions:
 	ld	e, a
 	ld	a, b
 	sbc	a, d
-	ldhl	sp,	#11
+	ldhl	sp,	#12
 	ld	(hl-), a
 	ld	(hl), e
-	ld	a, (#_last_x)
-	ld	e, #0x00
-	ld	hl, #_player_x
-	ld	c, (hl)
+	ld	a, (#_last_x + 1)
 	ld	b, #0x00
-	sub	a, c
-	ld	l, a
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	a, e
-	sbc	a, b
+	ld	hl, #_player_x + 1
+	ld	c, (hl)
+	ldhl	sp,	#5
+	ld	(hl), c
+	inc	hl
+	ld	(hl), #0x00
+	ld	e, a
+	ld	d, b
+	ld	a, (hl-)
+	ld	l, (hl)
 	ld	h, a
-;	spillPairReg hl
-;	spillPairReg hl
-	push	bc
-	push	hl
-	ldhl	sp,	#14
+	ld	a, e
+	sub	a, l
+	ld	e, a
+	ld	a, d
+	sbc	a, h
+	ld	b, a
+	ld	c, e
+	ldhl	sp,	#11
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	push	de
 	call	__mulint
-	add	sp, #4
-	ldhl	sp,	#8
-	ld	a, e
+	ldhl	sp,	#7
+	ld	a, c
 	ld	(hl+), a
-	ld	(hl), d
-	pop	bc
+	ld	(hl), b
 	ld	a, (#_last_y)
-	ldhl	sp,	#8
+	ldhl	sp,	#9
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl-), a
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	ldhl	sp,	#4
+	ldhl	sp,	#3
 	ld	a,	(hl+)
 	ld	h, (hl)
 	ld	l, a
@@ -3434,113 +3171,97 @@ _check_collisions:
 	ld	e, a
 	ld	a, d
 	sbc	a, h
-	ldhl	sp,	#11
+	ldhl	sp,	#12
 	ld	(hl-), a
 	ld	a, e
 	ld	(hl+), a
 	inc	hl
-	ld	a, (hl-)
-	dec	hl
-	ld	e, a
-	ld	d, #0x00
-	ld	a, e
-	sub	a, c
-	ld	c, a
-	ld	a, d
-	sbc	a, b
-	ld	b, a
-	push	bc
+	ld	c, (hl)
+	ld	b, #0x00
+	ldhl	sp,#5
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
-	push	de
-	call	__mulint
-	add	sp, #4
+	ld	a, c
+	sub	a, e
+	ld	e, a
+	ld	a, b
+	sbc	a, d
+	ld	b, a
 	ld	c, e
-	ld	b, d
-	ldhl	sp,	#6
+	ldhl	sp,	#11
+	ld	a, (hl+)
+	ld	e, a
+	ld	d, (hl)
+	call	__mulint
+	ldhl	sp,	#7
 	ld	a, (hl+)
 	sub	a, c
 	ld	a, (hl)
 	sbc	a, b
 	ld	d, (hl)
 	ld	a, b
-	bit	7,a
-	jr	Z, 00279$
+	ld	e, a
+	bit	7, e
+	jr	Z, 00323$
 	bit	7, d
-	jr	NZ, 00280$
+	jr	NZ, 00324$
 	cp	a, a
-	jr	00280$
-00279$:
+	jr	00324$
+00323$:
 	bit	7, d
-	jr	Z, 00280$
+	jr	Z, 00324$
 	scf
-00280$:
+00324$:
 	jr	NC, 00124$
-	C$player.c$501$5_2$332	= .
-	.globl	C$player.c$501$5_2$332
-;src/player.c:501: player_x = r->x - 1;
-	ldhl	sp,#2
+;src/player.c:503: player_x = (uint16_t)PX_TO_SUB(r->x - 1);
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	dec	a
-	ld	(#_player_x),a
-	C$player.c$502$5_2$332	= .
-	.globl	C$player.c$502$5_2$332
-;src/player.c:502: x_speed = 0;
-	ld	hl, #_x_speed
-	ld	(hl), #0x00
+	ld	b, #0x00
+	ld	c, a
+	dec	bc
+	ld	b, c
+	ld	c, #0x00
+	ld	hl, #_player_x
+	ld	a, c
+	ld	(hl+), a
+	ld	(hl), b
 	jr	00131$
 00124$:
-	C$player.c$505$5_2$333	= .
-	.globl	C$player.c$505$5_2$333
-;src/player.c:505: player_y = r->y + 1;
-	ldhl	sp,	#14
+;src/player.c:507: player_y = r->y + 1;
+	ldhl	sp,	#15
 	ld	a, (hl)
 	inc	a
 	ld	(#_player_y),a
-	C$player.c$506$5_2$333	= .
-	.globl	C$player.c$506$5_2$333
-;src/player.c:506: y_speed = 0;
+;src/player.c:508: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-	C$player.c$509$4_2$325	= .
-	.globl	C$player.c$509$4_2$325
-;src/player.c:509: break;
+;src/player.c:511: break;
 	jr	00131$
-	C$player.c$511$4_2$325	= .
-	.globl	C$player.c$511$4_2$325
-;src/player.c:511: case LEFT_CENTER: // LEFT - CENTER
+;src/player.c:513: case LEFT_CENTER: // LEFT - CENTER
 00126$:
-	C$player.c$512$4_2$325	= .
-	.globl	C$player.c$512$4_2$325
-;src/player.c:512: player_x = r->x - 1;
-	ldhl	sp,#2
+;src/player.c:514: player_x = (uint16_t)PX_TO_SUB(r->x - 1);
+	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
-	dec	a
-	ld	(#_player_x),a
-	C$player.c$513$4_2$325	= .
-	.globl	C$player.c$513$4_2$325
-;src/player.c:513: x_speed = 0;
-	ld	hl, #_x_speed
-	ld	(hl), #0x00
-	C$player.c$514$4_2$325	= .
-	.globl	C$player.c$514$4_2$325
-;src/player.c:514: break;
+	ld	b, #0x00
+	ld	c, a
+	dec	bc
+	xor	a, a
+	ld	hl, #_player_x
+	ld	(hl+), a
+	ld	(hl), c
+;src/player.c:516: break;
 	jr	00131$
-	C$player.c$516$4_2$325	= .
-	.globl	C$player.c$516$4_2$325
-;src/player.c:516: case CENTER_UP: // CENTER - UP
+;src/player.c:518: case CENTER_UP: // CENTER - UP
 00127$:
-	C$player.c$517$4_2$325	= .
-	.globl	C$player.c$517$4_2$325
-;src/player.c:517: player_y = r->y - r->size_y - 1;
-	ldhl	sp,#13
+;src/player.c:519: player_y = r->y - r->size_y - 1;
+	ldhl	sp,#14
 	ld	a, (hl+)
 	ld	e, a
 	ld	a, (hl-)
@@ -3558,79 +3279,49 @@ _check_collisions:
 	sub	a, c
 	dec	a
 	ld	(#_player_y),a
-	C$player.c$518$4_2$325	= .
-	.globl	C$player.c$518$4_2$325
-;src/player.c:518: is_grounded = true;
+;src/player.c:520: is_grounded = true;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x01
-	C$player.c$519$4_2$325	= .
-	.globl	C$player.c$519$4_2$325
-;src/player.c:519: current_coyote_frames = 0;
+;src/player.c:521: current_coyote_frames = 0;
 	ld	hl, #_current_coyote_frames
 	ld	(hl), #0x00
-	C$player.c$520$4_2$325	= .
-	.globl	C$player.c$520$4_2$325
-;src/player.c:520: y_speed = 0;
+;src/player.c:522: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-	C$player.c$521$4_2$325	= .
-	.globl	C$player.c$521$4_2$325
-;src/player.c:521: break;
+;src/player.c:523: break;
 	jr	00131$
-	C$player.c$523$4_2$325	= .
-	.globl	C$player.c$523$4_2$325
-;src/player.c:523: case CENTER_DOWN: // CENTER - DOWN
+;src/player.c:525: case CENTER_DOWN: // CENTER - DOWN
 00128$:
-	C$player.c$524$4_2$325	= .
-	.globl	C$player.c$524$4_2$325
-;src/player.c:524: player_y = r->y + 1;
-	ldhl	sp,#13
+;src/player.c:526: player_y = r->y + 1;
+	ldhl	sp,#14
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
 	inc	a
 	ld	(#_player_y),a
-	C$player.c$525$4_2$325	= .
-	.globl	C$player.c$525$4_2$325
-;src/player.c:525: y_speed = 0;
+;src/player.c:527: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-	C$player.c$531$2_0$319	= .
-	.globl	C$player.c$531$2_0$319
-;src/player.c:531: }
+;src/player.c:533: }
 00131$:
-	C$player.c$420$2_0$319	= .
-	.globl	C$player.c$420$2_0$319
-;src/player.c:420: for(i=0; i<8; i++){
+;src/player.c:422: for(i=0; i<8; i++){
 	ld	hl, #_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x08
 	jp	C, 00133$
-	C$player.c$533$2_0$319	= .
-	.globl	C$player.c$533$2_0$319
-;src/player.c:533: }
-	add	sp, #15
-	C$player.c$533$2_0$319	= .
-	.globl	C$player.c$533$2_0$319
-	XFplayer$check_collisions$0$0	= .
-	.globl	XFplayer$check_collisions$0$0
+;src/player.c:535: }
+	add	sp, #16
 	ret
-	Fplayer$update_score$0$0	= .
-	.globl	Fplayer$update_score$0$0
-	C$player.c$535$2_0$335	= .
-	.globl	C$player.c$535$2_0$335
-;src/player.c:535: static void update_score(void){
+;src/player.c:537: static void update_score(void){
 ;	---------------------------------
 ; Function update_score
 ; ---------------------------------
 _update_score:
 	dec	sp
 	dec	sp
-	C$player.c$537$1_0$335	= .
-	.globl	C$player.c$537$1_0$335
-;src/player.c:537: if((PREV_PLAYER_FLOOR != PLAYER_FLOOR) && PLAYER_FLOOR == ((highest_visited_floor - 1) & 0x03)){
+;src/player.c:539: if((PREV_PLAYER_FLOOR != PLAYER_FLOOR) && PLAYER_FLOOR == ((highest_visited_floor - 1) & 0x03)){
 	ld	a, (#_last_y)
 	rlca
 	rlca
@@ -3642,59 +3333,49 @@ _update_score:
 	rlca
 	rlca
 	and	a, #0x03
-	ld	c, a
-	C$player.c$540$1_0$335	= .
-	.globl	C$player.c$540$1_0$335
-;src/player.c:540: max_player_y = (uint8_t)((PREV_PLAYER_FLOOR << 6) - player_y);
+	ld	e, a
+;src/player.c:542: max_player_y = (uint8_t)((PREV_PLAYER_FLOOR << 6) - player_y);
 	ld	a, (hl)
 	ldhl	sp,	#1
-	C$player.c$537$1_0$335	= .
-	.globl	C$player.c$537$1_0$335
-;src/player.c:537: if((PREV_PLAYER_FLOOR != PLAYER_FLOOR) && PLAYER_FLOOR == ((highest_visited_floor - 1) & 0x03)){
+;src/player.c:539: if((PREV_PLAYER_FLOOR != PLAYER_FLOOR) && PLAYER_FLOOR == ((highest_visited_floor - 1) & 0x03)){
 	ld	(hl-), a
 	ld	a, (hl)
-	sub	a, c
+	sub	a, e
 	jr	Z, 00102$
 	ld	hl, #_highest_visited_floor
-	ld	e, (hl)
-	ld	d, #0x00
-	dec	de
-	ld	a, e
-	and	a, #0x03
-	ld	e, a
-	ld	d, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	a, c
+	ld	c, (hl)
 	ld	b, #0x00
-	sub	a, e
+	dec	bc
+	ld	a, c
+	and	a, #0x03
+	ld	c, a
+	ld	b, #0x00
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	a, e
+	ld	d, #0x00
+	sub	a, c
 	jr	NZ, 00102$
-	ld	a, b
-	sub	a, d
+	ld	a, d
+	sub	a, b
 	jr	NZ, 00102$
-	C$player.c$538$2_0$336	= .
-	.globl	C$player.c$538$2_0$336
-;src/player.c:538: score += 4;
+;src/player.c:540: score += 4;
 	ld	hl, #_score
 	ld	a, (hl+)
-	ld	e, a
+	ld	c, a
 	ld	a, (hl-)
-	ld	d, a
-	inc	de
-	inc	de
-	inc	de
-	inc	de
-	ld	a, e
+	ld	b, a
+	inc	bc
+	inc	bc
+	inc	bc
+	inc	bc
+	ld	a, c
 	ld	(hl+), a
-	ld	(hl), d
-	C$player.c$539$2_0$336	= .
-	.globl	C$player.c$539$2_0$336
-;src/player.c:539: highest_visited_floor = PLAYER_FLOOR;
+	ld	(hl), b
+;src/player.c:541: highest_visited_floor = PLAYER_FLOOR;
 	ld	hl, #_highest_visited_floor
-	ld	(hl), c
-	C$player.c$540$2_0$336	= .
-	.globl	C$player.c$540$2_0$336
-;src/player.c:540: max_player_y = (uint8_t)((PREV_PLAYER_FLOOR << 6) - player_y);
+	ld	(hl), e
+;src/player.c:542: max_player_y = (uint8_t)((PREV_PLAYER_FLOOR << 6) - player_y);
 	ldhl	sp,	#0
 	ld	a, (hl+)
 	rrca
@@ -3702,21 +3383,15 @@ _update_score:
 	and	a, #0xc0
 	sub	a, (hl)
 	ld	(#_max_player_y),a
-	C$player.c$541$2_0$336	= .
-	.globl	C$player.c$541$2_0$336
-;src/player.c:541: return;
+;src/player.c:543: return;
 	jr	00108$
 00102$:
-	C$player.c$544$1_0$335	= .
-	.globl	C$player.c$544$1_0$335
-;src/player.c:544: if(PLAYER_FLOOR != highest_visited_floor) return;
+;src/player.c:546: if(PLAYER_FLOOR != highest_visited_floor) return;
 	ld	a, (#_highest_visited_floor)
-	sub	a, c
+	sub	a, e
 	jr	NZ, 00108$
-	C$player.c$546$1_0$335	= .
-	.globl	C$player.c$546$1_0$335
-;src/player.c:546: test_max_player_y = (uint8_t)((((PLAYER_FLOOR + 1) & 0x03) << 6) - player_y);
-	ld	a, c
+;src/player.c:548: test_max_player_y = (uint8_t)((((PLAYER_FLOOR + 1) & 0x03) << 6) - player_y);
+	ld	a, e
 	inc	a
 	and	a, #0x03
 	rrca
@@ -3725,229 +3400,190 @@ _update_score:
 	ldhl	sp,	#1
 	sub	a, (hl)
 	ld	(#_test_max_player_y),a
-	C$player.c$547$1_0$335	= .
-	.globl	C$player.c$547$1_0$335
-;src/player.c:547: if(max_player_y < test_max_player_y){
+;src/player.c:549: if(max_player_y < test_max_player_y){
 	ld	a, (#_max_player_y)
 	ld	hl, #_test_max_player_y
 	sub	a, (hl)
 	jr	NC, 00108$
-	C$player.c$548$2_0$337	= .
-	.globl	C$player.c$548$2_0$337
-;src/player.c:548: max_player_y = test_max_player_y;
+;src/player.c:550: max_player_y = test_max_player_y;
 	ld	a, (hl)
 	ld	(#_max_player_y),a
 00108$:
-	C$player.c$550$1_0$335	= .
-	.globl	C$player.c$550$1_0$335
-;src/player.c:550: }
+;src/player.c:552: }
 	inc	sp
 	inc	sp
-	C$player.c$550$1_0$335	= .
-	.globl	C$player.c$550$1_0$335
-	XFplayer$update_score$0$0	= .
-	.globl	XFplayer$update_score$0$0
 	ret
-	Fplayer$calculate_final_score$0$0	= .
-	.globl	Fplayer$calculate_final_score$0$0
-	C$player.c$552$1_0$339	= .
-	.globl	C$player.c$552$1_0$339
-;src/player.c:552: static void calculate_final_score(void){
+;src/player.c:554: static void calculate_final_score(void){
 ;	---------------------------------
 ; Function calculate_final_score
 ; ---------------------------------
 _calculate_final_score:
-	C$player.c$553$1_0$339	= .
-	.globl	C$player.c$553$1_0$339
-;src/player.c:553: score += (max_player_y >> 4);
+;src/player.c:555: score += (max_player_y >> 4);
 	ld	a, (#_max_player_y)
 	swap	a
 	and	a, #0x0f
+	ld	hl, #_score
+	ld	c, (hl)
+	inc	hl
+	ld	b, (hl)
+	dec	hl
+	ld	e, #0x00
+	add	a, c
 	ld	c, a
-	ld	b, #0x00
-	ld	hl, #_score
-	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	a, (_score + 1)
-	ld	h, a
-;	spillPairReg hl
-;	spillPairReg hl
-	add	hl, bc
-	ld	c, l
-	ld	a, h
-	ld	hl, #_score
+	ld	a, e
+	adc	a, b
 	ld	(hl), c
 	inc	hl
 	ld	(hl), a
-	C$player.c$554$1_0$339	= .
-	.globl	C$player.c$554$1_0$339
-;src/player.c:554: }
-	C$player.c$554$1_0$339	= .
-	.globl	C$player.c$554$1_0$339
-	XFplayer$calculate_final_score$0$0	= .
-	.globl	XFplayer$calculate_final_score$0$0
+;src/player.c:556: }
 	ret
-	Fplayer$point_vs_rect$0$0	= .
-	.globl	Fplayer$point_vs_rect$0$0
-	C$player.c$556$1_0$341	= .
-	.globl	C$player.c$556$1_0$341
-;src/player.c:556: static inline bool point_vs_rect(rect *r){
+;src/player.c:558: static inline bool point_vs_rect(rect *r){
 ;	---------------------------------
 ; Function point_vs_rect
 ; ---------------------------------
 _point_vs_rect:
-	add	sp, #-4
-	C$player.c$557$1_0$341	= .
-	.globl	C$player.c$557$1_0$341
-;src/player.c:557: return (player_x >= r->x && player_y <= r->y && player_x <= (r->x + r->size_x) && player_y >= (r->y - r->size_y));
+	add	sp, #-7
+	ld	c, e
+	ld	b, d
+;src/player.c:559: return ((uint8_t)SUB_TO_PX(player_x) >= r->x && player_y <= r->y && (uint8_t)SUB_TO_PX(player_x) <= (r->x + r->size_x) && player_y >= (r->y - r->size_y));
+	ld	a, (#_player_x + 1)
 	ldhl	sp,	#6
-	ld	a, (hl)
-	ldhl	sp,	#0
 	ld	(hl), a
-	ldhl	sp,	#7
+	ld	a, (bc)
+	ld	e, a
 	ld	a, (hl)
-	ldhl	sp,	#1
-	ld	(hl+), a
-	pop	de
-	push	de
-	ld	a, (de)
+	sub	a, e
+	jp	C, 00103$
+	ld	l, c
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, b
+;	spillPairReg hl
+;	spillPairReg hl
+	inc	hl
+	ld	a, (hl)
+	ldhl	sp,#2
 	ld	(hl), a
-	ld	a, (#_player_x)
-	ldhl	sp,	#2
+	ld	hl, #_player_y
 	sub	a, (hl)
 	jr	C, 00103$
+	ldhl	sp,	#0
+	ld	a, e
+	ld	(hl+), a
+	ld	(hl), #0x00
+	ld	l, c
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, b
+;	spillPairReg hl
+;	spillPairReg hl
 	inc	hl
-	pop	bc
-	push	bc
+	inc	hl
+	ld	e, (hl)
+	ld	d, #0x00
+	pop	hl
+	push	hl
+	add	hl, de
+	push	hl
+	ld	a, l
+	ldhl	sp,	#5
+	ld	(hl), a
+	pop	hl
+	ld	a, h
+	ldhl	sp,	#4
+	ld	(hl+), a
+	inc	hl
+	ld	a, (hl-)
+	ld	(hl+), a
+	ld	(hl), #0x00
+	ldhl	sp,	#3
+	ld	e, l
+	ld	d, h
+	ldhl	sp,	#5
+	ld	a, (de)
+	inc	de
+	sub	a, (hl)
+	inc	hl
+	ld	a, (de)
+	sbc	a, (hl)
+	ld	a, (de)
+	ld	d, a
+	bit	7, (hl)
+	jr	Z, 00131$
+	bit	7, d
+	jr	NZ, 00132$
+	cp	a, a
+	jr	00132$
+00131$:
+	bit	7, d
+	jr	Z, 00132$
+	scf
+00132$:
+	jr	C, 00103$
+	ldhl	sp,	#2
+	ld	e, (hl)
+	ld	d, #0x00
+	inc	bc
+	inc	bc
 	inc	bc
 	ld	a, (bc)
-	ld	(hl), a
-	ld	hl, #_player_y
-	sub	a, (hl)
-	jr	C, 00103$
-	ldhl	sp,	#2
-	ld	c, (hl)
-	ld	b, #0x00
-	pop	de
-	push	de
-	inc	de
-	inc	de
-	ld	a, (de)
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	l, a
-	add	hl, bc
-	push	hl
-	ld	hl, #_player_x
-	ld	c, (hl)
-	pop	hl
-	ld	b, #0x00
-	ld	e, b
-	ld	d, h
-	ld	a, l
-	sub	a, c
-	ld	a, h
-	sbc	a, b
-	bit	7, e
-	jr	Z, 00125$
-	bit	7, d
-	jr	NZ, 00126$
-	cp	a, a
-	jr	00126$
-00125$:
-	bit	7, d
-	jr	Z, 00126$
-	scf
-00126$:
-	jr	C, 00103$
-	ldhl	sp,	#3
-	ld	c, (hl)
-	ld	b, #0x00
-	pop	de
-	push	de
-	inc	de
-	inc	de
-	inc	de
-	ld	a, (de)
-	ld	e, a
-	ld	d, #0x00
-	ld	a, c
-	sub	a, e
 	ld	c, a
-	ld	a, b
-	sbc	a, d
-	ld	b, a
-	ld	hl, #_player_y
-	ld	l, (hl)
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	e, b
-	ld	d, h
-	ld	a, l
+	ld	b, #0x00
+	ld	a, e
 	sub	a, c
-	ld	a, h
+	ld	c, a
+	ld	a, d
 	sbc	a, b
-	bit	7, e
-	jr	Z, 00127$
+	ld	b, a
+	ld	a, (#_player_y)
+	ldhl	sp,	#5
+	ld	(hl+), a
+	xor	a, a
+	ld	(hl-), a
+	ld	a, (hl+)
+	sub	a, c
+	ld	a, (hl)
+	sbc	a, b
+	ld	d, (hl)
+	ld	a, b
+	bit	7,a
+	jr	Z, 00133$
 	bit	7, d
-	jr	NZ, 00128$
+	jr	NZ, 00134$
 	cp	a, a
-	jr	00128$
-00127$:
+	jr	00134$
+00133$:
 	bit	7, d
-	jr	Z, 00128$
+	jr	Z, 00134$
 	scf
-00128$:
+00134$:
 	jr	NC, 00104$
 00103$:
-	ld	e, #0x00
+	xor	a, a
 	jr	00105$
 00104$:
-	ld	e, #0x01
+	ld	a, #0x01
 00105$:
-	C$player.c$558$1_0$341	= .
-	.globl	C$player.c$558$1_0$341
-;src/player.c:558: }
-	add	sp, #4
-	C$player.c$558$1_0$341	= .
-	.globl	C$player.c$558$1_0$341
-	XFplayer$point_vs_rect$0$0	= .
-	.globl	XFplayer$point_vs_rect$0$0
+;src/player.c:560: }
+	add	sp, #7
 	ret
-	Fplayer$r_solid_function$0$0	= .
-	.globl	Fplayer$r_solid_function$0$0
-	C$player.c$564$1_0$343	= .
-	.globl	C$player.c$564$1_0$343
-;src/player.c:564: static bool r_solid_function(uint8_t epa){
+;src/player.c:566: static bool r_solid_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_solid_function
 ; ---------------------------------
 _r_solid_function:
 	dec	sp
 	dec	sp
-	C$player.c$565$1_0$343	= .
-	.globl	C$player.c$565$1_0$343
-;src/player.c:565: if(epa == CENTER_DOWN){
-	ldhl	sp,	#4
-	ld	a, (hl)
+;src/player.c:567: if(epa == CENTER_DOWN){
 	sub	a, #0x32
 	jp	NZ,00111$
-	C$player.c$568$3_0$344	= .
-	.globl	C$player.c$568$3_0$344
-;src/player.c:568: bool is_upper = i & 0x01 == 0x01;
+;src/player.c:570: bool is_upper = i & 0x01 == 0x01;
 	ld	a, (#_i)
 	and	a, #0x01
 	ld	c, a
 	ldhl	sp,	#0
 	ld	(hl), c
-	C$player.c$569$1_0$343	= .
-	.globl	C$player.c$569$1_0$343
-;src/player.c:569: component_at_r = is_upper ? map_components[PLAYER_FLOOR][i>>1].components >> 4 : map_components[PLAYER_FLOOR][i>>1].components & 0x0F;
+;src/player.c:571: component_at_r = is_upper ? map_components[PLAYER_FLOOR][i>>1].components >> 4 : map_components[PLAYER_FLOOR][i>>1].components & 0x0F;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3995,20 +3631,14 @@ _r_solid_function:
 	ld	a, (bc)
 	and	a, #0x0f
 00115$:
-	C$player.c$570$2_0$344	= .
-	.globl	C$player.c$570$2_0$344
-;src/player.c:570: if(component_at_r == 2){
+;src/player.c:572: if(component_at_r == 2){
 	sub	a, #0x02
 	jp	NZ,00111$
-	C$player.c$571$3_0$345	= .
-	.globl	C$player.c$571$3_0$345
-;src/player.c:571: if(is_upper){
+;src/player.c:573: if(is_upper){
 	ldhl	sp,	#0
 	bit	0, (hl)
 	jp	Z, 00106$
-	C$player.c$572$4_0$346	= .
-	.globl	C$player.c$572$4_0$346
-;src/player.c:572: if((map_components[PLAYER_FLOOR][i>>1].status >> 4) == 0){
+;src/player.c:574: if((map_components[PLAYER_FLOOR][i>>1].status >> 4) == 0){
 	inc	hl
 	ld	bc, #_map_components+0
 	ld	a, e
@@ -4027,15 +3657,11 @@ _r_solid_function:
 	swap	a
 	and	a,#0x0f
 	jr	NZ, 00102$
-	C$player.c$573$5_0$347	= .
-	.globl	C$player.c$573$5_0$347
-;src/player.c:573: play_bump_sfx();
+;src/player.c:575: play_bump_sfx();
 	push	bc
 	call	_play_bump_sfx
 	pop	bc
-	C$player.c$574$5_0$347	= .
-	.globl	C$player.c$574$5_0$347
-;src/player.c:574: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 1, 4, 1, top_map_02_broken);
+;src/player.c:576: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 1, 4, 1, top_map_02_broken);
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4065,9 +3691,7 @@ _r_solid_function:
 	inc	sp
 	call	_set_bkg_tiles
 	add	sp, #6
-	C$player.c$575$5_0$347	= .
-	.globl	C$player.c$575$5_0$347
-;src/player.c:575: map_components[PLAYER_FLOOR][i>>1].status |= 0x10;
+;src/player.c:577: map_components[PLAYER_FLOOR][i>>1].status |= 0x10;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4090,22 +3714,16 @@ _r_solid_function:
 	add	hl, bc
 	inc	hl
 	set	4, (hl)
-	C$player.c$576$5_0$347	= .
-	.globl	C$player.c$576$5_0$347
-;src/player.c:576: return false;
-	ld	e, #0x00
+;src/player.c:578: return false;
+	xor	a, a
 	jp	00112$
 00102$:
-	C$player.c$578$4_0$346	= .
-	.globl	C$player.c$578$4_0$346
-;src/player.c:578: instanciate_brick_particles();
+;src/player.c:580: instanciate_brick_particles();
 	push	bc
 	call	_instanciate_brick_particles
 	call	_play_break_sfx
 	pop	bc
-	C$player.c$580$4_0$346	= .
-	.globl	C$player.c$580$4_0$346
-;src/player.c:580: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 1, 4, 1, top_map_00);
+;src/player.c:582: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 1, 4, 1, top_map_00);
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4135,9 +3753,7 @@ _r_solid_function:
 	inc	sp
 	call	_set_bkg_tiles
 	add	sp, #6
-	C$player.c$581$4_0$346	= .
-	.globl	C$player.c$581$4_0$346
-;src/player.c:581: map_components[PLAYER_FLOOR][i>>1].components = map_components[PLAYER_FLOOR][i>>1].components & 0x0F;
+;src/player.c:583: map_components[PLAYER_FLOOR][i>>1].components = map_components[PLAYER_FLOOR][i>>1].components & 0x0F;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4161,9 +3777,7 @@ _r_solid_function:
 	ld	a, (hl)
 	and	a, #0x0f
 	ld	(hl), a
-	C$player.c$582$4_0$346	= .
-	.globl	C$player.c$582$4_0$346
-;src/player.c:582: map_components[PLAYER_FLOOR][i>>1].status = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
+;src/player.c:584: map_components[PLAYER_FLOOR][i>>1].status = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4188,9 +3802,7 @@ _r_solid_function:
 	ld	a, (hl)
 	and	a, #0x0f
 	ld	(hl), a
-	C$player.c$583$4_0$346	= .
-	.globl	C$player.c$583$4_0$346
-;src/player.c:583: rect_list[PLAYER_FLOOR][i].type = INACTIVE;
+;src/player.c:585: rect_list[PLAYER_FLOOR][i].type = INACTIVE;
 	ld	bc, #_rect_list+0
 	ld	a, (#_player_y)
 	rlca
@@ -4222,9 +3834,7 @@ _r_solid_function:
 	ld	(hl), #0x02
 	jp	00111$
 00106$:
-	C$player.c$585$4_0$348	= .
-	.globl	C$player.c$585$4_0$348
-;src/player.c:585: if((map_components[PLAYER_FLOOR][i>>1].status & 0x0F) == 0){
+;src/player.c:587: if((map_components[PLAYER_FLOOR][i>>1].status & 0x0F) == 0){
 	ld	bc, #_map_components+0
 	ld	a, e
 	add	a, c
@@ -4242,15 +3852,11 @@ _r_solid_function:
 	ld	a, (de)
 	and	a, #0x0f
 	jr	NZ, 00104$
-	C$player.c$586$5_0$349	= .
-	.globl	C$player.c$586$5_0$349
-;src/player.c:586: play_bump_sfx();
+;src/player.c:588: play_bump_sfx();
 	push	bc
 	call	_play_bump_sfx
 	pop	bc
-	C$player.c$587$5_0$349	= .
-	.globl	C$player.c$587$5_0$349
-;src/player.c:587: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 5, 4, 2, bot_map_02_broken);
+;src/player.c:589: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 5, 4, 2, bot_map_02_broken);
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4280,9 +3886,7 @@ _r_solid_function:
 	inc	sp
 	call	_set_bkg_tiles
 	add	sp, #6
-	C$player.c$588$5_0$349	= .
-	.globl	C$player.c$588$5_0$349
-;src/player.c:588: map_components[PLAYER_FLOOR][i>>1].status |= 0x01;
+;src/player.c:590: map_components[PLAYER_FLOOR][i>>1].status |= 0x01;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4305,22 +3909,16 @@ _r_solid_function:
 	add	hl, bc
 	inc	hl
 	set	0, (hl)
-	C$player.c$589$5_0$349	= .
-	.globl	C$player.c$589$5_0$349
-;src/player.c:589: return false;
-	ld	e, #0x00
+;src/player.c:591: return false;
+	xor	a, a
 	jp	00112$
 00104$:
-	C$player.c$591$4_0$348	= .
-	.globl	C$player.c$591$4_0$348
-;src/player.c:591: instanciate_brick_particles();
+;src/player.c:593: instanciate_brick_particles();
 	push	bc
 	call	_instanciate_brick_particles
 	call	_play_break_sfx
 	pop	bc
-	C$player.c$593$4_0$348	= .
-	.globl	C$player.c$593$4_0$348
-;src/player.c:593: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 5, 4, 2, bot_map_00);
+;src/player.c:595: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 5, 4, 2, bot_map_00);
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4350,9 +3948,7 @@ _r_solid_function:
 	inc	sp
 	call	_set_bkg_tiles
 	add	sp, #6
-	C$player.c$594$4_0$348	= .
-	.globl	C$player.c$594$4_0$348
-;src/player.c:594: map_components[PLAYER_FLOOR][i>>1].components = map_components[PLAYER_FLOOR][i>>1].components & 0xF0;
+;src/player.c:596: map_components[PLAYER_FLOOR][i>>1].components = map_components[PLAYER_FLOOR][i>>1].components & 0xF0;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4376,9 +3972,7 @@ _r_solid_function:
 	ld	a, (hl)
 	and	a, #0xf0
 	ld	(hl), a
-	C$player.c$595$4_0$348	= .
-	.globl	C$player.c$595$4_0$348
-;src/player.c:595: map_components[PLAYER_FLOOR][i>>1].status = map_components[PLAYER_FLOOR][i>>1].status & 0xF0;
+;src/player.c:597: map_components[PLAYER_FLOOR][i>>1].status = map_components[PLAYER_FLOOR][i>>1].status & 0xF0;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4403,9 +3997,7 @@ _r_solid_function:
 	ld	a, (hl)
 	and	a, #0xf0
 	ld	(hl), a
-	C$player.c$596$4_0$348	= .
-	.globl	C$player.c$596$4_0$348
-;src/player.c:596: rect_list[PLAYER_FLOOR][i].type = INACTIVE;
+;src/player.c:598: rect_list[PLAYER_FLOOR][i].type = INACTIVE;
 	ld	bc, #_rect_list+0
 	ld	a, (#_player_y)
 	rlca
@@ -4436,35 +4028,19 @@ _r_solid_function:
 	add	hl, bc
 	ld	(hl), #0x02
 00111$:
-	C$player.c$602$1_0$343	= .
-	.globl	C$player.c$602$1_0$343
-;src/player.c:602: return false;
-	ld	e, #0x00
+;src/player.c:604: return false;
+	xor	a, a
 00112$:
-	C$player.c$603$1_0$343	= .
-	.globl	C$player.c$603$1_0$343
-;src/player.c:603: }
+;src/player.c:605: }
 	inc	sp
 	inc	sp
-	C$player.c$603$1_0$343	= .
-	.globl	C$player.c$603$1_0$343
-	XFplayer$r_solid_function$0$0	= .
-	.globl	XFplayer$r_solid_function$0$0
 	ret
-	Fplayer$r_traversable_function$0$0	= .
-	.globl	Fplayer$r_traversable_function$0$0
-	C$player.c$604$1_0$351	= .
-	.globl	C$player.c$604$1_0$351
-;src/player.c:604: static bool r_traversable_function(uint8_t epa){
+;src/player.c:606: static bool r_traversable_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_traversable_function
 ; ---------------------------------
 _r_traversable_function:
-	C$player.c$605$1_0$351	= .
-	.globl	C$player.c$605$1_0$351
-;src/player.c:605: return (bool)(epa != CENTER_UP || (joy & J_DOWN));
-	ldhl	sp,	#2
-	ld	a, (hl)
+;src/player.c:607: return (bool)(epa != CENTER_UP || (joy & J_DOWN));
 	sub	a, #0x31
 	jr	NZ, 00104$
 	ld	a, (#_joy)
@@ -4472,58 +4048,30 @@ _r_traversable_function:
 	rrca
 	rrca
 	and	a,#0x01
-	jr	NZ, 00104$
-	ld	e,a
-	ret
+	ret	Z
 00104$:
-	ld	e, #0x01
-	C$player.c$606$1_0$351	= .
-	.globl	C$player.c$606$1_0$351
-;src/player.c:606: }
-	C$player.c$606$1_0$351	= .
-	.globl	C$player.c$606$1_0$351
-	XFplayer$r_traversable_function$0$0	= .
-	.globl	XFplayer$r_traversable_function$0$0
+	ld	a, #0x01
+;src/player.c:608: }
 	ret
-	Fplayer$r_inactive_function$0$0	= .
-	.globl	Fplayer$r_inactive_function$0$0
-	C$player.c$607$1_0$353	= .
-	.globl	C$player.c$607$1_0$353
-;src/player.c:607: static bool r_inactive_function(uint8_t epa){
+;src/player.c:609: static bool r_inactive_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_inactive_function
 ; ---------------------------------
 _r_inactive_function:
-	C$player.c$608$1_0$353	= .
-	.globl	C$player.c$608$1_0$353
-;src/player.c:608: return true;
-	ld	e, #0x01
-	C$player.c$609$1_0$353	= .
-	.globl	C$player.c$609$1_0$353
-;src/player.c:609: }
-	C$player.c$609$1_0$353	= .
-	.globl	C$player.c$609$1_0$353
-	XFplayer$r_inactive_function$0$0	= .
-	.globl	XFplayer$r_inactive_function$0$0
+;src/player.c:610: return true;
+	ld	a, #0x01
+;src/player.c:611: }
 	ret
-	Fplayer$r_bouncy_function$0$0	= .
-	.globl	Fplayer$r_bouncy_function$0$0
-	C$player.c$610$1_0$355	= .
-	.globl	C$player.c$610$1_0$355
-;src/player.c:610: static bool r_bouncy_function(uint8_t epa){
+;src/player.c:612: static bool r_bouncy_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_bouncy_function
 ; ---------------------------------
 _r_bouncy_function:
-	C$player.c$611$1_0$355	= .
-	.globl	C$player.c$611$1_0$355
-;src/player.c:611: if(epa == CENTER_UP){
-	ldhl	sp,	#2
-	ld	a, (hl)
+;src/player.c:613: if(epa == CENTER_UP){
 	sub	a, #0x31
 	jp	NZ,00109$
-;src/player.c:409: if(current_state == state) {return;}
-;src/player.c:410: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
+;src/player.c:411: if(current_state == state) {return;}
+;src/player.c:412: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
 	ld	a,(#_current_state)
 	cp	a,#0x02
 	jr	Z, 00114$
@@ -4531,50 +4079,38 @@ _r_bouncy_function:
 	jr	NZ, 00113$
 	call	_instanciate_collision_puffs
 00113$:
-;src/player.c:411: frame_counter = 0;
+;src/player.c:413: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-;src/player.c:412: current_frame = 0;
+;src/player.c:414: current_frame = 0;
 	ld	hl, #_current_frame
 	ld	(hl), #0x00
-;src/player.c:413: current_state = state;
+;src/player.c:415: current_state = state;
 	ld	hl, #_current_state
 	ld	(hl), #0x02
-;src/player.c:612: switch_state(PLAYER_STATE_JUMPING);
+;src/player.c:614: switch_state(PLAYER_STATE_JUMPING);
 00114$:
-	C$player.c$613$2_0$356	= .
-	.globl	C$player.c$613$2_0$356
-;src/player.c:613: play_boing_sfx();
+;src/player.c:615: play_boing_sfx();
 	call	_play_boing_sfx
-	C$player.c$614$2_0$356	= .
-	.globl	C$player.c$614$2_0$356
-;src/player.c:614: y_speed = (int8_t)(-45);
+;src/player.c:616: y_speed = (int8_t)(-45);
 	ld	hl, #_y_speed
 	ld	(hl), #0xd3
-	C$player.c$615$2_0$356	= .
-	.globl	C$player.c$615$2_0$356
-;src/player.c:615: is_grounded = false;
+;src/player.c:617: is_grounded = false;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x00
-	C$player.c$616$2_0$356	= .
-	.globl	C$player.c$616$2_0$356
-;src/player.c:616: is_jumping = true;
+;src/player.c:618: is_jumping = true;
 	ld	hl, #_is_jumping
 	ld	(hl), #0x01
-	C$player.c$620$2_1$357	= .
-	.globl	C$player.c$620$2_1$357
-;src/player.c:620: if(i & 0x01 == 0x01) {return true;}
+;src/player.c:622: if(i & 0x01 == 0x01) {return true;}
 	push	hl
 	ld	hl, #_i
 	bit	0, (hl)
 	pop	hl
 	jr	Z, 00102$
-	ld	e, #0x01
+	ld	a, #0x01
 	ret
 00102$:
-	C$player.c$622$2_1$357	= .
-	.globl	C$player.c$622$2_1$357
-;src/player.c:622: status_of_rack = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
+;src/player.c:624: status_of_rack = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4603,70 +4139,43 @@ _r_bouncy_function:
 	inc	hl
 	ld	a, (hl)
 	and	a, #0x0f
-	C$player.c$631$2_1$357	= .
-	.globl	C$player.c$631$2_1$357
-;src/player.c:631: if(status_of_rack == 0x00){
+;src/player.c:633: if(status_of_rack == 0x00){
 	ld	c, a
 	or	a, a
 	jr	NZ, 00104$
-	C$player.c$632$3_1$359	= .
-	.globl	C$player.c$632$3_1$359
-;src/player.c:632: return true;
-	ld	e, #0x01
+;src/player.c:634: return true;
+	ld	a, #0x01
 	ret
 00104$:
-	C$player.c$634$2_1$357	= .
-	.globl	C$player.c$634$2_1$357
-;src/player.c:634: if((status_of_rack & 0b00001100) == 0b00001100){
+;src/player.c:636: if((status_of_rack & 0b00001100) == 0b00001100){
 	ld	a, c
 	and	a, #0x0c
-	ld	e, a
-	ld	d, #0x00
-	C$player.c$637$1_0$355	= .
-	.globl	C$player.c$637$1_0$355
-;src/player.c:637: make_cloth_fall(status_of_rack & 0x03);
+;src/player.c:639: make_cloth_fall(status_of_rack & 0x03);
+	push	af
 	ld	a, c
 	and	a, #0x03
 	ld	b, a
-	C$player.c$634$2_1$357	= .
-	.globl	C$player.c$634$2_1$357
-;src/player.c:634: if((status_of_rack & 0b00001100) == 0b00001100){
-	ld	a, e
+	pop	af
+;src/player.c:636: if((status_of_rack & 0b00001100) == 0b00001100){
 	sub	a, #0x0c
-	or	a, d
 	jr	NZ, 00106$
-	C$player.c$637$3_1$360	= .
-	.globl	C$player.c$637$3_1$360
-;src/player.c:637: make_cloth_fall(status_of_rack & 0x03);
+;src/player.c:639: make_cloth_fall(status_of_rack & 0x03);
 	push	bc
-	push	bc
-	inc	sp
+	ld	a, b
 	call	_make_cloth_fall
-	inc	sp
 	pop	bc
-	C$player.c$639$3_1$360	= .
-	.globl	C$player.c$639$3_1$360
-;src/player.c:639: make_cloth_fall((status_of_rack + 1) & 0x03);
+;src/player.c:641: make_cloth_fall((status_of_rack + 1) & 0x03);
 	ld	a, c
 	inc	a
 	and	a, #0x03
-	push	af
-	inc	sp
 	call	_make_cloth_fall
-	inc	sp
 	jr	00107$
 00106$:
-	C$player.c$643$3_1$361	= .
-	.globl	C$player.c$643$3_1$361
-;src/player.c:643: make_cloth_fall(status_of_rack & 0x03);
-	push	bc
-	inc	sp
+;src/player.c:645: make_cloth_fall(status_of_rack & 0x03);
+	ld	a, b
 	call	_make_cloth_fall
-	inc	sp
 00107$:
-	C$player.c$645$2_1$357	= .
-	.globl	C$player.c$645$2_1$357
-;src/player.c:645: map_components[PLAYER_FLOOR][i>>1].status &= 0xF0;
+;src/player.c:647: map_components[PLAYER_FLOOR][i>>1].status &= 0xF0;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4697,33 +4206,17 @@ _r_bouncy_function:
 	and	a, #0xf0
 	ld	(hl), a
 00109$:
-	C$player.c$647$1_0$355	= .
-	.globl	C$player.c$647$1_0$355
-;src/player.c:647: return true;
-	ld	e, #0x01
-	C$player.c$648$1_0$355	= .
-	.globl	C$player.c$648$1_0$355
-;src/player.c:648: }
-	C$player.c$648$1_0$355	= .
-	.globl	C$player.c$648$1_0$355
-	XFplayer$r_bouncy_function$0$0	= .
-	.globl	XFplayer$r_bouncy_function$0$0
+;src/player.c:649: return true;
+	ld	a, #0x01
+;src/player.c:650: }
 	ret
-	Fplayer$make_cloth_fall$0$0	= .
-	.globl	Fplayer$make_cloth_fall$0$0
-	C$player.c$650$1_0$368	= .
-	.globl	C$player.c$650$1_0$368
-;src/player.c:650: static void make_cloth_fall(uint8_t sprite_in_OAM){
+;src/player.c:652: static void make_cloth_fall(uint8_t sprite_in_OAM){
 ;	---------------------------------
 ; Function make_cloth_fall
 ; ---------------------------------
 _make_cloth_fall:
-	C$player.c$651$1_0$368	= .
-	.globl	C$player.c$651$1_0$368
-;src/player.c:651: clothes_speed |= (0b00000001 << ((sprite_in_OAM)<<1));
-	ldhl	sp,	#2
-	ld	c, (hl)
-	ld	a, c
+;src/player.c:653: clothes_speed |= (0b00000001 << ((sprite_in_OAM)<<1));
+	ld	c, a
 	add	a, a
 	ld	b, a
 	ld	a, #0x01
@@ -4737,11 +4230,11 @@ _make_cloth_fall:
 	ld	hl, #_clothes_speed
 	or	a, (hl)
 	ld	(hl), a
-;src/player.c:652: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
+;src/player.c:654: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
 	ld	a, c
 	add	a, #0x10
 	ld	e, a
-;C:/gbdk/include/gb/gb.h:1458: return shadow_OAM[nb].tile;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1815: return shadow_OAM[nb].tile;
 	ld	l, e
 	ld	bc, #_shadow_OAM+0
 ;	spillPairReg hl
@@ -4755,10 +4248,10 @@ _make_cloth_fall:
 	inc	hl
 	inc	hl
 	ld	c, (hl)
-;src/player.c:652: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
+;src/player.c:654: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
 	inc	c
 	inc	c
-;C:/gbdk/include/gb/gb.h:1447: shadow_OAM[nb].tile=tile;
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
 	ld	l, e
 ;	spillPairReg hl
 ;	spillPairReg hl
@@ -4772,112 +4265,19 @@ _make_cloth_fall:
 	inc	hl
 	inc	hl
 	ld	(hl), c
-	C$player.c$652$3_0$368	= .
-	.globl	C$player.c$652$3_0$368
-;src/player.c:652: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
-	C$player.c$653$3_0$368	= .
-	.globl	C$player.c$653$3_0$368
-;src/player.c:653: }
-	C$player.c$653$3_0$368	= .
-	.globl	C$player.c$653$3_0$368
-	XFplayer$make_cloth_fall$0$0	= .
-	.globl	XFplayer$make_cloth_fall$0$0
+;src/player.c:654: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
+;src/player.c:655: }
 	ret
-	Fplayer$r_shingled_function$0$0	= .
-	.globl	Fplayer$r_shingled_function$0$0
-	C$player.c$655$3_0$376	= .
-	.globl	C$player.c$655$3_0$376
-;src/player.c:655: static bool r_shingled_function(uint8_t epa){
+;src/player.c:657: static bool r_shingled_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_shingled_function
 ; ---------------------------------
 _r_shingled_function:
-	C$player.c$656$1_0$376	= .
-	.globl	C$player.c$656$1_0$376
-;src/player.c:656: if(epa == CENTER_UP){
-	ldhl	sp,	#2
-	ld	a, (hl)
-	sub	a, #0x31
+;src/player.c:658: if(epa == CENTER_UP){
+	cp	a, #0x31
 	jr	NZ, 00102$
-;src/player.c:409: if(current_state == state) {return;}
-	ld	a, (#_current_state)
-	sub	a, #0x04
-	jr	Z, 00109$
-;src/player.c:410: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
-	ld	a, (#_current_state)
-	sub	a, #0x03
-	jr	NZ, 00108$
-	call	_instanciate_collision_puffs
-00108$:
-;src/player.c:411: frame_counter = 0;
-	ld	hl, #_frame_counter
-	ld	(hl), #0x00
-;src/player.c:412: current_frame = 0;
-	ld	hl, #_current_frame
-	ld	(hl), #0x00
-;src/player.c:413: current_state = state;
-	ld	hl, #_current_state
-	ld	(hl), #0x04
-;src/player.c:657: switch_state(PLAYER_STATE_HURT);
-00109$:
-	C$player.c$658$2_0$377	= .
-	.globl	C$player.c$658$2_0$377
-;src/player.c:658: y_speed = 10;
-	ld	hl, #_y_speed
-	ld	(hl), #0x0a
-	C$player.c$659$2_0$377	= .
-	.globl	C$player.c$659$2_0$377
-;src/player.c:659: x_speed = 0;
-	ld	hl, #_x_speed
-	ld	(hl), #0x00
-	C$player.c$660$2_0$377	= .
-	.globl	C$player.c$660$2_0$377
-;src/player.c:660: return true;
-	ld	e, #0x01
-	ret
-00102$:
-	C$player.c$662$1_0$376	= .
-	.globl	C$player.c$662$1_0$376
-;src/player.c:662: if(epa == CENTER_DOWN){
-	ldhl	sp,	#2
-	ld	a, (hl)
-	sub	a, #0x32
-	jr	NZ, 00104$
-	C$player.c$663$2_0$378	= .
-	.globl	C$player.c$663$2_0$378
-;src/player.c:663: play_bump_sfx();
-	call	_play_bump_sfx
-00104$:
-	C$player.c$665$1_0$376	= .
-	.globl	C$player.c$665$1_0$376
-;src/player.c:665: return false;
-	ld	e, #0x00
-	C$player.c$666$1_0$376	= .
-	.globl	C$player.c$666$1_0$376
-;src/player.c:666: }
-	C$player.c$666$1_0$376	= .
-	.globl	C$player.c$666$1_0$376
-	XFplayer$r_shingled_function$0$0	= .
-	.globl	XFplayer$r_shingled_function$0$0
-	ret
-	Fplayer$r_spikey_function$0$0	= .
-	.globl	Fplayer$r_spikey_function$0$0
-	C$player.c$667$1_0$385	= .
-	.globl	C$player.c$667$1_0$385
-;src/player.c:667: static bool r_spikey_function(uint8_t epa){
-;	---------------------------------
-; Function r_spikey_function
-; ---------------------------------
-_r_spikey_function:
-	C$player.c$668$1_0$385	= .
-	.globl	C$player.c$668$1_0$385
-;src/player.c:668: if(epa == CENTER_UP){
-	ldhl	sp,	#2
-	ld	a, (hl)
-	sub	a, #0x31
-	jr	NZ, 00102$
-;src/player.c:409: if(current_state == state) {return;}
-;src/player.c:410: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
+;src/player.c:411: if(current_state == state) {return;}
+;src/player.c:412: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
 	ld	a,(#_current_state)
 	cp	a,#0x04
 	jr	Z, 00109$
@@ -4885,82 +4285,101 @@ _r_spikey_function:
 	jr	NZ, 00108$
 	call	_instanciate_collision_puffs
 00108$:
-;src/player.c:411: frame_counter = 0;
+;src/player.c:413: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-;src/player.c:412: current_frame = 0;
+;src/player.c:414: current_frame = 0;
 	ld	hl, #_current_frame
 	ld	(hl), #0x00
-;src/player.c:413: current_state = state;
+;src/player.c:415: current_state = state;
 	ld	hl, #_current_state
 	ld	(hl), #0x04
-;src/player.c:669: switch_state(PLAYER_STATE_HURT);
+;src/player.c:659: switch_state(PLAYER_STATE_HURT);
 00109$:
-	C$player.c$670$2_0$386	= .
-	.globl	C$player.c$670$2_0$386
-;src/player.c:670: y_speed = (int8_t)(HURT_Y_SPEED);
-	ld	hl, #_y_speed
-	ld	(hl), #0xf0
-	C$player.c$671$2_0$386	= .
-	.globl	C$player.c$671$2_0$386
-;src/player.c:671: x_speed = HURT_X_SPEED;
+;src/player.c:661: x_speed = 0;
+	xor	a, a
 	ld	hl, #_x_speed
-	ld	(hl), #0x08
-	C$player.c$672$2_0$386	= .
-	.globl	C$player.c$672$2_0$386
-;src/player.c:672: return true;
-	ld	e, #0x01
+	ld	(hl+), a
+	ld	(hl), a
+;src/player.c:662: return true;
+	ld	a, #0x01
 	ret
 00102$:
-	C$player.c$674$1_0$385	= .
-	.globl	C$player.c$674$1_0$385
-;src/player.c:674: if(epa == CENTER_DOWN){
-	ldhl	sp,	#2
-	ld	a, (hl)
+;src/player.c:664: if(epa == CENTER_DOWN){
 	sub	a, #0x32
 	jr	NZ, 00104$
-	C$player.c$675$2_0$387	= .
-	.globl	C$player.c$675$2_0$387
-;src/player.c:675: play_bump_sfx();
+;src/player.c:665: play_bump_sfx();
 	call	_play_bump_sfx
 00104$:
-	C$player.c$677$1_0$385	= .
-	.globl	C$player.c$677$1_0$385
-;src/player.c:677: return false;
-	ld	e, #0x00
-	C$player.c$678$1_0$385	= .
-	.globl	C$player.c$678$1_0$385
-;src/player.c:678: }
-	C$player.c$678$1_0$385	= .
-	.globl	C$player.c$678$1_0$385
-	XFplayer$r_spikey_function$0$0	= .
-	.globl	XFplayer$r_spikey_function$0$0
+;src/player.c:667: return false;
+	xor	a, a
+;src/player.c:668: }
 	ret
-	Fplayer$r_initf_function$0$0	= .
-	.globl	Fplayer$r_initf_function$0$0
-	C$player.c$679$1_0$394	= .
-	.globl	C$player.c$679$1_0$394
-;src/player.c:679: static bool r_initf_function(uint8_t epa){
+;src/player.c:669: static bool r_spikey_function(uint8_t epa){
+;	---------------------------------
+; Function r_spikey_function
+; ---------------------------------
+_r_spikey_function:
+;src/player.c:670: if(epa == CENTER_UP){
+	cp	a, #0x31
+	jr	NZ, 00102$
+;src/player.c:411: if(current_state == state) {return;}
+;src/player.c:412: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
+	ld	a,(#_current_state)
+	cp	a,#0x04
+	jr	Z, 00109$
+	sub	a, #0x03
+	jr	NZ, 00108$
+	call	_instanciate_collision_puffs
+00108$:
+;src/player.c:413: frame_counter = 0;
+	ld	hl, #_frame_counter
+	ld	(hl), #0x00
+;src/player.c:414: current_frame = 0;
+	ld	hl, #_current_frame
+	ld	(hl), #0x00
+;src/player.c:415: current_state = state;
+	ld	hl, #_current_state
+	ld	(hl), #0x04
+;src/player.c:671: switch_state(PLAYER_STATE_HURT);
+00109$:
+;src/player.c:672: y_speed = (int8_t)(HURT_Y_SPEED);
+	ld	hl, #_y_speed
+	ld	(hl), #0xf8
+;src/player.c:673: x_speed = HURT_X_SPEED;
+	ld	hl, #_x_speed
+	xor	a, a
+	ld	(hl+), a
+;src/player.c:674: return true;
+	ld	a,#0x01
+	ld	(hl),a
+	ret
+00102$:
+;src/player.c:676: if(epa == CENTER_DOWN){
+	sub	a, #0x32
+	jr	NZ, 00104$
+;src/player.c:677: play_bump_sfx();
+	call	_play_bump_sfx
+00104$:
+;src/player.c:679: return false;
+	xor	a, a
+;src/player.c:680: }
+	ret
+;src/player.c:681: static bool r_initf_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_initf_function
 ; ---------------------------------
 _r_initf_function:
-	C$player.c$680$1_0$394	= .
-	.globl	C$player.c$680$1_0$394
-;src/player.c:680: game_started_flag = epa == CENTER_UP;
-	ldhl	sp,	#2
-	ld	a, (hl)
+;src/player.c:682: game_started_flag = epa == CENTER_UP;
 	sub	a, #0x31
 	ld	a, #0x01
-	jr	Z, 00117$
+	jr	Z, 00121$
 	xor	a, a
-00117$:
+00121$:
 	ld	c, a
 	ld	hl, #_game_started_flag
 	ld	(hl), c
-	C$player.c$681$1_0$394	= .
-	.globl	C$player.c$681$1_0$394
-;src/player.c:681: return (bool)(epa != CENTER_UP || (joy & J_DOWN));
+;src/player.c:683: return (bool)(epa != CENTER_UP || (joy & J_DOWN));
 	bit	0, c
 	jr	Z, 00104$
 	ld	a, (#_joy)
@@ -4968,28 +4387,18 @@ _r_initf_function:
 	rrca
 	rrca
 	and	a,#0x01
-	jr	NZ, 00104$
-	ld	e,a
-	ret
+	ret	Z
 00104$:
-	ld	e, #0x01
-	C$player.c$682$1_0$394	= .
-	.globl	C$player.c$682$1_0$394
-;src/player.c:682: }
-	C$player.c$682$1_0$394	= .
-	.globl	C$player.c$682$1_0$394
-	XFplayer$r_initf_function$0$0	= .
-	.globl	XFplayer$r_initf_function$0$0
+	ld	a, #0x01
+;src/player.c:684: }
 	ret
 	.area _CODE
 	.area _INITIALIZER
-Fplayer$__xinit_puff_frame$0_0$0 == .
 __xinit__puff_frame:
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0x00	; 0
-Fplayer$__xinit_rect_functions$0_0$0 == .
 __xinit__rect_functions:
 	.dw _r_solid_function
 	.dw _r_traversable_function
