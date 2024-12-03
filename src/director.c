@@ -12,6 +12,10 @@
 #include "../res/Thought_bubble.h"
 #include "../res/base_floor_map.h"
 
+#include "../res/badday_data.h"
+#include "../res/badday_map.h"
+#include "../res/mrwhositletters.h"
+
 // The metasprite will be built starting with hardware sprite zero (the first)
 #define SPR_NUM_START 0
 
@@ -125,6 +129,7 @@ void play_intro_cinematic(void){
     //add new player frames
     set_sprite_data(37, 10, playerSprite_extra);
     set_sprite_data(47, 23, thought_bubble);
+    //add new bkg tile data
     set_bkg_data(0x70, 2, cloud_tiles);
     set_bkg_data(0x72, 6, open_window_tiles);
     set_bkg_tile_xy(0, 17, 0x61);
@@ -132,6 +137,8 @@ void play_intro_cinematic(void){
     set_bkg_tile_xy(21, 17, 0x61);
     set_bkg_tile_xy(21, 16, 0x6C);
     set_bkg_tile_xy(0, 15, 0x4D);
+    set_bkg_data(0x80, 31, badday_data);
+    set_sprite_data(0xA0, 8, mrwhosit);
     // MOVE CHARACTER TO DOOR
     player_x = 0;
     move_metasprite(idle_metasprites[0], TILE_NUM_START, SPR_NUM_START, (uint8_t)SUB_TO_PX(player_x), player_y);
@@ -400,13 +407,17 @@ void play_intro_cinematic(void){
     {
         if (i == 20)
         {
+            //change tiles here
             set_bkg_tiles(15, 25, 4, 5, open_window_map);
+            fill_bkg_rect(3, 25, 8, 5, 0);
+            set_bkg_tiles(3, 22, 7, 6, badday_map);
         }
         
         pan_up(i>>2);
         finish_frame(1)
     }
     fill_bkg_rect(1, 16, 20, 7, 0);
+    set_bkg_tiles(3, 22, 7, 1, badday_map);
     for (i = 1; i < 60; i++)
     {
         if (i & 0x01)
@@ -416,7 +427,35 @@ void play_intro_cinematic(void){
         finish_frame(1)
     }
 
-    finish_frame(200)
+    finish_frame(150)
+
+    OBP1_REG = DMG_PALETTE(DMG_WHITE, DMG_WHITE, DMG_WHITE, DMG_WHITE);
+    move_metasprite_ex(mrwhosit_sprite, 0, 0x10, 0, 30, 80);
+
+    for(i = 0; i < 3; i++){
+        switch (i)
+        {
+        case 0:
+            OBP1_REG = DMG_PALETTE(DMG_WHITE, DMG_WHITE, DMG_WHITE, DMG_LITE_GRAY);
+            instanciate_puff(38, 76, false);
+            break;
+
+        case 1:
+            OBP1_REG = DMG_PALETTE(DMG_WHITE, DMG_WHITE, DMG_LITE_GRAY, DMG_DARK_GRAY);
+            instanciate_puff(79, 76, false);
+            break;
+
+        case 2:
+            OBP1_REG = DMG_PALETTE(DMG_WHITE, DMG_LITE_GRAY, DMG_DARK_GRAY, DMG_BLACK);
+            instanciate_puff(70, 70, false);
+            break;
+        default:
+            break;
+        }
+        finish_frame(8)
+    }
+
+    finish_frame(100)
 
     i = 0;
     while (1)
@@ -446,6 +485,8 @@ bool finish_frame_inner(uint8_t count){
         }
         
         frame_counter++;
+        render_all_particles();
+        end_frame();
         wait_vbl_done();
     }
     return false;

@@ -1,6 +1,6 @@
 /*
 
- PLANTERBOX.H
+ MRWHOSITLETTERS.H
 
  Include File.
 
@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 0
+  Tiles                : 0 to 7
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -22,18 +22,18 @@
 
 */
 
-#ifndef __Planterbox_h_INCLUDE
-#define __Planterbox_h_INCLUDE
+#ifndef __mrwhositletters_h_INCLUDE
+#define __mrwhositletters_h_INCLUDE
 
 #include <gb/gb.h>
 #include <gb/metasprites.h>
 
 /* Bank of tiles. */
-#define planter_boxBank 0
+#define mrwhositBank 0
 /* Start of tile array. */
-extern const unsigned char planter_box[];
-extern const metasprite_t planter[];
+extern const unsigned char mrwhosit[];
+extern const metasprite_t mrwhosit_sprite[];
 
 #endif
 
-/* End of PLANTERBOX.H */
+/* End of MRWHOSITLETTERS.H */

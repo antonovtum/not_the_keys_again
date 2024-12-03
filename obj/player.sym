@@ -26,10 +26,10 @@ Symbol Table
   1 _brick_frame                                                   00001B R
     _brick_particle                                                ****** GX
   1 _brick_y_speed                                                 00001C R
-  0 _calculate_final_score                                         00108B R
+  0 _calculate_final_score                                         000FC4 R
   0 _calculate_physics                                             000250 R
     _camera_y                                                      ****** GX
-  0 _check_collisions                                              000A35 R
+  0 _check_collisions                                              00096E R
   0 _clamp_x_velocity                                              0000D4 GR
   0 _clamp_y_velocity                                              0000D6 GR
     _clothes_speed                                                 ****** GX
@@ -37,7 +37,7 @@ Symbol Table
   1 _current_coyote_frames                                         000014 R
   1 _current_frame                                                 000002 R
   1 _current_state                                                 000013 GR
-  0 _end_frame                                                     0009AF GR
+  0 _end_frame                                                     0008E8 GR
   0 _fall_g                                                        0000D1 GR
   1 _frame_counter                                                 000001 R
     _frames_in_state                                               ****** GX
@@ -45,32 +45,35 @@ Symbol Table
     _game_started_flag                                             ****** GX
     _hide_sprites_range                                            ****** GX
   1 _highest_visited_floor                                         000019 R
-  0 _hurt_frame                                                    000956 R
+  0 _hurt_frame                                                    00088F R
   1 _i                                                             000004 R
     _idle_metasprites                                              ****** GX
   0 _impulse                                                       0000D2 GR
-  0 _instanciate_brick_particles                                   000904 R
-  0 _instanciate_collision_puffs                                   000853 R
+  0 _instanciate_brick_particles                                   00083D R
+  0 _instanciate_collision_puffs                                   00081D GR
+  0 _instanciate_puff                                              0007AB GR
   1 _is_facing_right                                               000009 GR
   1 _is_grounded                                                   00000A R
   1 _is_jumping                                                    00000B R
   1 _joy                                                           000005 R
     _joypad                                                        ****** GX
   0 _jump_g                                                        0000D0 GR
-  0 _jump_power                                                    0000D3 GR
 ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
 Hexadecimal [24-Bits]
 
 Symbol Table
 
+  0 _jump_power                                                    0000D3 GR
   1 _last_x                                                        000010 R
   1 _last_y                                                        000012 R
-  0 _make_cloth_fall                                               00145F R
+  0 _make_cloth_fall                                               001398 R
+  0 _make_planter_fall                                             001471 R
     _map_components                                                ****** GX
   1 _max_player_y                                                  000017 R
     _metasprites_speeds                                            ****** GX
     _metasprites_states                                            ****** GX
   1 _next_free_puff                                                00001A R
+    _planters_drop_flag                                            ****** GX
     _play_boing_sfx                                                ****** GX
     _play_break_sfx                                                ****** GX
     _play_bump_sfx                                                 ****** GX
@@ -81,20 +84,21 @@ Symbol Table
   0 _player_init                                                   000000 GR
   1 _player_x                                                      00000D GR
   1 _player_y                                                      00000F GR
-  0 _point_vs_rect                                                 0010A3 R
+  0 _point_vs_rect                                                 000FDC R
   2 _puff_frame                                                    000000 R
     _r                                                             ****** GX
-  0 _r_bouncy_function                                             0013AE R
-  0 _r_inactive_function                                           0013AB R
-  0 _r_initf_function                                              0014FA R
-  0 _r_shingled_function                                           00148F R
-  0 _r_solid_function                                              00113A R
-  0 _r_spikey_function                                             0014C2 R
-  0 _r_traversable_function                                        00139B R
+  0 _r_bouncy_function                                             0012E7 R
+  0 _r_inactive_function                                           0012E4 R
+  0 _r_initf_function                                              001496 R
+  0 _r_precarious_function                                         001433 R
+  0 _r_shingled_function                                           0013C8 R
+  0 _r_solid_function                                              001073 R
+  0 _r_spikey_function                                             0013FB R
+  0 _r_traversable_function                                        0012D4 R
     _rand_init                                                     ****** GX
   2 _rect_functions                                                000004 R
     _rect_list                                                     ****** GX
-  0 _render_all_particles                                          0006E9 R
+  0 _render_all_particles                                          0006E9 GR
   0 _render_player                                                 00034B GR
   0 _retrieve_input                                                000153 R
   1 _score                                                         000015 GR
@@ -104,28 +108,27 @@ Symbol Table
     _stop_hurt_sfx                                                 ****** GX
     _stop_jump_sfx                                                 ****** GX
     _stop_sfx                                                      ****** GX
-  0 _switch_state                                                  000A17 R
+  0 _switch_state                                                  000950 R
   1 _test_max_player_y                                             000018 R
     _top_map_00                                                    ****** GX
     _top_map_02_broken                                             ****** GX
-  0 _update_score                                                  001014 R
+  0 _update_score                                                  000F4D R
   1 _x_force                                                       000006 R
   1 _x_speed                                                       000007 R
   1 _y_speed                                                       00000C R
-
 
 ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 3
 Hexadecimal [24-Bits]
 
 Area Table
 
-   0 _CODE                                      size   1516   flags    0
+   0 _CODE                                      size   14B2   flags    0
    1 _DATA                                      size     1D   flags    0
-   2 _INITIALIZED                               size     12   flags    0
+   2 _INITIALIZED                               size     14   flags    0
    3 _DABS                                      size      0   flags    8
    4 _HOME                                      size      0   flags    0
    5 _GSINIT                                    size      0   flags    0
    6 _GSFINAL                                   size      0   flags    0
-   7 _INITIALIZER                               size     12   flags    0
+   7 _INITIALIZER                               size     14   flags    0
    8 _CABS                                      size      0   flags    8
 

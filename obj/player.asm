@@ -36,6 +36,9 @@
 	.globl _player_init
 	.globl _compute_player_frame
 	.globl _render_player
+	.globl _render_all_particles
+	.globl _instanciate_puff
+	.globl _instanciate_collision_puffs
 	.globl _end_frame
 ;--------------------------------------------------------
 ; special function registers
@@ -101,7 +104,7 @@ _brick_y_speed:
 _puff_frame:
 	.ds 4
 _rect_functions:
-	.ds 14
+	.ds 16
 ;--------------------------------------------------------
 ; absolute external ram data
 ;--------------------------------------------------------
@@ -122,52 +125,52 @@ _rect_functions:
 ; code
 ;--------------------------------------------------------
 	.area _CODE
-;src/player.c:129: void player_init(void)
+;src/player.c:132: void player_init(void)
 ;	---------------------------------
 ; Function player_init
 ; ---------------------------------
 _player_init::
-;src/player.c:131: player_dead_flag = false;
+;src/player.c:134: player_dead_flag = false;
 	ld	hl, #_player_dead_flag
 	ld	(hl), #0x00
-;src/player.c:133: OBP0_REG = 0xE4; //11100100
+;src/player.c:136: OBP0_REG = 0xE4; //11100100
 	ld	a, #0xe4
 	ldh	(_OBP0_REG + 0), a
-;src/player.c:136: set_sprite_data(TILE_NUM_START, PLAYER_SPRITES, playerSprites);
+;src/player.c:139: set_sprite_data(TILE_NUM_START, PLAYER_SPRITES, playerSprites);
 	ld	de, #_playerSprites
 	push	de
 	ld	hl, #0x1800
 	push	hl
 	call	_set_sprite_data
 	add	sp, #4
-;src/player.c:137: set_sprite_data(PLAYER_SPRITES, 3, Sfx);
+;src/player.c:140: set_sprite_data(PLAYER_SPRITES, 3, Sfx);
 	ld	de, #_Sfx
 	push	de
 	ld	hl, #0x318
 	push	hl
 	call	_set_sprite_data
 	add	sp, #4
-;src/player.c:139: frame_counter = 0;
+;src/player.c:142: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-;src/player.c:140: current_frame = 0;
+;src/player.c:143: current_frame = 0;
 	ld	hl, #_current_frame
 	ld	(hl), #0x00
-;src/player.c:141: current_state = PLAYER_STATE_IDLE;
+;src/player.c:144: current_state = PLAYER_STATE_IDLE;
 	ld	hl, #_current_state
 	ld	(hl), #0x00
-;src/player.c:142: x_force = 0U;
+;src/player.c:145: x_force = 0U;
 	ld	hl, #_x_force
 	ld	(hl), #0x00
-;src/player.c:143: x_speed = 0U;
+;src/player.c:146: x_speed = 0U;
 	xor	a, a
 	ld	hl, #_x_speed
 	ld	(hl+), a
 	ld	(hl), a
-;src/player.c:144: y_speed = 0;
+;src/player.c:147: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-;src/player.c:145: player_x = last_x = PX_TO_SUB(16U);
+;src/player.c:148: player_x = last_x = PX_TO_SUB(16U);
 	ld	hl, #_last_x
 	xor	a, a
 	ld	(hl+), a
@@ -176,41 +179,41 @@ _player_init::
 	xor	a, a
 	ld	(hl+), a
 	ld	(hl), #0x10
-;src/player.c:146: player_y = last_y = 128U;
+;src/player.c:149: player_y = last_y = 128U;
 	ld	hl, #_last_y
 	ld	(hl), #0x80
 	ld	hl, #_player_y
 	ld	(hl), #0x80
-;src/player.c:147: is_facing_right = true;
+;src/player.c:150: is_facing_right = true;
 	ld	hl, #_is_facing_right
 	ld	(hl), #0x01
-;src/player.c:148: is_grounded = true;
+;src/player.c:151: is_grounded = true;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x01
-;src/player.c:149: next_free_puff = 0;
+;src/player.c:152: next_free_puff = 0;
 	ld	hl, #_next_free_puff
 	ld	(hl), #0x00
-;src/player.c:150: score = 0;
+;src/player.c:153: score = 0;
 	xor	a, a
 	ld	hl, #_score
 	ld	(hl+), a
 	ld	(hl), a
-;src/player.c:151: highest_visited_floor = 1;
+;src/player.c:154: highest_visited_floor = 1;
 	ld	hl, #_highest_visited_floor
 	ld	(hl), #0x01
-;src/player.c:152: max_player_y = 0;
+;src/player.c:155: max_player_y = 0;
 	ld	hl, #_max_player_y
 	ld	(hl), #0x00
-;src/player.c:153: a_not_pressed = true;
+;src/player.c:156: a_not_pressed = true;
 	ld	hl, #_a_not_pressed
 	ld	(hl), #0x01
-;src/player.c:154: current_coyote_frames = 0;
+;src/player.c:157: current_coyote_frames = 0;
 	ld	hl, #_current_coyote_frames
 	ld	(hl), #0x00
-;src/player.c:155: joy = 0;
+;src/player.c:158: joy = 0;
 	ld	hl, #_joy
 	ld	(hl), #0x00
-;src/player.c:156: move_metasprite(idle_metasprites[0], TILE_NUM_START, SPR_NUM_START, (uint8_t)SUB_TO_PX(player_x), player_y);
+;src/player.c:159: move_metasprite(idle_metasprites[0], TILE_NUM_START, SPR_NUM_START, (uint8_t)SUB_TO_PX(player_x), player_y);
 	ld	hl, #_idle_metasprites
 	ld	a, (hl+)
 	ld	c, a
@@ -230,7 +233,7 @@ _player_init::
 	ld	de, #0x8010
 	xor	a, a
 	call	___move_metasprite
-;src/player.c:158: set_sprite_data(0x1B, 2, brick_particle);
+;src/player.c:161: set_sprite_data(0x1B, 2, brick_particle);
 	ld	de, #_brick_particle
 	push	de
 	ld	a, #0x02
@@ -250,10 +253,10 @@ _player_init::
 	ld	(hl), #0x1c
 	ld	hl, #(_shadow_OAM + 62)
 	ld	(hl), #0x1c
-;src/player.c:163: brick_frame = 0;
+;src/player.c:166: brick_frame = 0;
 	ld	hl, #_brick_frame
 	ld	(hl), #0x00
-;src/player.c:164: }
+;src/player.c:167: }
 	ret
 _jump_g:
 	.db #0x02	; 2
@@ -262,36 +265,36 @@ _fall_g:
 _impulse:
 	.db #0x18	; 24
 _jump_power:
-	.db #0xdd	; -35
+	.db #0xe0	; -32
 _clamp_x_velocity:
 	.dw #0x0200
 _clamp_y_velocity:
 	.db #0x14	;  20
-;src/player.c:166: void compute_player_frame(void)
+;src/player.c:169: void compute_player_frame(void)
 ;	---------------------------------
 ; Function compute_player_frame
 ; ---------------------------------
 _compute_player_frame::
-;src/player.c:168: if(current_state == PLAYER_STATE_HURT){
+;src/player.c:171: if(current_state == PLAYER_STATE_HURT){
 	ld	a, (#_current_state)
 	sub	a, #0x04
 	jr	NZ, 00104$
-;src/player.c:169: hurt_frame();
+;src/player.c:172: hurt_frame();
 	call	_hurt_frame
 	jr	00105$
 00104$:
-;src/player.c:172: retrieve_input();
+;src/player.c:175: retrieve_input();
 	call	_retrieve_input
-;src/player.c:174: if(player_dead_flag) return;
+;src/player.c:177: if(player_dead_flag) return;
 	ld	hl, #_player_dead_flag
 	bit	0, (hl)
 	ret	NZ
-;src/player.c:176: calculate_physics();
+;src/player.c:179: calculate_physics();
 	call	_calculate_physics
 00105$:
-;src/player.c:182: check_collisions();
+;src/player.c:185: check_collisions();
 	call	_check_collisions
-;src/player.c:183: if(y_speed > 0 && (current_state != PLAYER_STATE_HURT && current_state != PLAYER_STATE_FALLING)){
+;src/player.c:186: if(y_speed > 0 && (current_state != PLAYER_STATE_HURT && current_state != PLAYER_STATE_FALLING)){
 	ld	hl, #_y_speed
 	ld	e, (hl)
 	xor	a, a
@@ -314,17 +317,17 @@ _compute_player_frame::
 	jr	Z, 00107$
 	sub	a, #0x03
 	jr	Z, 00107$
-;src/player.c:184: switch_state(PLAYER_STATE_FALLING);
+;src/player.c:187: switch_state(PLAYER_STATE_FALLING);
 	ld	a, #0x03
 	call	_switch_state
-;src/player.c:185: is_grounded = false;
+;src/player.c:188: is_grounded = false;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x00
-;src/player.c:186: is_jumping = false;
+;src/player.c:189: is_jumping = false;
 	ld	hl, #_is_jumping
 	ld	(hl), #0x00
 00107$:
-;src/player.c:189: if(current_state == PLAYER_STATE_FALLING && current_coyote_frames < COYOTE_FRAMES) current_coyote_frames++;
+;src/player.c:192: if(current_state == PLAYER_STATE_FALLING && current_coyote_frames < COYOTE_FRAMES) current_coyote_frames++;
 	ld	a, (#_current_state)
 	sub	a, #0x03
 	jr	NZ, 00111$
@@ -334,42 +337,42 @@ _compute_player_frame::
 	jr	NC, 00111$
 	inc	(hl)
 00111$:
-;src/player.c:191: update_score();
+;src/player.c:194: update_score();
 	call	_update_score
-;src/player.c:193: last_x = player_x;
+;src/player.c:196: last_x = player_x;
 	ld	a, (#_player_x)
 	ld	(#_last_x),a
 	ld	a, (#_player_x + 1)
 	ld	(#_last_x + 1),a
-;src/player.c:194: last_y = player_y;
+;src/player.c:197: last_y = player_y;
 	ld	a, (#_player_y)
 	ld	(#_last_y),a
-;src/player.c:196: render_all_particles();
+;src/player.c:199: render_all_particles();
 	call	_render_all_particles
-;src/player.c:198: render_player();
+;src/player.c:201: render_player();
 	call	_render_player
-;src/player.c:200: end_frame();
-;src/player.c:201: }
+;src/player.c:203: end_frame();
+;src/player.c:204: }
 	jp	_end_frame
-;src/player.c:203: static void retrieve_input(void){
+;src/player.c:206: static void retrieve_input(void){
 ;	---------------------------------
 ; Function retrieve_input
 ; ---------------------------------
 _retrieve_input:
-;src/player.c:204: joy = joypad();
+;src/player.c:207: joy = joypad();
 	call	_joypad
-;src/player.c:205: if (joy & J_RIGHT)
+;src/player.c:208: if (joy & J_RIGHT)
 	ld	(#_joy),a
 	bit	0, a
 	jr	Z, 00120$
-;src/player.c:207: if(is_grounded)switch_state(PLAYER_STATE_RUNNING);
+;src/player.c:210: if(is_grounded)switch_state(PLAYER_STATE_RUNNING);
 	ld	hl, #_is_grounded
 	bit	0, (hl)
 	jr	Z, 00102$
 	ld	a, #0x01
 	call	_switch_state
 00102$:
-;src/player.c:208: if (!is_facing_right && x_speed)
+;src/player.c:211: if (!is_facing_right && x_speed)
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
 	jr	NZ, 00104$
@@ -377,30 +380,30 @@ _retrieve_input:
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	Z, 00104$
-;src/player.c:210: x_force = 0;
+;src/player.c:213: x_force = 0;
 	ld	hl, #_x_force
 	ld	(hl), #0x00
 	jr	00121$
 00104$:
-;src/player.c:214: is_facing_right = true;
+;src/player.c:217: is_facing_right = true;
 	ld	hl, #_is_facing_right
 	ld	(hl), #0x01
-;src/player.c:215: x_force = impulse;
+;src/player.c:218: x_force = impulse;
 	ld	hl, #_x_force
 	ld	(hl), #0x18
 	jr	00121$
 00120$:
-;src/player.c:218: else if (joy & J_LEFT)
+;src/player.c:221: else if (joy & J_LEFT)
 	bit	1, a
 	jr	Z, 00117$
-;src/player.c:220: if(is_grounded)switch_state(PLAYER_STATE_RUNNING);
+;src/player.c:223: if(is_grounded)switch_state(PLAYER_STATE_RUNNING);
 	ld	hl, #_is_grounded
 	bit	0, (hl)
 	jr	Z, 00108$
 	ld	a, #0x01
 	call	_switch_state
 00108$:
-;src/player.c:221: if (is_facing_right && x_speed)
+;src/player.c:224: if (is_facing_right && x_speed)
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
 	jr	Z, 00110$
@@ -408,23 +411,23 @@ _retrieve_input:
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	Z, 00110$
-;src/player.c:223: x_force = 0;
+;src/player.c:226: x_force = 0;
 	ld	hl, #_x_force
 	ld	(hl), #0x00
 	jr	00121$
 00110$:
-;src/player.c:227: is_facing_right = false;
+;src/player.c:230: is_facing_right = false;
 	ld	hl, #_is_facing_right
 	ld	(hl), #0x00
-;src/player.c:228: x_force = impulse;
+;src/player.c:231: x_force = impulse;
 	ld	hl, #_x_force
 	ld	(hl), #0x18
 	jr	00121$
 00117$:
-;src/player.c:233: x_force = 0;
+;src/player.c:236: x_force = 0;
 	ld	hl, #_x_force
 	ld	(hl), #0x00
-;src/player.c:234: if((!x_speed) && (!y_speed)) switch_state(PLAYER_STATE_IDLE);
+;src/player.c:237: if((!x_speed) && (!y_speed)) switch_state(PLAYER_STATE_IDLE);
 	ld	hl, #_x_speed + 1
 	ld	a, (hl-)
 	or	a, (hl)
@@ -434,9 +437,9 @@ _retrieve_input:
 	jr	NZ, 00121$
 	call	_switch_state
 00121$:
-;src/player.c:205: if (joy & J_RIGHT)
+;src/player.c:208: if (joy & J_RIGHT)
 	ld	a, (#_joy)
-;src/player.c:236: if ((joy & J_A && a_not_pressed) && (is_grounded || current_coyote_frames < COYOTE_FRAMES) && (y_speed >= 0))
+;src/player.c:239: if ((joy & J_A && a_not_pressed) && (is_grounded || current_coyote_frames < COYOTE_FRAMES) && (y_speed >= 0))
 	and	a, #0x10
 	ld	c, a
 	or	a, a
@@ -454,26 +457,26 @@ _retrieve_input:
 	ld	a, (#_y_speed)
 	bit	7, a
 	jr	NZ, 00127$
-;src/player.c:238: switch_state(PLAYER_STATE_JUMPING);
+;src/player.c:241: switch_state(PLAYER_STATE_JUMPING);
 	ld	a, #0x02
 	call	_switch_state
-;src/player.c:239: play_jump_sfx();
+;src/player.c:242: play_jump_sfx();
 	call	_play_jump_sfx
-;src/player.c:240: a_not_pressed = false;
+;src/player.c:243: a_not_pressed = false;
 	ld	hl, #_a_not_pressed
 	ld	(hl), #0x00
-;src/player.c:241: y_speed = jump_power;
+;src/player.c:244: y_speed = jump_power;
 	ld	hl, #_y_speed
-	ld	(hl), #0xdd
-;src/player.c:242: is_grounded = false;
+	ld	(hl), #0xe0
+;src/player.c:245: is_grounded = false;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x00
-;src/player.c:243: is_jumping = true;
+;src/player.c:246: is_jumping = true;
 	ld	hl, #_is_jumping
 	ld	(hl), #0x01
 	jr	00128$
 00127$:
-;src/player.c:245: else if ((!(joy & J_A) || y_speed > 0) && !is_grounded)
+;src/player.c:248: else if ((!(joy & J_A) || y_speed > 0) && !is_grounded)
 	ld	a, c
 	or	a, a
 	jr	Z, 00125$
@@ -498,31 +501,31 @@ _retrieve_input:
 	ld	hl, #_is_grounded
 	bit	0, (hl)
 	jr	NZ, 00128$
-;src/player.c:247: switch_state(PLAYER_STATE_FALLING);
+;src/player.c:250: switch_state(PLAYER_STATE_FALLING);
 	ld	a, #0x03
 	call	_switch_state
-;src/player.c:248: stop_jump_sfx();
+;src/player.c:251: stop_jump_sfx();
 	call	_stop_jump_sfx
-;src/player.c:249: is_jumping = false;
+;src/player.c:252: is_jumping = false;
 	ld	hl, #_is_jumping
 	ld	(hl), #0x00
 00128$:
-;src/player.c:251: if(!(joy & J_A)) a_not_pressed = true;
+;src/player.c:254: if(!(joy & J_A)) a_not_pressed = true;
 	ld	a, (#_joy)
 	bit	4, a
 	ret	NZ
 	ld	hl, #_a_not_pressed
 	ld	(hl), #0x01
-;src/player.c:252: }
+;src/player.c:255: }
 	ret
-;src/player.c:254: static void calculate_physics(void){
+;src/player.c:257: static void calculate_physics(void){
 ;	---------------------------------
 ; Function calculate_physics
 ; ---------------------------------
 _calculate_physics:
 	dec	sp
 	dec	sp
-;src/player.c:259: player_x = is_facing_right ? player_x + (x_speed) /*+ (x_force >> 2)*/ : player_x - (x_speed) /*- (x_force >> 2)*/;
+;src/player.c:262: player_x = is_facing_right ? player_x + (x_speed) /*+ (x_force >> 2)*/ : player_x - (x_speed) /*- (x_force >> 2)*/;
 	ld	a, (#_x_speed)
 	ldhl	sp,	#0
 	ld	(hl), a
@@ -561,14 +564,14 @@ _calculate_physics:
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;src/player.c:260: if((uint8_t)(SUB_TO_PX(player_x) - 10U) > 160U) {
+;src/player.c:263: if((uint8_t)(SUB_TO_PX(player_x) - 10U) > 160U) {
 	ld	a, (hl)
 	add	a, #0xf6
 	ld	c, a
 	ld	a, #0xa0
 	sub	a, c
 	jr	NC, 00105$
-;src/player.c:261: if((uint8_t)(SUB_TO_PX(player_x) - 10U) < 200) player_x = player_x - (160U << 8); //right exit
+;src/player.c:264: if((uint8_t)(SUB_TO_PX(player_x) - 10U) < 200) player_x = player_x - (160U << 8); //right exit
 	dec	hl
 	ld	a, (hl+)
 	ld	e, a
@@ -585,7 +588,7 @@ _calculate_physics:
 	ld	(hl), a
 	jr	00105$
 00102$:
-;src/player.c:262: else player_x = player_x + (160U << 8); //left exit
+;src/player.c:265: else player_x = player_x + (160U << 8); //left exit
 	ld	a, b
 	add	a, #0xa0
 	ld	hl, #_player_x
@@ -593,16 +596,16 @@ _calculate_physics:
 	inc	hl
 	ld	(hl), a
 00105$:
-;src/player.c:267: x_speed = x_speed >= clamp_x_velocity ? clamp_x_velocity : x_speed + x_force;
+;src/player.c:270: x_speed = x_speed >= clamp_x_velocity ? clamp_x_velocity : x_speed + x_force;
 	ld	hl, #_x_speed
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
-;src/player.c:264: if (x_force)
+;src/player.c:267: if (x_force)
 	ld	a, (#_x_force)
 	or	a, a
 	jr	Z, 00107$
-;src/player.c:267: x_speed = x_speed >= clamp_x_velocity ? clamp_x_velocity : x_speed + x_force;
+;src/player.c:270: x_speed = x_speed >= clamp_x_velocity ? clamp_x_velocity : x_speed + x_force;
 	ldhl	sp,	#0
 	ld	a, (hl+)
 	sub	a, #0x00
@@ -629,7 +632,7 @@ _calculate_physics:
 	ld	(hl), b
 	jr	00108$
 00107$:
-;src/player.c:272: x_speed = x_speed <= 0 ? 0 : MAX(0, x_speed - (impulse<<1));
+;src/player.c:275: x_speed = x_speed <= 0 ? 0 : MAX(0, x_speed - (impulse<<1));
 	ld	e, b
 	xor	a, a
 	ld	d, a
@@ -666,7 +669,7 @@ _calculate_physics:
 	ld	(hl+), a
 	ld	(hl), b
 00108$:
-;src/player.c:275: player_y += (y_speed >> (PHYSICS_DAMPNER + 1)) + ((is_jumping ? jump_g : fall_g) >> 2);
+;src/player.c:278: player_y += (y_speed >> (PHYSICS_DAMPNER + 1)) + ((is_jumping ? jump_g : fall_g) >> 2);
 	ld	hl, #_y_speed
 	ld	c, (hl)
 	sra	c
@@ -686,7 +689,7 @@ _calculate_physics:
 	ld	c, (hl)
 	add	a, c
 	ld	(hl), a
-;src/player.c:278: y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + (is_jumping ? jump_g : fall_g);
+;src/player.c:281: y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + (is_jumping ? jump_g : fall_g);
 	ld	a, (#_y_speed)
 	xor	a, #0x80
 	sub	a, #0x94
@@ -704,17 +707,17 @@ _calculate_physics:
 	add	a, (hl)
 00122$:
 	ld	(#_y_speed),a
-;src/player.c:279: }
+;src/player.c:282: }
 	inc	sp
 	inc	sp
 	ret
-;src/player.c:281: void render_player(void){
+;src/player.c:284: void render_player(void){
 ;	---------------------------------
 ; Function render_player
 ; ---------------------------------
 _render_player::
 	add	sp, #-8
-;src/player.c:285: if(!player_dead_flag && (uint8_t)(player_y - camera_y) > 160U) {
+;src/player.c:288: if(!player_dead_flag && (uint8_t)(player_y - camera_y) > 160U) {
 	ld	a, (#_player_y)
 	ld	hl, #_camera_y
 	sub	a, (hl)
@@ -727,24 +730,24 @@ _render_player::
 	ldhl	sp,	#7
 	sub	a, (hl)
 	jr	NC, 00102$
-;src/player.c:286: player_dead_flag = true;
+;src/player.c:289: player_dead_flag = true;
 	ld	hl, #_player_dead_flag
 	ld	(hl), #0x01
-;src/player.c:287: game_ended_flag = true;
+;src/player.c:290: game_ended_flag = true;
 	ld	hl, #_game_ended_flag
 	ld	(hl), #0x01
-;src/player.c:288: calculate_final_score();
+;src/player.c:291: calculate_final_score();
 	call	_calculate_final_score
-;src/player.c:289: stop_sfx();
+;src/player.c:292: stop_sfx();
 	call	_stop_sfx
-;src/player.c:292: hide_sprites_range(0, 20);
+;src/player.c:295: hide_sprites_range(0, 20);
 	ld	e, #0x14
 	xor	a, a
 	call	_hide_sprites_range
-;src/player.c:293: return;
+;src/player.c:296: return;
 	jp	00127$
 00102$:
-;src/player.c:296: hide_metasprite(metasprites_states[current_state][current_frame], 0);
+;src/player.c:299: hide_metasprite(metasprites_states[current_state][current_frame], 0);
 	ld	hl, #_current_state
 	ld	b, (hl)
 	ld	e, #0x00
@@ -761,14 +764,14 @@ _render_player::
 	ldhl	sp,	#0
 	ld	(hl+), a
 	ld	(hl), c
-;src/player.c:295: if(current_state == PLAYER_STATE_HURT && (frame_counter & 0x02)){
+;src/player.c:298: if(current_state == PLAYER_STATE_HURT && (frame_counter & 0x02)){
 	ld	a, (#_current_state)
 	sub	a, #0x04
 	jr	NZ, 00107$
 	ld	a, (#_frame_counter)
 	bit	1, a
 	jr	Z, 00107$
-;src/player.c:296: hide_metasprite(metasprites_states[current_state][current_frame], 0);
+;src/player.c:299: hide_metasprite(metasprites_states[current_state][current_frame], 0);
 	ld	de, #_metasprites_states
 	ldhl	sp,	#4
 	ld	a,	(hl+)
@@ -792,7 +795,7 @@ _render_player::
 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:298: __hide_metasprite(base_sprite);
 	xor	a, a
 	call	___hide_metasprite
-;src/player.c:297: hide_metasprite(metasprites_states[current_state][current_frame], 4);
+;src/player.c:300: hide_metasprite(metasprites_states[current_state][current_frame], 4);
 	ld	hl, #_current_state
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -817,20 +820,22 @@ _render_player::
 	add	hl, bc
 	ld	a, (hl+)
 	ld	c, (hl)
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:297: __current_metasprite = metasprite;
 	ld	hl, #___current_metasprite
 	ld	(hl+), a
 	ld	(hl), c
 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:298: __hide_metasprite(base_sprite);
 	ld	a, #0x04
 	call	___hide_metasprite
+;src/player.c:301: if(frame_counter & 0x01)play_hurt_sfx();
 	ld	a, (#_frame_counter)
 	rrca
 	jp	NC,00127$
 	call	_play_hurt_sfx
-;src/player.c:299: return;
+;src/player.c:302: return;
 	jp	00127$
 00107$:
-;src/player.c:302: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
+;src/player.c:305: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
 	jp	Z, 00129$
@@ -935,7 +940,7 @@ _render_player::
 	ld	d, (hl)
 	xor	a, a
 	call	___move_metasprite
-;src/player.c:302: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
+;src/player.c:305: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
 	jr	00130$
 00129$:
 	ld	a, (#_player_x + 1)
@@ -977,13 +982,13 @@ _render_player::
 	ld	e, a
 	xor	a, a
 	call	___move_metasprite_vflip
-;src/player.c:302: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
+;src/player.c:305: is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, SPR_NUM_START, SUB_TO_PX(player_x), (uint8_t)(player_y - camera_y));
 00130$:
-;src/player.c:303: if((uint8_t)(SUB_TO_PX(player_x)) > 160U) {
+;src/player.c:306: if((uint8_t)(SUB_TO_PX(player_x)) > 160U) {
 	ld	a, (#_player_x + 1)
 	ldhl	sp,	#3
 	ld	(hl), a
-;src/player.c:296: hide_metasprite(metasprites_states[current_state][current_frame], 0);
+;src/player.c:299: hide_metasprite(metasprites_states[current_state][current_frame], 0);
 	ld	hl, #_current_state
 	ld	e, (hl)
 	ld	d, #0x00
@@ -995,7 +1000,7 @@ _render_player::
 	ldhl	sp,	#4
 	ld	a, e
 	ld	(hl+), a
-;src/player.c:303: if((uint8_t)(SUB_TO_PX(player_x)) > 160U) {
+;src/player.c:306: if((uint8_t)(SUB_TO_PX(player_x)) > 160U) {
 	ld	a, d
 	ld	(hl-), a
 	dec	hl
@@ -1007,13 +1012,13 @@ _render_player::
 	ld	a, #0xa0
 	sub	a, (hl)
 	jp	NC, 00113$
-;src/player.c:285: if(!player_dead_flag && (uint8_t)(player_y - camera_y) > 160U) {
+;src/player.c:288: if(!player_dead_flag && (uint8_t)(player_y - camera_y) > 160U) {
 	ld	a, (#_player_y)
 	ld	hl, #_camera_y
 	sub	a, (hl)
 	ldhl	sp,	#6
 	ld	(hl), a
-;src/player.c:304: if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
+;src/player.c:307: if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
 	ldhl	sp,	#3
 	ld	a, (hl)
 	ldhl	sp,	#7
@@ -1069,7 +1074,7 @@ _render_player::
 	ld	e, a
 	ld	a, #0x04
 	call	___move_metasprite
-;src/player.c:304: if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
+;src/player.c:307: if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
 	jp	00114$
 00131$:
 	ldhl	sp,	#7
@@ -1113,10 +1118,10 @@ _render_player::
 	ld	e, a
 	ld	a, #0x04
 	call	___move_metasprite_vflip
-;src/player.c:304: if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
+;src/player.c:307: if((uint8_t)(SUB_TO_PX(player_x)) < 200) is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) - 160, (uint8_t)(player_y - camera_y)); //right exit
 	jp	00114$
 00110$:
-;src/player.c:305: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
+;src/player.c:308: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
 	ld	hl, #_is_facing_right
 	bit	0, (hl)
 	jr	Z, 00133$
@@ -1216,7 +1221,7 @@ _render_player::
 	ld	d, (hl)
 	ld	a, #0x04
 	call	___move_metasprite
-;src/player.c:305: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
+;src/player.c:308: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
 	jp	00114$
 00133$:
 	ldhl	sp,	#6
@@ -1326,10 +1331,10 @@ _render_player::
 	ld	d, (hl)
 	ld	a, #0x04
 	call	___move_metasprite_vflip
-;src/player.c:305: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
+;src/player.c:308: else is_facing_right?move_metasprite(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160U, (uint8_t)(player_y - camera_y)): move_metasprite_vflip(metasprites_states[current_state][current_frame], TILE_NUM_START, 4, SUB_TO_PX(player_x) + 160, (uint8_t)(player_y - camera_y)); //left exit
 	jr	00114$
 00113$:
-;src/player.c:307: hide_metasprite(metasprites_states[current_state][current_frame], 4);
+;src/player.c:310: hide_metasprite(metasprites_states[current_state][current_frame], 4);
 	ld	de, #_metasprites_states
 	ldhl	sp,	#4
 	ld	a,	(hl+)
@@ -1385,9 +1390,9 @@ _render_player::
 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/metasprites.h:298: __hide_metasprite(base_sprite);
 	ld	a, #0x04
 	call	___hide_metasprite
-;src/player.c:307: hide_metasprite(metasprites_states[current_state][current_frame], 4);
+;src/player.c:310: hide_metasprite(metasprites_states[current_state][current_frame], 4);
 00114$:
-;src/player.c:310: if((uint8_t)(player_y - camera_y) < MAX_SPRITE_HEIGHT && !player_dead_flag){
+;src/player.c:313: if((uint8_t)(player_y - camera_y) < MAX_SPRITE_HEIGHT && !player_dead_flag){
 	ld	a, (#_player_y)
 	ld	hl, #_camera_y
 	sub	a, (hl)
@@ -1397,7 +1402,7 @@ _render_player::
 	ld	hl, #_player_dead_flag
 	bit	0, (hl)
 	jr	NZ, 00127$
-;src/player.c:311: camera_y -= MAX_SPRITE_HEIGHT - ((uint8_t)(player_y - camera_y));
+;src/player.c:314: camera_y -= MAX_SPRITE_HEIGHT - ((uint8_t)(player_y - camera_y));
 	ld	a, #0x1a
 	sub	a, c
 	ld	c, a
@@ -1406,20 +1411,19 @@ _render_player::
 	sub	a, c
 	ld	(hl), a
 00127$:
-;src/player.c:313: }
+;src/player.c:316: }
 	add	sp, #8
 	ret
-;src/player.c:315: static void render_all_particles(void){
+;src/player.c:318: void render_all_particles(void){
 ;	---------------------------------
 ; Function render_all_particles
 ; ---------------------------------
-_render_all_particles:
-	add	sp, #-6
-;src/player.c:317: for(i = 0; i < MAX_PUFF; i++){
+_render_all_particles::
+;src/player.c:320: for(i = 0; i < MAX_PUFF; i++){
 	ld	hl, #_i
 	ld	(hl), #0x00
-00127$:
-;src/player.c:318: if(puff_frame[i] == 0){
+00120$:
+;src/player.c:321: if(puff_frame[i] == 0){
 	ld	a, #<(_puff_frame)
 	ld	hl, #_i
 	add	a, (hl)
@@ -1429,15 +1433,15 @@ _render_all_particles:
 	ld	b, a
 	ld	a, (bc)
 	ld	c, a
-;src/player.c:319: hide_sprite(FIRST_PUFF + i);
+;src/player.c:322: hide_sprite(FIRST_PUFF + i);
 	ld	a, (hl)
 	add	a, #0x08
 	ld	b, a
-;src/player.c:318: if(puff_frame[i] == 0){
+;src/player.c:321: if(puff_frame[i] == 0){
 	ld	a, c
 	or	a, a
 	jr	NZ, 00102$
-;src/player.c:319: hide_sprite(FIRST_PUFF + i);
+;src/player.c:322: hide_sprite(FIRST_PUFF + i);
 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1905: shadow_OAM[nb].y = 0;
 	ld	de, #_shadow_OAM+0
 	ld	l, b
@@ -1450,10 +1454,10 @@ _render_all_particles:
 	add	hl, hl
 	add	hl, de
 	ld	(hl), #0x00
-;src/player.c:320: continue;
+;src/player.c:323: continue;
 	jr	00103$
 00102$:
-;src/player.c:322: set_sprite_tile(FIRST_PUFF + i, PLAYER_SPRITES - 1 + (puff_frame[i] >> 2));
+;src/player.c:325: set_sprite_tile(FIRST_PUFF + i, PLAYER_SPRITES - 1 + (puff_frame[i] >> 2));
 	ld	a, c
 	rrca
 	rrca
@@ -1474,7 +1478,7 @@ _render_all_particles:
 	inc	hl
 	inc	hl
 	ld	(hl), c
-;src/player.c:323: puff_frame[i] = (puff_frame[i] + 1) & 0x0f; //puff_frame[i]++ mod 16 
+;src/player.c:326: puff_frame[i] = (puff_frame[i] + 1) & 0x0f; //puff_frame[i]++ mod 16 
 	ld	a, #<(_puff_frame)
 	ld	hl, #_i
 	add	a, (hl)
@@ -1487,26 +1491,26 @@ _render_all_particles:
 	and	a, #0x0f
 	ld	(bc), a
 00103$:
-;src/player.c:317: for(i = 0; i < MAX_PUFF; i++){
+;src/player.c:320: for(i = 0; i < MAX_PUFF; i++){
 	ld	hl, #_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x04
-	jr	C, 00127$
-;src/player.c:327: if(brick_frame == 0){
+	jr	C, 00120$
+;src/player.c:330: if(brick_frame == 0){
 	ld	a, (#_brick_frame)
 	or	a, a
 	jr	NZ, 00106$
-;src/player.c:328: hide_sprites_range(12, 16);
+;src/player.c:331: hide_sprites_range(12, 16);
 	ld	e, #0x10
 	ld	a, #0x0c
 	call	_hide_sprites_range
 	jr	00107$
 00106$:
-;src/player.c:331: brick_frame--;
+;src/player.c:334: brick_frame--;
 	ld	hl, #_brick_frame
 	dec	(hl)
-;src/player.c:332: scroll_sprite(12, 1, brick_y_speed>>1);
+;src/player.c:335: scroll_sprite(12, 1, brick_y_speed>>1);
 	ld	hl, #_brick_y_speed
 	ld	e, (hl)
 	sra	e
@@ -1520,7 +1524,7 @@ _render_all_particles:
 	ld	a, (bc)
 	inc	a
 	ld	(bc), a
-;src/player.c:333: scroll_sprite(13, -1, brick_y_speed>>1);
+;src/player.c:336: scroll_sprite(13, -1, brick_y_speed>>1);
 	ld	e, (hl)
 	sra	e
 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1893: OAM_item_t * itm = &shadow_OAM[nb];
@@ -1553,65 +1557,67 @@ _render_all_particles:
 	ld	a, (bc)
 	dec	a
 	ld	(bc), a
-;src/player.c:336: brick_y_speed++;
+;src/player.c:339: brick_y_speed++;
 	inc	(hl)
 00107$:
-;src/player.c:340: if(current_state != PLAYER_STATE_RUNNING) return;
+;src/player.c:343: if(current_state != PLAYER_STATE_RUNNING) return;
 	ld	a, (#_current_state)
 	dec	a
-	jp	NZ,00128$
-;src/player.c:341: if((frame_counter != 0) || (!(current_frame == 0 || current_frame == 3))) return;
+	ret	NZ
+;src/player.c:344: if((frame_counter != 0) || (!(current_frame == 0 || current_frame == 3))) return;
 	ld	a, (#_frame_counter)
 	or	a, a
-	jp	NZ,00128$
+	ret	NZ
 	ld	hl, #_current_frame
 	ld	a, (hl)
 	or	a, a
 	jr	Z, 00111$
 	ld	a, (hl)
 	sub	a, #0x03
-	jp	NZ,00128$
+	ret	NZ
 00111$:
-;src/player.c:344: i = FIRST_PUFF + next_free_puff;
+;src/player.c:347: instanciate_puff(SUB_TO_PX(player_x), player_y, is_facing_right);
+	ld	hl, #_player_x + 1
+	ld	c, (hl)
+	ld	a, (#_is_facing_right)
+	push	af
+	inc	sp
+	ld	hl, #_player_y
+	ld	e, (hl)
+	ld	a, c
+	call	_instanciate_puff
+;src/player.c:356: }
+	ret
+;src/player.c:358: void instanciate_puff(uint8_t x, uint8_t y, bool is_facing_right){
+;	---------------------------------
+; Function instanciate_puff
+; ---------------------------------
+_instanciate_puff::
+	dec	sp
+	dec	sp
+	ldhl	sp,	#1
+	ld	(hl-), a
+	ld	(hl), e
+;src/player.c:359: uint8_t i = FIRST_PUFF + next_free_puff;
 	ld	a, (#_next_free_puff)
 	add	a, #0x08
-	ld	hl, #_i
-	ld	(hl), a
-;src/player.c:345: set_sprite_tile(i, PLAYER_SPRITES);
-	ld	c, (hl)
+	ld	c, a
 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
+	ld	de, #_shadow_OAM+0
+	ld	l, c
+;	spillPairReg hl
+;	spillPairReg hl
 	ld	h, #0x00
 ;	spillPairReg hl
 ;	spillPairReg hl
-	ld	l, c
 	add	hl, hl
 	add	hl, hl
-	ld	de, #_shadow_OAM
 	add	hl, de
 	inc	hl
 	inc	hl
 	ld	(hl), #0x18
-;src/player.c:346: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
-	ld	hl, #_i
-	ld	c, (hl)
 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1860: return shadow_OAM[nb].prop;
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
 	ld	l, c
-	add	hl, hl
-	add	hl, hl
-	ld	de, #_shadow_OAM
-	add	hl, de
-	inc	hl
-	inc	hl
-	inc	hl
-	ld	c, (hl)
-;src/player.c:346: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
-	res	5, c
-	ld	hl, #_i
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
-	ld	l, (hl)
 ;	spillPairReg hl
 ;	spillPairReg hl
 	ld	h, #0x00
@@ -1619,270 +1625,108 @@ _render_all_particles:
 ;	spillPairReg hl
 	add	hl, hl
 	add	hl, hl
-	ld	de, #_shadow_OAM
-	add	hl, de
+	ld	c, l
+	ld	b, h
+	ld	hl,#_shadow_OAM + 1
+	add	hl,bc
 	inc	hl
 	inc	hl
+	ld	e, (hl)
+;src/player.c:361: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
+	res	5, e
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
+	ld	hl,#_shadow_OAM + 1
+	add	hl,bc
 	inc	hl
-	ld	(hl), c
-;src/player.c:347: puff_frame[next_free_puff] = 4;
-	ld	a, #<(_puff_frame)
+	inc	hl
+	ld	(hl), e
+;src/player.c:362: puff_frame[next_free_puff] = 4;
+	ld	de, #_puff_frame+0
+	ld	a, e
 	ld	hl, #_next_free_puff
 	add	a, (hl)
-	ld	c, a
-	ld	a, #>(_puff_frame)
-	adc	a, #0x00
-	ld	b, a
+	ld	e, a
+	jr	NC, 00117$
+	inc	d
+00117$:
 	ld	a, #0x04
-	ld	(bc), a
-;src/player.c:348: move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET, (uint8_t)((player_y + Y_OFFSET) - camera_y));
-	ld	a, (#_player_y)
+	ld	(de), a
+;src/player.c:363: move_sprite(i, x + X_OFFSET, (uint8_t)((y + Y_OFFSET) - camera_y));
+	ldhl	sp,	#0
+	ld	a, (hl)
 	add	a, #0x08
 	ld	hl, #_camera_y
-	ld	c, (hl)
-	sub	a, c
-	ldhl	sp,	#2
-	ld	(hl), a
-	ld	a, (#_player_x + 1)
-	add	a, #0xfc
-	ldhl	sp,	#3
-	ld	(hl), a
-	ld	hl, #_i
-	ld	c, (hl)
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
-	xor	a, a
-	sla	c
-	adc	a, a
-	sla	c
-	adc	a, a
-	ldhl	sp,	#0
-	ld	(hl), c
-	inc	hl
-	ld	(hl), a
-	ld	de, #_shadow_OAM
-	pop	hl
-	push	hl
-	add	hl, de
-	push	hl
-	ld	a, l
-	ldhl	sp,	#6
-	ld	(hl), a
-	pop	hl
-	ld	a, h
-	ldhl	sp,	#5
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
-	ld	(hl-), a
-	ld	a, (hl+)
-	ld	e, a
-	ld	d, (hl)
-	ldhl	sp,	#2
-	ld	a, (hl+)
-	inc	hl
-	ld	(de), a
-	ld	a, (hl+)
-	ld	c, a
-	ld	a, (hl-)
-	dec	hl
-	ld	b, a
-	inc	bc
-	ld	a, (hl)
-	ld	(bc), a
-;src/player.c:349: if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
-	ld	hl, #_is_facing_right
-	bit	0, (hl)
-	jr	NZ, 00115$
-	ld	hl, #_i
 	ld	e, (hl)
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
-	ld	bc, #_shadow_OAM+0
-	ld	l, e
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	add	hl, hl
-	add	hl, hl
+	sub	a, e
+	ld	d, a
+	ldhl	sp,	#1
+	ld	a, (hl)
+	add	a, #0xfc
+	ld	e, a
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
+	ld	hl, #_shadow_OAM
 	add	hl, bc
-	inc	hl
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
+	ld	a, d
+	ld	(hl+), a
+	ld	(hl), e
+;src/player.c:364: if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
+	ldhl	sp,	#4
+	bit	0, (hl)
+	jr	NZ, 00102$
+;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
+	ld	hl,#_shadow_OAM + 1
+	add	hl,bc
 	inc	hl
 	inc	hl
 	ld	(hl), #0x20
-;src/player.c:349: if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
-00115$:
-;src/player.c:351: next_free_puff = (next_free_puff + 1) & 0x03;
+;src/player.c:364: if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
+00102$:
+;src/player.c:366: next_free_puff = (next_free_puff + 1) & 0x03;
 	ld	hl, #_next_free_puff
 	ld	a, (hl)
 	inc	a
 	and	a, #0x03
 	ld	(hl), a
-00128$:
-;src/player.c:352: }
-	add	sp, #6
-	ret
-;src/player.c:354: static void instanciate_collision_puffs(void){
+;src/player.c:367: }
+	inc	sp
+	inc	sp
+	pop	hl
+	inc	sp
+	jp	(hl)
+;src/player.c:369: void instanciate_collision_puffs(void){
 ;	---------------------------------
 ; Function instanciate_collision_puffs
 ; ---------------------------------
-_instanciate_collision_puffs:
-;src/player.c:356: uint8_t i = FIRST_PUFF + next_free_puff;
-	ld	a, (#_next_free_puff)
-	add	a, #0x08
-	ld	c, a
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
-	ld	de, #_shadow_OAM+0
-	ld	l, c
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, de
-	inc	hl
-	inc	hl
-	ld	(hl), #0x18
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1860: return shadow_OAM[nb].prop;
-	ld	l, c
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	add	hl, hl
-	add	hl, hl
-	ld	e, l
-	ld	d, h
-	ld	hl,#_shadow_OAM + 1
-	add	hl,de
-	inc	hl
-	inc	hl
+_instanciate_collision_puffs::
+;src/player.c:370: instanciate_puff(SUB_TO_PX(player_x), player_y, false);
+	ld	hl, #_player_x + 1
 	ld	c, (hl)
-;src/player.c:358: set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // remove flip
-	res	5, c
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
-	ld	hl,#_shadow_OAM + 1
-	add	hl,de
-	inc	hl
-	inc	hl
-	ld	(hl), c
-;src/player.c:359: puff_frame[next_free_puff] = 4;
-	ld	a, #<(_puff_frame)
-	ld	hl, #_next_free_puff
-	add	a, (hl)
-	ld	c, a
-	ld	a, #>(_puff_frame)
-	adc	a, #0x00
-	ld	b, a
-	ld	a, #0x04
-	ld	(bc), a
-;src/player.c:360: move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET - 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
-	ld	a, (#_player_y)
-	add	a, #0x08
-	ld	hl, #_camera_y
+	xor	a, a
+	push	af
+	inc	sp
+	ld	hl, #_player_y
+	ld	e, (hl)
+	ld	a, c
+	call	_instanciate_puff
+;src/player.c:371: instanciate_puff(SUB_TO_PX(player_x), player_y, true);
+	ld	hl, #_player_x + 1
 	ld	c, (hl)
-	sub	a, c
-	ld	b, a
-	ld	a, (#_player_x + 1)
-	add	a, #0xf4
-	ld	c, a
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
-	ld	hl, #_shadow_OAM
-	add	hl, de
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
-	ld	a, b
-	ld	(hl+), a
-	ld	(hl), c
-;src/player.c:362: next_free_puff = (next_free_puff + 1) & 0x03;
-	ld	hl, #_next_free_puff
-	ld	a, (hl)
-	inc	a
-	and	a, #0x03
-	ld	(hl), a
-;src/player.c:364: i = FIRST_PUFF + next_free_puff;
-	ld	a, (hl)
-	add	a, #0x08
-	ld	c, a
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
-	ld	de, #_shadow_OAM+0
-	ld	l, c
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	add	hl, hl
-	add	hl, hl
-	add	hl, de
-	inc	hl
-	inc	hl
-	ld	(hl), #0x18
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1860: return shadow_OAM[nb].prop;
-	ld	l, c
-;	spillPairReg hl
-;	spillPairReg hl
-	ld	h, #0x00
-;	spillPairReg hl
-;	spillPairReg hl
-	add	hl, hl
-	add	hl, hl
-	ld	e, l
-	ld	d, h
-	ld	hl,#_shadow_OAM + 1
-	add	hl,de
-	inc	hl
-	inc	hl
-	ld	c, (hl)
-;src/player.c:366: set_sprite_prop(i, get_sprite_prop(i) | 0x20); // add flip
-	set	5, c
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1850: shadow_OAM[nb].prop=prop;
-	ld	hl,#_shadow_OAM + 1
-	add	hl,de
-	inc	hl
-	inc	hl
-	ld	(hl), c
-;src/player.c:367: puff_frame[next_free_puff] = 4;
-	ld	a, #<(_puff_frame)
-	ld	hl, #_next_free_puff
-	add	a, (hl)
-	ld	c, a
-	ld	a, #>(_puff_frame)
-	adc	a, #0x00
-	ld	b, a
-	ld	a, #0x04
-	ld	(bc), a
-;src/player.c:368: move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET + 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
-	ld	a, (#_player_y)
-	add	a, #0x08
-	ld	hl, #_camera_y
-	ld	c, (hl)
-	sub	a, c
-	ld	b, a
-	ld	a, (#_player_x + 1)
-	add	a, #0x04
-	ld	c, a
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
-	ld	hl, #_shadow_OAM
-	add	hl, de
-;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1878: itm->y=y, itm->x=x;
-	ld	a, b
-	ld	(hl+), a
-	ld	(hl), c
-;src/player.c:370: next_free_puff = (next_free_puff + 1) & 0x03;
-	ld	hl, #_next_free_puff
-	ld	a, (hl)
-	inc	a
-	and	a, #0x03
-	ld	(hl), a
-;src/player.c:371: }
+	ld	a, #0x01
+	push	af
+	inc	sp
+	ld	hl, #_player_y
+	ld	e, (hl)
+	ld	a, c
+	call	_instanciate_puff
+;src/player.c:388: }
 	ret
-;src/player.c:373: static void instanciate_brick_particles(void){
+;src/player.c:390: static void instanciate_brick_particles(void){
 ;	---------------------------------
 ; Function instanciate_brick_particles
 ; ---------------------------------
 _instanciate_brick_particles:
-;src/player.c:375: uint8_t particle_x = ((3 + (i<<1 & 0x0C)) << 3) + 14u;
+;src/player.c:392: uint8_t particle_x = ((3 + (i<<1 & 0x0C)) << 3) + 14u;
 	ld	a, (#_i)
 	add	a, a
 	and	a, #0x0c
@@ -1892,7 +1736,7 @@ _instanciate_brick_particles:
 	add	a, a
 	add	a, #0x0e
 	ld	c, a
-;src/player.c:376: uint8_t particle_y = (((PLAYER_FLOOR << 3) + 1 + ((~i & 0x01) << 2)) << 3) - camera_y + 16u;
+;src/player.c:393: uint8_t particle_y = (((PLAYER_FLOOR << 3) + 1 + ((~i & 0x01) << 2)) << 3) - camera_y + 16u;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -1916,7 +1760,7 @@ _instanciate_brick_particles:
 	sub	a, b
 	add	a, #0x10
 	ld	b, a
-;src/player.c:377: move_sprite(12, particle_x, particle_y);
+;src/player.c:394: move_sprite(12, particle_x, particle_y);
 	ld	e, c
 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1877: OAM_item_t * itm = &shadow_OAM[nb];
 	ld	hl, #(_shadow_OAM + 48)
@@ -1942,31 +1786,31 @@ _instanciate_brick_particles:
 	ld	(hl), b
 	inc	hl
 	ld	(hl), c
-;src/player.c:381: brick_frame = 10;
+;src/player.c:398: brick_frame = 10;
 	ld	hl, #_brick_frame
 	ld	(hl), #0x0a
-;src/player.c:382: brick_y_speed = -5;
+;src/player.c:399: brick_y_speed = -5;
 	ld	hl, #_brick_y_speed
 	ld	(hl), #0xfb
-;src/player.c:383: }
+;src/player.c:400: }
 	ret
-;src/player.c:385: static void hurt_frame(void){
+;src/player.c:402: static void hurt_frame(void){
 ;	---------------------------------
 ; Function hurt_frame
 ; ---------------------------------
 _hurt_frame:
-;src/player.c:386: if(frame_counter >= HURT_FRAMES){
+;src/player.c:403: if(frame_counter >= HURT_FRAMES){
 	ld	a, (#_frame_counter)
 	sub	a, #0x1e
 	jr	C, 00102$
-;src/player.c:387: switch_state(PLAYER_STATE_FALLING);
+;src/player.c:404: switch_state(PLAYER_STATE_FALLING);
 	ld	a, #0x03
 	call	_switch_state
-;src/player.c:388: stop_hurt_sfx();
-;src/player.c:389: return;
+;src/player.c:405: stop_hurt_sfx();
+;src/player.c:406: return;
 	jp	_stop_hurt_sfx
 00102$:
-;src/player.c:391: player_x = is_facing_right ? player_x - (x_speed) : player_x + (x_speed);
+;src/player.c:408: player_x = is_facing_right ? player_x - (x_speed) : player_x + (x_speed);
 	ld	hl, #_x_speed
 	ld	a, (hl+)
 	ld	c, a
@@ -1996,7 +1840,7 @@ _hurt_frame:
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;src/player.c:392: player_y += (y_speed >> PHYSICS_DAMPNER);
+;src/player.c:409: player_y += (y_speed >> PHYSICS_DAMPNER);
 	ld	a, (#_y_speed)
 	sra	a
 	sra	a
@@ -2004,7 +1848,7 @@ _hurt_frame:
 	ld	c, (hl)
 	add	a, c
 	ld	(hl), a
-;src/player.c:393: y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + HURT_G;
+;src/player.c:410: y_speed = y_speed >= clamp_y_velocity ? clamp_y_velocity : y_speed + HURT_G;
 	ld	a, (#_y_speed)
 	xor	a, #0x80
 	sub	a, #0x94
@@ -2016,14 +1860,14 @@ _hurt_frame:
 	inc	a
 00108$:
 	ld	(#_y_speed),a
-;src/player.c:394: }
+;src/player.c:411: }
 	ret
-;src/player.c:396: void end_frame(void){
+;src/player.c:413: void end_frame(void){
 ;	---------------------------------
 ; Function end_frame
 ; ---------------------------------
 _end_frame::
-;src/player.c:397: if(frame_counter == (uint8_t)(metasprites_speeds[current_state][current_frame])){
+;src/player.c:414: if(frame_counter == (uint8_t)(metasprites_speeds[current_state][current_frame])){
 	ld	bc, #_metasprites_speeds+0
 	ld	hl, #_current_state
 	ld	l, (hl)
@@ -2049,13 +1893,13 @@ _end_frame::
 	ld	a, (#_frame_counter)
 	sub	a, c
 	jr	NZ, 00104$
-;src/player.c:398: frame_counter = 0;
+;src/player.c:415: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-;src/player.c:399: current_frame++;
+;src/player.c:416: current_frame++;
 	ld	hl, #_current_frame
 	inc	(hl)
-;src/player.c:400: if(current_frame == frames_in_state[current_state]){current_frame = 0;}
+;src/player.c:417: if(current_frame == frames_in_state[current_state]){current_frame = 0;}
 	ld	bc, #_frames_in_state+0
 	ld	a, c
 	ld	hl, #_current_state
@@ -2073,15 +1917,15 @@ _end_frame::
 	ld	(hl), #0x00
 	jr	00105$
 00104$:
-;src/player.c:402: frame_counter++;
+;src/player.c:419: frame_counter++;
 	ld	hl, #_frame_counter
 	inc	(hl)
 00105$:
-;src/player.c:405: if(!rand_init){
+;src/player.c:422: if(!rand_init){
 	ld	hl, #_rand_init
 	bit	0, (hl)
 	ret	NZ
-;src/player.c:406: r = r ^ DIV_REG ^ (current_frame << frame_counter);
+;src/player.c:423: r = r ^ DIV_REG ^ (current_frame << frame_counter);
 	ldh	a, (_DIV_REG + 0)
 	ld	hl, #_r
 	xor	a, (hl)
@@ -2098,16 +1942,16 @@ _end_frame::
 	jr	NZ,00137$
 	xor	a, c
 	ld	(#_r),a
-;src/player.c:408: }
+;src/player.c:425: }
 	ret
-;src/player.c:410: static inline void switch_state(PlayerState state){
+;src/player.c:427: static inline void switch_state(PlayerState state){
 ;	---------------------------------
 ; Function switch_state
 ; ---------------------------------
 _switch_state:
 	ld	c, a
-;src/player.c:411: if(current_state == state) {return;}
-;src/player.c:412: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
+;src/player.c:428: if(current_state == state) {return;}
+;src/player.c:429: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
 	ld	a,(#_current_state)
 	cp	a,c
 	ret	Z
@@ -2117,28 +1961,28 @@ _switch_state:
 	call	_instanciate_collision_puffs
 	pop	bc
 00104$:
-;src/player.c:413: frame_counter = 0;
+;src/player.c:430: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-;src/player.c:414: current_frame = 0;
+;src/player.c:431: current_frame = 0;
 	ld	hl, #_current_frame
 	ld	(hl), #0x00
-;src/player.c:415: current_state = state;
+;src/player.c:432: current_state = state;
 	ld	hl, #_current_state
 	ld	(hl), c
-;src/player.c:416: }
+;src/player.c:433: }
 	ret
-;src/player.c:420: static void check_collisions(void){
+;src/player.c:437: static void check_collisions(void){
 ;	---------------------------------
 ; Function check_collisions
 ; ---------------------------------
 _check_collisions:
 	add	sp, #-16
-;src/player.c:422: for(i=0; i<8; i++){
+;src/player.c:439: for(i=0; i<8; i++){
 	ld	hl, #_i
 	ld	(hl), #0x00
 00133$:
-;src/player.c:423: r = &rect_list[PLAYER_FLOOR][i];
+;src/player.c:440: r = &rect_list[PLAYER_FLOOR][i];
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -2169,7 +2013,7 @@ _check_collisions:
 	ldhl	sp,	#1
 	ld	(hl), c
 	inc	hl
-;src/player.c:424: if(r->type == INACTIVE) continue;
+;src/player.c:441: if(r->type == INACTIVE) continue;
 	ld	(hl-), a
 	ld	a, (hl+)
 	ld	e, a
@@ -2181,7 +2025,7 @@ _check_collisions:
 	ld	a, (bc)
 	sub	a, #0x02
 	jp	Z,00131$
-;src/player.c:425: if(!point_vs_rect(r)) {
+;src/player.c:442: if(!point_vs_rect(r)) {
 	ldhl	sp,	#1
 	ld	e, (hl)
 	inc	hl
@@ -2190,7 +2034,7 @@ _check_collisions:
 	ld	c, a
 	bit	0, c
 	jp	Z, 00131$
-;src/player.c:434: external_point_area |= ((uint8_t)SUB_TO_PX(last_x) >= (r->x + r->size_x)) ? 0x10 : ((uint8_t)SUB_TO_PX(last_x) <= r->x) ? 0x20 : 0x30;        
+;src/player.c:451: external_point_area |= ((uint8_t)SUB_TO_PX(last_x) >= (r->x + r->size_x)) ? 0x10 : ((uint8_t)SUB_TO_PX(last_x) <= r->x) ? 0x20 : 0x30;        
 	ld	a, (#_last_x + 1)
 	ldhl	sp,	#6
 	ld	(hl), a
@@ -2286,7 +2130,7 @@ _check_collisions:
 	ldhl	sp,	#15
 	ld	a, (hl)
 	ldhl	sp,	#0
-;src/player.c:435: external_point_area |= (last_y <= (r->y - r->size_y)) ? 0x01 : (last_y >= r->y) ? 0x02 : 0x03;
+;src/player.c:452: external_point_area |= (last_y <= (r->y - r->size_y)) ? 0x01 : (last_y >= r->y) ? 0x02 : 0x03;
 	ld	(hl+), a
 	ld	a, (hl+)
 	ld	e, a
@@ -2396,7 +2240,7 @@ _check_collisions:
 	ld	a, (hl)
 	or	a, b
 	ld	c, a
-;src/player.c:437: if((player_y > last_y) ? (player_y - last_y) > 50 : (last_y - player_y) > 50){
+;src/player.c:454: if((player_y > last_y) ? (player_y - last_y) > 50 : (last_y - player_y) > 50){
 	ld	a, (#_last_y)
 	ld	hl, #_player_y
 	sub	a, (hl)
@@ -2476,13 +2320,13 @@ _check_collisions:
 00145$:
 	or	a, a
 	jr	Z, 00106$
-;src/player.c:438: external_point_area = (external_point_area & 0xF0) + 0x02; //check for overflow height
+;src/player.c:455: external_point_area = (external_point_area & 0xF0) + 0x02; //check for overflow height
 	ld	a, c
 	and	a, #0xf0
 	add	a, #0x02
 	ld	c, a
 00106$:
-;src/player.c:441: if(rect_functions[r->type](external_point_area)) continue;
+;src/player.c:458: if(rect_functions[r->type](external_point_area)) continue;
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -2515,7 +2359,7 @@ _check_collisions:
 	pop	bc
 	bit	0, l
 	jp	NZ, 00131$
-;src/player.c:444: switch (external_point_area)
+;src/player.c:461: switch (external_point_area)
 	ld	a,c
 	cp	a,#0x11
 	jr	Z, 00109$
@@ -2534,9 +2378,9 @@ _check_collisions:
 	sub	a, #0x32
 	jp	Z,00128$
 	jp	00131$
-;src/player.c:446: case RIGHT_UP: // RIGHT - UP
+;src/player.c:463: case RIGHT_UP: // RIGHT - UP
 00109$:
-;src/player.c:447: rx = r->x + r->size_x;
+;src/player.c:464: rx = r->x + r->size_x;
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -2554,7 +2398,7 @@ _check_collisions:
 	add	a, (hl)
 	inc	hl
 	ld	(hl), a
-;src/player.c:448: ry = r->y - r->size_y;
+;src/player.c:465: ry = r->y - r->size_y;
 	ldhl	sp,#14
 	ld	a, (hl+)
 	ld	e, a
@@ -2574,7 +2418,7 @@ _check_collisions:
 	ldhl	sp,	#5
 	ld	(hl), a
 	ld	c, (hl)
-;src/player.c:449: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) < (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
+;src/player.c:466: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) < (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
 	ld	b, #0x00
 	ld	a, (#_player_y)
 	ldhl	sp,	#6
@@ -2680,7 +2524,7 @@ _check_collisions:
 	scf
 00318$:
 	jr	NC, 00111$
-;src/player.c:451: player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
+;src/player.c:468: player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -2705,25 +2549,25 @@ _check_collisions:
 	ld	(hl), b
 	jp	00131$
 00111$:
-;src/player.c:455: player_y = r->y - r->size_y - 1;
+;src/player.c:472: player_y = r->y - r->size_y - 1;
 	ldhl	sp,	#5
 	ld	a, (hl)
 	dec	a
 	ld	(#_player_y),a
-;src/player.c:456: is_grounded = true;
+;src/player.c:473: is_grounded = true;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x01
-;src/player.c:457: current_coyote_frames = 0;
+;src/player.c:474: current_coyote_frames = 0;
 	ld	hl, #_current_coyote_frames
 	ld	(hl), #0x00
-;src/player.c:458: y_speed = 0;
+;src/player.c:475: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-;src/player.c:460: break;
+;src/player.c:477: break;
 	jp	00131$
-;src/player.c:462: case RIGHT_DOWN: // RIGHT - DOWN
+;src/player.c:479: case RIGHT_DOWN: // RIGHT - DOWN
 00113$:
-;src/player.c:463: rx = r->x + r->size_x;
+;src/player.c:480: rx = r->x + r->size_x;
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -2741,7 +2585,7 @@ _check_collisions:
 	add	a, (hl)
 	inc	hl
 	ld	(hl), a
-;src/player.c:464: ry = r->y;
+;src/player.c:481: ry = r->y;
 	ldhl	sp,#14
 	ld	a, (hl+)
 	ld	e, a
@@ -2750,7 +2594,7 @@ _check_collisions:
 	ldhl	sp,	#5
 	ld	(hl), a
 	ld	c, (hl)
-;src/player.c:465: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) > (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
+;src/player.c:482: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) > (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
 	ld	b, #0x00
 	ld	a, (#_player_y)
 	ldhl	sp,	#6
@@ -2857,7 +2701,7 @@ _check_collisions:
 	scf
 00320$:
 	jr	NC, 00115$
-;src/player.c:467: player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
+;src/player.c:484: player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -2882,19 +2726,19 @@ _check_collisions:
 	ld	(hl), b
 	jp	00131$
 00115$:
-;src/player.c:471: player_y = r->y + 1;
+;src/player.c:488: player_y = r->y + 1;
 	ldhl	sp,	#5
 	ld	a, (hl)
 	inc	a
 	ld	(#_player_y),a
-;src/player.c:472: y_speed = 0;
+;src/player.c:489: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-;src/player.c:475: break;
+;src/player.c:492: break;
 	jp	00131$
-;src/player.c:477: case RIGHT_CENTER: // RIGHT - CENTER
+;src/player.c:494: case RIGHT_CENTER: // RIGHT - CENTER
 00117$:
-;src/player.c:478: player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
+;src/player.c:495: player_x = (uint16_t)PX_TO_SUB(r->x + r->size_x + 1);
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -2918,11 +2762,11 @@ _check_collisions:
 	ld	hl, #_player_x
 	ld	(hl+), a
 	ld	(hl), c
-;src/player.c:480: break;
+;src/player.c:497: break;
 	jp	00131$
-;src/player.c:482: case LEFT_UP: // LEFT - UP
+;src/player.c:499: case LEFT_UP: // LEFT - UP
 00118$:
-;src/player.c:483: rx = r->x;
+;src/player.c:500: rx = r->x;
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -2930,7 +2774,7 @@ _check_collisions:
 	ld	a, (de)
 	ldhl	sp,	#11
 	ld	(hl), a
-;src/player.c:484: ry = r->y - r->size_y;
+;src/player.c:501: ry = r->y - r->size_y;
 	ldhl	sp,#14
 	ld	a, (hl+)
 	ld	e, a
@@ -2950,7 +2794,7 @@ _check_collisions:
 	ldhl	sp,	#4
 	ld	(hl), a
 	ld	c, (hl)
-;src/player.c:485: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) > (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
+;src/player.c:502: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) > (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
 	ld	b, #0x00
 	ld	a, (#_player_y)
 	ldhl	sp,	#5
@@ -3057,7 +2901,7 @@ _check_collisions:
 	scf
 00322$:
 	jr	NC, 00120$
-;src/player.c:487: player_x = (uint16_t)PX_TO_SUB(r->x - 1);
+;src/player.c:504: player_x = (uint16_t)PX_TO_SUB(r->x - 1);
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -3074,32 +2918,32 @@ _check_collisions:
 	ld	(hl), b
 	jp	00131$
 00120$:
-;src/player.c:491: player_y = r->y - r->size_y - 1;
+;src/player.c:508: player_y = r->y - r->size_y - 1;
 	ldhl	sp,	#4
 	ld	a, (hl)
 	dec	a
 	ld	(#_player_y),a
-;src/player.c:492: is_grounded = true;
+;src/player.c:509: is_grounded = true;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x01
-;src/player.c:493: current_coyote_frames = 0;
+;src/player.c:510: current_coyote_frames = 0;
 	ld	hl, #_current_coyote_frames
 	ld	(hl), #0x00
-;src/player.c:494: y_speed = 0;
+;src/player.c:511: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-;src/player.c:496: break;
+;src/player.c:513: break;
 	jp	00131$
-;src/player.c:498: case LEFT_DOWN: // LEFT - DOWN
+;src/player.c:515: case LEFT_DOWN: // LEFT - DOWN
 00122$:
-;src/player.c:499: rx = r->x;
+;src/player.c:516: rx = r->x;
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
 	ldhl	sp,	#13
-;src/player.c:500: ry = r->y;
+;src/player.c:517: ry = r->y;
 	ld	(hl+), a
 	ld	a, (hl+)
 	ld	e, a
@@ -3107,7 +2951,7 @@ _check_collisions:
 	ld	a, (de)
 	ld	(hl), a
 	ld	c, (hl)
-;src/player.c:501: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) < (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
+;src/player.c:518: if((ry-player_y)*((uint8_t)SUB_TO_PX(last_x) - (uint8_t)SUB_TO_PX(player_x)) < (last_y - player_y)*(rx-(uint8_t)SUB_TO_PX(player_x))){
 	ld	b, #0x00
 	ld	a, (#_player_y)
 	ldhl	sp,	#3
@@ -3214,7 +3058,7 @@ _check_collisions:
 	scf
 00324$:
 	jr	NC, 00124$
-;src/player.c:503: player_x = (uint16_t)PX_TO_SUB(r->x - 1);
+;src/player.c:520: player_x = (uint16_t)PX_TO_SUB(r->x - 1);
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -3231,19 +3075,19 @@ _check_collisions:
 	ld	(hl), b
 	jr	00131$
 00124$:
-;src/player.c:507: player_y = r->y + 1;
+;src/player.c:524: player_y = r->y + 1;
 	ldhl	sp,	#15
 	ld	a, (hl)
 	inc	a
 	ld	(#_player_y),a
-;src/player.c:508: y_speed = 0;
+;src/player.c:525: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-;src/player.c:511: break;
+;src/player.c:528: break;
 	jr	00131$
-;src/player.c:513: case LEFT_CENTER: // LEFT - CENTER
+;src/player.c:530: case LEFT_CENTER: // LEFT - CENTER
 00126$:
-;src/player.c:514: player_x = (uint16_t)PX_TO_SUB(r->x - 1);
+;src/player.c:531: player_x = (uint16_t)PX_TO_SUB(r->x - 1);
 	ldhl	sp,#1
 	ld	a, (hl+)
 	ld	e, a
@@ -3256,11 +3100,11 @@ _check_collisions:
 	ld	hl, #_player_x
 	ld	(hl+), a
 	ld	(hl), c
-;src/player.c:516: break;
+;src/player.c:533: break;
 	jr	00131$
-;src/player.c:518: case CENTER_UP: // CENTER - UP
+;src/player.c:535: case CENTER_UP: // CENTER - UP
 00127$:
-;src/player.c:519: player_y = r->y - r->size_y - 1;
+;src/player.c:536: player_y = r->y - r->size_y - 1;
 	ldhl	sp,#14
 	ld	a, (hl+)
 	ld	e, a
@@ -3279,20 +3123,20 @@ _check_collisions:
 	sub	a, c
 	dec	a
 	ld	(#_player_y),a
-;src/player.c:520: is_grounded = true;
+;src/player.c:537: is_grounded = true;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x01
-;src/player.c:521: current_coyote_frames = 0;
+;src/player.c:538: current_coyote_frames = 0;
 	ld	hl, #_current_coyote_frames
 	ld	(hl), #0x00
-;src/player.c:522: y_speed = 0;
+;src/player.c:539: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-;src/player.c:523: break;
+;src/player.c:540: break;
 	jr	00131$
-;src/player.c:525: case CENTER_DOWN: // CENTER - DOWN
+;src/player.c:542: case CENTER_DOWN: // CENTER - DOWN
 00128$:
-;src/player.c:526: player_y = r->y + 1;
+;src/player.c:543: player_y = r->y + 1;
 	ldhl	sp,#14
 	ld	a, (hl+)
 	ld	e, a
@@ -3300,28 +3144,28 @@ _check_collisions:
 	ld	a, (de)
 	inc	a
 	ld	(#_player_y),a
-;src/player.c:527: y_speed = 0;
+;src/player.c:544: y_speed = 0;
 	ld	hl, #_y_speed
 	ld	(hl), #0x00
-;src/player.c:533: }
+;src/player.c:550: }
 00131$:
-;src/player.c:422: for(i=0; i<8; i++){
+;src/player.c:439: for(i=0; i<8; i++){
 	ld	hl, #_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x08
 	jp	C, 00133$
-;src/player.c:535: }
+;src/player.c:552: }
 	add	sp, #16
 	ret
-;src/player.c:537: static void update_score(void){
+;src/player.c:554: static void update_score(void){
 ;	---------------------------------
 ; Function update_score
 ; ---------------------------------
 _update_score:
 	dec	sp
 	dec	sp
-;src/player.c:539: if((PREV_PLAYER_FLOOR != PLAYER_FLOOR) && PLAYER_FLOOR == ((highest_visited_floor - 1) & 0x03)){
+;src/player.c:556: if((PREV_PLAYER_FLOOR != PLAYER_FLOOR) && PLAYER_FLOOR == ((highest_visited_floor - 1) & 0x03)){
 	ld	a, (#_last_y)
 	rlca
 	rlca
@@ -3334,10 +3178,10 @@ _update_score:
 	rlca
 	and	a, #0x03
 	ld	e, a
-;src/player.c:542: max_player_y = (uint8_t)((PREV_PLAYER_FLOOR << 6) - player_y);
+;src/player.c:559: max_player_y = (uint8_t)((PREV_PLAYER_FLOOR << 6) - player_y);
 	ld	a, (hl)
 	ldhl	sp,	#1
-;src/player.c:539: if((PREV_PLAYER_FLOOR != PLAYER_FLOOR) && PLAYER_FLOOR == ((highest_visited_floor - 1) & 0x03)){
+;src/player.c:556: if((PREV_PLAYER_FLOOR != PLAYER_FLOOR) && PLAYER_FLOOR == ((highest_visited_floor - 1) & 0x03)){
 	ld	(hl-), a
 	ld	a, (hl)
 	sub	a, e
@@ -3359,7 +3203,7 @@ _update_score:
 	ld	a, d
 	sub	a, b
 	jr	NZ, 00102$
-;src/player.c:540: score += 4;
+;src/player.c:557: score += 4;
 	ld	hl, #_score
 	ld	a, (hl+)
 	ld	c, a
@@ -3372,10 +3216,10 @@ _update_score:
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;src/player.c:541: highest_visited_floor = PLAYER_FLOOR;
+;src/player.c:558: highest_visited_floor = PLAYER_FLOOR;
 	ld	hl, #_highest_visited_floor
 	ld	(hl), e
-;src/player.c:542: max_player_y = (uint8_t)((PREV_PLAYER_FLOOR << 6) - player_y);
+;src/player.c:559: max_player_y = (uint8_t)((PREV_PLAYER_FLOOR << 6) - player_y);
 	ldhl	sp,	#0
 	ld	a, (hl+)
 	rrca
@@ -3383,14 +3227,14 @@ _update_score:
 	and	a, #0xc0
 	sub	a, (hl)
 	ld	(#_max_player_y),a
-;src/player.c:543: return;
+;src/player.c:560: return;
 	jr	00108$
 00102$:
-;src/player.c:546: if(PLAYER_FLOOR != highest_visited_floor) return;
+;src/player.c:563: if(PLAYER_FLOOR != highest_visited_floor) return;
 	ld	a, (#_highest_visited_floor)
 	sub	a, e
 	jr	NZ, 00108$
-;src/player.c:548: test_max_player_y = (uint8_t)((((PLAYER_FLOOR + 1) & 0x03) << 6) - player_y);
+;src/player.c:565: test_max_player_y = (uint8_t)((((PLAYER_FLOOR + 1) & 0x03) << 6) - player_y);
 	ld	a, e
 	inc	a
 	and	a, #0x03
@@ -3400,25 +3244,25 @@ _update_score:
 	ldhl	sp,	#1
 	sub	a, (hl)
 	ld	(#_test_max_player_y),a
-;src/player.c:549: if(max_player_y < test_max_player_y){
+;src/player.c:566: if(max_player_y < test_max_player_y){
 	ld	a, (#_max_player_y)
 	ld	hl, #_test_max_player_y
 	sub	a, (hl)
 	jr	NC, 00108$
-;src/player.c:550: max_player_y = test_max_player_y;
+;src/player.c:567: max_player_y = test_max_player_y;
 	ld	a, (hl)
 	ld	(#_max_player_y),a
 00108$:
-;src/player.c:552: }
+;src/player.c:569: }
 	inc	sp
 	inc	sp
 	ret
-;src/player.c:554: static void calculate_final_score(void){
+;src/player.c:571: static void calculate_final_score(void){
 ;	---------------------------------
 ; Function calculate_final_score
 ; ---------------------------------
 _calculate_final_score:
-;src/player.c:555: score += (max_player_y >> 4);
+;src/player.c:572: score += (max_player_y >> 4);
 	ld	a, (#_max_player_y)
 	swap	a
 	and	a, #0x0f
@@ -3435,9 +3279,9 @@ _calculate_final_score:
 	ld	(hl), c
 	inc	hl
 	ld	(hl), a
-;src/player.c:556: }
+;src/player.c:573: }
 	ret
-;src/player.c:558: static inline bool point_vs_rect(rect *r){
+;src/player.c:575: static inline bool point_vs_rect(rect *r){
 ;	---------------------------------
 ; Function point_vs_rect
 ; ---------------------------------
@@ -3445,7 +3289,7 @@ _point_vs_rect:
 	add	sp, #-7
 	ld	c, e
 	ld	b, d
-;src/player.c:559: return ((uint8_t)SUB_TO_PX(player_x) >= r->x && player_y <= r->y && (uint8_t)SUB_TO_PX(player_x) <= (r->x + r->size_x) && player_y >= (r->y - r->size_y));
+;src/player.c:576: return ((uint8_t)SUB_TO_PX(player_x) >= r->x && player_y <= r->y && (uint8_t)SUB_TO_PX(player_x) <= (r->x + r->size_x) && player_y >= (r->y - r->size_y));
 	ld	a, (#_player_x + 1)
 	ldhl	sp,	#6
 	ld	(hl), a
@@ -3564,26 +3408,26 @@ _point_vs_rect:
 00104$:
 	ld	a, #0x01
 00105$:
-;src/player.c:560: }
+;src/player.c:577: }
 	add	sp, #7
 	ret
-;src/player.c:566: static bool r_solid_function(uint8_t epa){
+;src/player.c:583: static bool r_solid_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_solid_function
 ; ---------------------------------
 _r_solid_function:
 	dec	sp
 	dec	sp
-;src/player.c:567: if(epa == CENTER_DOWN){
+;src/player.c:584: if(epa == CENTER_DOWN){
 	sub	a, #0x32
 	jp	NZ,00111$
-;src/player.c:570: bool is_upper = i & 0x01 == 0x01;
+;src/player.c:587: bool is_upper = i & 0x01 == 0x01;
 	ld	a, (#_i)
 	and	a, #0x01
 	ld	c, a
 	ldhl	sp,	#0
 	ld	(hl), c
-;src/player.c:571: component_at_r = is_upper ? map_components[PLAYER_FLOOR][i>>1].components >> 4 : map_components[PLAYER_FLOOR][i>>1].components & 0x0F;
+;src/player.c:588: component_at_r = is_upper ? map_components[PLAYER_FLOOR][i>>1].components >> 4 : map_components[PLAYER_FLOOR][i>>1].components & 0x0F;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3631,14 +3475,14 @@ _r_solid_function:
 	ld	a, (bc)
 	and	a, #0x0f
 00115$:
-;src/player.c:572: if(component_at_r == 2){
+;src/player.c:589: if(component_at_r == 2){
 	sub	a, #0x02
 	jp	NZ,00111$
-;src/player.c:573: if(is_upper){
+;src/player.c:590: if(is_upper){
 	ldhl	sp,	#0
 	bit	0, (hl)
 	jp	Z, 00106$
-;src/player.c:574: if((map_components[PLAYER_FLOOR][i>>1].status >> 4) == 0){
+;src/player.c:591: if((map_components[PLAYER_FLOOR][i>>1].status >> 4) == 0){
 	inc	hl
 	ld	bc, #_map_components+0
 	ld	a, e
@@ -3657,11 +3501,11 @@ _r_solid_function:
 	swap	a
 	and	a,#0x0f
 	jr	NZ, 00102$
-;src/player.c:575: play_bump_sfx();
+;src/player.c:592: play_bump_sfx();
 	push	bc
 	call	_play_bump_sfx
 	pop	bc
-;src/player.c:576: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 1, 4, 1, top_map_02_broken);
+;src/player.c:593: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 1, 4, 1, top_map_02_broken);
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3691,7 +3535,7 @@ _r_solid_function:
 	inc	sp
 	call	_set_bkg_tiles
 	add	sp, #6
-;src/player.c:577: map_components[PLAYER_FLOOR][i>>1].status |= 0x10;
+;src/player.c:594: map_components[PLAYER_FLOOR][i>>1].status |= 0x10;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3714,16 +3558,16 @@ _r_solid_function:
 	add	hl, bc
 	inc	hl
 	set	4, (hl)
-;src/player.c:578: return false;
+;src/player.c:595: return false;
 	xor	a, a
 	jp	00112$
 00102$:
-;src/player.c:580: instanciate_brick_particles();
+;src/player.c:597: instanciate_brick_particles();
 	push	bc
 	call	_instanciate_brick_particles
 	call	_play_break_sfx
 	pop	bc
-;src/player.c:582: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 1, 4, 1, top_map_00);
+;src/player.c:599: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 1, 4, 1, top_map_00);
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3753,7 +3597,7 @@ _r_solid_function:
 	inc	sp
 	call	_set_bkg_tiles
 	add	sp, #6
-;src/player.c:583: map_components[PLAYER_FLOOR][i>>1].components = map_components[PLAYER_FLOOR][i>>1].components & 0x0F;
+;src/player.c:600: map_components[PLAYER_FLOOR][i>>1].components = map_components[PLAYER_FLOOR][i>>1].components & 0x0F;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3777,7 +3621,7 @@ _r_solid_function:
 	ld	a, (hl)
 	and	a, #0x0f
 	ld	(hl), a
-;src/player.c:584: map_components[PLAYER_FLOOR][i>>1].status = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
+;src/player.c:601: map_components[PLAYER_FLOOR][i>>1].status = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3802,7 +3646,7 @@ _r_solid_function:
 	ld	a, (hl)
 	and	a, #0x0f
 	ld	(hl), a
-;src/player.c:585: rect_list[PLAYER_FLOOR][i].type = INACTIVE;
+;src/player.c:602: rect_list[PLAYER_FLOOR][i].type = INACTIVE;
 	ld	bc, #_rect_list+0
 	ld	a, (#_player_y)
 	rlca
@@ -3834,7 +3678,7 @@ _r_solid_function:
 	ld	(hl), #0x02
 	jp	00111$
 00106$:
-;src/player.c:587: if((map_components[PLAYER_FLOOR][i>>1].status & 0x0F) == 0){
+;src/player.c:604: if((map_components[PLAYER_FLOOR][i>>1].status & 0x0F) == 0){
 	ld	bc, #_map_components+0
 	ld	a, e
 	add	a, c
@@ -3852,11 +3696,11 @@ _r_solid_function:
 	ld	a, (de)
 	and	a, #0x0f
 	jr	NZ, 00104$
-;src/player.c:588: play_bump_sfx();
+;src/player.c:605: play_bump_sfx();
 	push	bc
 	call	_play_bump_sfx
 	pop	bc
-;src/player.c:589: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 5, 4, 2, bot_map_02_broken);
+;src/player.c:606: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 5, 4, 2, bot_map_02_broken);
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3886,7 +3730,7 @@ _r_solid_function:
 	inc	sp
 	call	_set_bkg_tiles
 	add	sp, #6
-;src/player.c:590: map_components[PLAYER_FLOOR][i>>1].status |= 0x01;
+;src/player.c:607: map_components[PLAYER_FLOOR][i>>1].status |= 0x01;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3909,16 +3753,16 @@ _r_solid_function:
 	add	hl, bc
 	inc	hl
 	set	0, (hl)
-;src/player.c:591: return false;
+;src/player.c:608: return false;
 	xor	a, a
 	jp	00112$
 00104$:
-;src/player.c:593: instanciate_brick_particles();
+;src/player.c:610: instanciate_brick_particles();
 	push	bc
 	call	_instanciate_brick_particles
 	call	_play_break_sfx
 	pop	bc
-;src/player.c:595: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 5, 4, 2, bot_map_00);
+;src/player.c:612: set_bkg_tiles(3 + (i<<1 & 0x0C), (PLAYER_FLOOR << 3) + 5, 4, 2, bot_map_00);
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3948,7 +3792,7 @@ _r_solid_function:
 	inc	sp
 	call	_set_bkg_tiles
 	add	sp, #6
-;src/player.c:596: map_components[PLAYER_FLOOR][i>>1].components = map_components[PLAYER_FLOOR][i>>1].components & 0xF0;
+;src/player.c:613: map_components[PLAYER_FLOOR][i>>1].components = map_components[PLAYER_FLOOR][i>>1].components & 0xF0;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3972,7 +3816,7 @@ _r_solid_function:
 	ld	a, (hl)
 	and	a, #0xf0
 	ld	(hl), a
-;src/player.c:597: map_components[PLAYER_FLOOR][i>>1].status = map_components[PLAYER_FLOOR][i>>1].status & 0xF0;
+;src/player.c:614: map_components[PLAYER_FLOOR][i>>1].status = map_components[PLAYER_FLOOR][i>>1].status & 0xF0;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -3997,7 +3841,7 @@ _r_solid_function:
 	ld	a, (hl)
 	and	a, #0xf0
 	ld	(hl), a
-;src/player.c:598: rect_list[PLAYER_FLOOR][i].type = INACTIVE;
+;src/player.c:615: rect_list[PLAYER_FLOOR][i].type = INACTIVE;
 	ld	bc, #_rect_list+0
 	ld	a, (#_player_y)
 	rlca
@@ -4028,19 +3872,19 @@ _r_solid_function:
 	add	hl, bc
 	ld	(hl), #0x02
 00111$:
-;src/player.c:604: return false;
+;src/player.c:621: return false;
 	xor	a, a
 00112$:
-;src/player.c:605: }
+;src/player.c:622: }
 	inc	sp
 	inc	sp
 	ret
-;src/player.c:606: static bool r_traversable_function(uint8_t epa){
+;src/player.c:623: static bool r_traversable_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_traversable_function
 ; ---------------------------------
 _r_traversable_function:
-;src/player.c:607: return (bool)(epa != CENTER_UP || (joy & J_DOWN));
+;src/player.c:624: return (bool)(epa != CENTER_UP || (joy & J_DOWN));
 	sub	a, #0x31
 	jr	NZ, 00104$
 	ld	a, (#_joy)
@@ -4051,27 +3895,27 @@ _r_traversable_function:
 	ret	Z
 00104$:
 	ld	a, #0x01
-;src/player.c:608: }
+;src/player.c:625: }
 	ret
-;src/player.c:609: static bool r_inactive_function(uint8_t epa){
+;src/player.c:626: static bool r_inactive_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_inactive_function
 ; ---------------------------------
 _r_inactive_function:
-;src/player.c:610: return true;
+;src/player.c:627: return true;
 	ld	a, #0x01
-;src/player.c:611: }
+;src/player.c:628: }
 	ret
-;src/player.c:612: static bool r_bouncy_function(uint8_t epa){
+;src/player.c:629: static bool r_bouncy_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_bouncy_function
 ; ---------------------------------
 _r_bouncy_function:
-;src/player.c:613: if(epa == CENTER_UP){
+;src/player.c:630: if(epa == CENTER_UP){
 	sub	a, #0x31
 	jp	NZ,00109$
-;src/player.c:411: if(current_state == state) {return;}
-;src/player.c:412: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
+;src/player.c:428: if(current_state == state) {return;}
+;src/player.c:429: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
 	ld	a,(#_current_state)
 	cp	a,#0x02
 	jr	Z, 00114$
@@ -4079,29 +3923,29 @@ _r_bouncy_function:
 	jr	NZ, 00113$
 	call	_instanciate_collision_puffs
 00113$:
-;src/player.c:413: frame_counter = 0;
+;src/player.c:430: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-;src/player.c:414: current_frame = 0;
+;src/player.c:431: current_frame = 0;
 	ld	hl, #_current_frame
 	ld	(hl), #0x00
-;src/player.c:415: current_state = state;
+;src/player.c:432: current_state = state;
 	ld	hl, #_current_state
 	ld	(hl), #0x02
-;src/player.c:614: switch_state(PLAYER_STATE_JUMPING);
+;src/player.c:631: switch_state(PLAYER_STATE_JUMPING);
 00114$:
-;src/player.c:615: play_boing_sfx();
+;src/player.c:632: play_boing_sfx();
 	call	_play_boing_sfx
-;src/player.c:616: y_speed = (int8_t)(-45);
+;src/player.c:633: y_speed = (int8_t)(-45);
 	ld	hl, #_y_speed
 	ld	(hl), #0xd3
-;src/player.c:617: is_grounded = false;
+;src/player.c:634: is_grounded = false;
 	ld	hl, #_is_grounded
 	ld	(hl), #0x00
-;src/player.c:618: is_jumping = true;
+;src/player.c:635: is_jumping = true;
 	ld	hl, #_is_jumping
 	ld	(hl), #0x01
-;src/player.c:622: if(i & 0x01 == 0x01) {return true;}
+;src/player.c:639: if(i & 0x01 == 0x01) {return true;}
 	push	hl
 	ld	hl, #_i
 	bit	0, (hl)
@@ -4110,7 +3954,7 @@ _r_bouncy_function:
 	ld	a, #0x01
 	ret
 00102$:
-;src/player.c:624: status_of_rack = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
+;src/player.c:641: status_of_rack = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4139,43 +3983,43 @@ _r_bouncy_function:
 	inc	hl
 	ld	a, (hl)
 	and	a, #0x0f
-;src/player.c:633: if(status_of_rack == 0x00){
+;src/player.c:650: if(status_of_rack == 0x00){
 	ld	c, a
 	or	a, a
 	jr	NZ, 00104$
-;src/player.c:634: return true;
+;src/player.c:651: return true;
 	ld	a, #0x01
 	ret
 00104$:
-;src/player.c:636: if((status_of_rack & 0b00001100) == 0b00001100){
+;src/player.c:653: if((status_of_rack & 0b00001100) == 0b00001100){
 	ld	a, c
 	and	a, #0x0c
-;src/player.c:639: make_cloth_fall(status_of_rack & 0x03);
+;src/player.c:656: make_cloth_fall(status_of_rack & 0x03);
 	push	af
 	ld	a, c
 	and	a, #0x03
 	ld	b, a
 	pop	af
-;src/player.c:636: if((status_of_rack & 0b00001100) == 0b00001100){
+;src/player.c:653: if((status_of_rack & 0b00001100) == 0b00001100){
 	sub	a, #0x0c
 	jr	NZ, 00106$
-;src/player.c:639: make_cloth_fall(status_of_rack & 0x03);
+;src/player.c:656: make_cloth_fall(status_of_rack & 0x03);
 	push	bc
 	ld	a, b
 	call	_make_cloth_fall
 	pop	bc
-;src/player.c:641: make_cloth_fall((status_of_rack + 1) & 0x03);
+;src/player.c:658: make_cloth_fall((status_of_rack + 1) & 0x03);
 	ld	a, c
 	inc	a
 	and	a, #0x03
 	call	_make_cloth_fall
 	jr	00107$
 00106$:
-;src/player.c:645: make_cloth_fall(status_of_rack & 0x03);
+;src/player.c:662: make_cloth_fall(status_of_rack & 0x03);
 	ld	a, b
 	call	_make_cloth_fall
 00107$:
-;src/player.c:647: map_components[PLAYER_FLOOR][i>>1].status &= 0xF0;
+;src/player.c:664: map_components[PLAYER_FLOOR][i>>1].status &= 0xF0;
 	ld	a, (#_player_y)
 	rlca
 	rlca
@@ -4206,16 +4050,16 @@ _r_bouncy_function:
 	and	a, #0xf0
 	ld	(hl), a
 00109$:
-;src/player.c:649: return true;
+;src/player.c:666: return true;
 	ld	a, #0x01
-;src/player.c:650: }
+;src/player.c:667: }
 	ret
-;src/player.c:652: static void make_cloth_fall(uint8_t sprite_in_OAM){
+;src/player.c:669: static void make_cloth_fall(uint8_t sprite_in_OAM){
 ;	---------------------------------
 ; Function make_cloth_fall
 ; ---------------------------------
 _make_cloth_fall:
-;src/player.c:653: clothes_speed |= (0b00000001 << ((sprite_in_OAM)<<1));
+;src/player.c:670: clothes_speed |= (0b00000001 << ((sprite_in_OAM)<<1));
 	ld	c, a
 	add	a, a
 	ld	b, a
@@ -4230,7 +4074,7 @@ _make_cloth_fall:
 	ld	hl, #_clothes_speed
 	or	a, (hl)
 	ld	(hl), a
-;src/player.c:654: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
+;src/player.c:671: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
 	ld	a, c
 	add	a, #0x10
 	ld	e, a
@@ -4248,7 +4092,7 @@ _make_cloth_fall:
 	inc	hl
 	inc	hl
 	ld	c, (hl)
-;src/player.c:654: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
+;src/player.c:671: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
 	inc	c
 	inc	c
 ;/home/javier/Escritorio/gb_development/gbdk/include/gb/gb.h:1804: shadow_OAM[nb].tile=tile;
@@ -4265,19 +4109,19 @@ _make_cloth_fall:
 	inc	hl
 	inc	hl
 	ld	(hl), c
-;src/player.c:654: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
-;src/player.c:655: }
+;src/player.c:671: set_sprite_tile(16 + sprite_in_OAM, get_sprite_tile(16 + sprite_in_OAM) + 2);
+;src/player.c:672: }
 	ret
-;src/player.c:657: static bool r_shingled_function(uint8_t epa){
+;src/player.c:674: static bool r_shingled_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_shingled_function
 ; ---------------------------------
 _r_shingled_function:
-;src/player.c:658: if(epa == CENTER_UP){
+;src/player.c:675: if(epa == CENTER_UP){
 	cp	a, #0x31
 	jr	NZ, 00102$
-;src/player.c:411: if(current_state == state) {return;}
-;src/player.c:412: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
+;src/player.c:428: if(current_state == state) {return;}
+;src/player.c:429: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
 	ld	a,(#_current_state)
 	cp	a,#0x04
 	jr	Z, 00109$
@@ -4285,46 +4129,46 @@ _r_shingled_function:
 	jr	NZ, 00108$
 	call	_instanciate_collision_puffs
 00108$:
-;src/player.c:413: frame_counter = 0;
+;src/player.c:430: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-;src/player.c:414: current_frame = 0;
+;src/player.c:431: current_frame = 0;
 	ld	hl, #_current_frame
 	ld	(hl), #0x00
-;src/player.c:415: current_state = state;
+;src/player.c:432: current_state = state;
 	ld	hl, #_current_state
 	ld	(hl), #0x04
-;src/player.c:659: switch_state(PLAYER_STATE_HURT);
+;src/player.c:676: switch_state(PLAYER_STATE_HURT);
 00109$:
-;src/player.c:661: x_speed = 0;
+;src/player.c:678: x_speed = 0;
 	xor	a, a
 	ld	hl, #_x_speed
 	ld	(hl+), a
 	ld	(hl), a
-;src/player.c:662: return true;
+;src/player.c:679: return true;
 	ld	a, #0x01
 	ret
 00102$:
-;src/player.c:664: if(epa == CENTER_DOWN){
+;src/player.c:681: if(epa == CENTER_DOWN){
 	sub	a, #0x32
 	jr	NZ, 00104$
-;src/player.c:665: play_bump_sfx();
+;src/player.c:682: play_bump_sfx();
 	call	_play_bump_sfx
 00104$:
-;src/player.c:667: return false;
+;src/player.c:684: return false;
 	xor	a, a
-;src/player.c:668: }
+;src/player.c:685: }
 	ret
-;src/player.c:669: static bool r_spikey_function(uint8_t epa){
+;src/player.c:686: static bool r_spikey_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_spikey_function
 ; ---------------------------------
 _r_spikey_function:
-;src/player.c:670: if(epa == CENTER_UP){
+;src/player.c:687: if(epa == CENTER_UP){
 	cp	a, #0x31
 	jr	NZ, 00102$
-;src/player.c:411: if(current_state == state) {return;}
-;src/player.c:412: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
+;src/player.c:428: if(current_state == state) {return;}
+;src/player.c:429: if(current_state == PLAYER_STATE_FALLING){instanciate_collision_puffs();}
 	ld	a,(#_current_state)
 	cp	a,#0x04
 	jr	Z, 00109$
@@ -4332,45 +4176,139 @@ _r_spikey_function:
 	jr	NZ, 00108$
 	call	_instanciate_collision_puffs
 00108$:
-;src/player.c:413: frame_counter = 0;
+;src/player.c:430: frame_counter = 0;
 	ld	hl, #_frame_counter
 	ld	(hl), #0x00
-;src/player.c:414: current_frame = 0;
+;src/player.c:431: current_frame = 0;
 	ld	hl, #_current_frame
 	ld	(hl), #0x00
-;src/player.c:415: current_state = state;
+;src/player.c:432: current_state = state;
 	ld	hl, #_current_state
 	ld	(hl), #0x04
-;src/player.c:671: switch_state(PLAYER_STATE_HURT);
+;src/player.c:688: switch_state(PLAYER_STATE_HURT);
 00109$:
-;src/player.c:672: y_speed = (int8_t)(HURT_Y_SPEED);
+;src/player.c:689: y_speed = (int8_t)(HURT_Y_SPEED);
 	ld	hl, #_y_speed
 	ld	(hl), #0xf8
-;src/player.c:673: x_speed = HURT_X_SPEED;
+;src/player.c:690: x_speed = HURT_X_SPEED;
 	ld	hl, #_x_speed
 	xor	a, a
 	ld	(hl+), a
-;src/player.c:674: return true;
+;src/player.c:691: return true;
 	ld	a,#0x01
 	ld	(hl),a
 	ret
 00102$:
-;src/player.c:676: if(epa == CENTER_DOWN){
+;src/player.c:693: if(epa == CENTER_DOWN){
 	sub	a, #0x32
 	jr	NZ, 00104$
-;src/player.c:677: play_bump_sfx();
+;src/player.c:694: play_bump_sfx();
 	call	_play_bump_sfx
 00104$:
-;src/player.c:679: return false;
+;src/player.c:696: return false;
 	xor	a, a
-;src/player.c:680: }
+;src/player.c:697: }
 	ret
-;src/player.c:681: static bool r_initf_function(uint8_t epa){
+;src/player.c:699: static bool r_precarious_function(uint8_t epa){
+;	---------------------------------
+; Function r_precarious_function
+; ---------------------------------
+_r_precarious_function:
+;src/player.c:700: if(epa == CENTER_UP){
+	sub	a, #0x31
+	jr	NZ, 00104$
+;src/player.c:701: uint8_t status_of_planter = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
+	ld	bc, #_map_components+0
+	ld	a, (#_player_y)
+	rlca
+	rlca
+	and	a, #0x03
+	ld	l, a
+;	spillPairReg hl
+;	spillPairReg hl
+	ld	h, #0x00
+;	spillPairReg hl
+;	spillPairReg hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, hl
+	add	hl, bc
+	ld	c, l
+	ld	b, h
+	ld	a, (#_i)
+	srl	a
+	add	a, a
+	ld	l, a
+	ld	h, #0x00
+	add	hl, bc
+	inc	hl
+	ld	b, (hl)
+	ld	a, b
+	and	a, #0x0f
+;src/player.c:702: uint8_t planter_sprite = status_of_planter >> 3;
+	push	af
+	swap	a
+	rlca
+	and	a, #0x1f
+	ld	c, a
+	pop	af
+;src/player.c:703: status_of_planter &= 0x07;
+	and	a, #0x07
+	jr	NZ, 00102$
+;src/player.c:704: if(!status_of_planter){
+;src/player.c:706: map_components[PLAYER_FLOOR][i>>1].status |= 0x01;
+	set	0, b
+	ld	(hl), b
+;src/player.c:707: make_planter_fall(planter_sprite);
+	ld	a, c
+	call	_make_planter_fall
+00102$:
+;src/player.c:720: return false;
+	xor	a, a
+	ret
+00104$:
+;src/player.c:722: return true;
+	ld	a, #0x01
+;src/player.c:723: }
+	ret
+;src/player.c:725: static void make_planter_fall(uint8_t sprite_in_OAM){
+;	---------------------------------
+; Function make_planter_fall
+; ---------------------------------
+_make_planter_fall:
+;src/player.c:727: planters_drop_flag[sprite_in_OAM] |= (PLAYER_FLOOR << 6) 
+	add	a,#<(_planters_drop_flag)
+	ld	c, a
+	ld	a, #>(_planters_drop_flag)
+	adc	a, #0x00
+	ld	b, a
+	ld	a, (bc)
+	ld	e, a
+	ld	a, (#_player_y)
+	rlca
+	rlca
+	and	a, #0x03
+	rrca
+	rrca
+	and	a, #0xc0
+	ld	d, a
+;src/player.c:728: | ((i >> 1) << 4) 
+	ld	a, (#_i)
+	srl	a
+	swap	a
+	and	a, #0xf0
+	or	a, d
+	set	3, a
+	or	a, e
+	ld	(bc), a
+;src/player.c:730: }
+	ret
+;src/player.c:732: static bool r_initf_function(uint8_t epa){
 ;	---------------------------------
 ; Function r_initf_function
 ; ---------------------------------
 _r_initf_function:
-;src/player.c:682: game_started_flag = epa == CENTER_UP;
+;src/player.c:733: game_started_flag = epa == CENTER_UP;
 	sub	a, #0x31
 	ld	a, #0x01
 	jr	Z, 00121$
@@ -4379,7 +4317,7 @@ _r_initf_function:
 	ld	c, a
 	ld	hl, #_game_started_flag
 	ld	(hl), c
-;src/player.c:683: return (bool)(epa != CENTER_UP || (joy & J_DOWN));
+;src/player.c:734: return (bool)(epa != CENTER_UP || (joy & J_DOWN));
 	bit	0, c
 	jr	Z, 00104$
 	ld	a, (#_joy)
@@ -4390,7 +4328,7 @@ _r_initf_function:
 	ret	Z
 00104$:
 	ld	a, #0x01
-;src/player.c:684: }
+;src/player.c:735: }
 	ret
 	.area _CODE
 	.area _INITIALIZER
@@ -4406,5 +4344,6 @@ __xinit__rect_functions:
 	.dw _r_bouncy_function
 	.dw _r_shingled_function
 	.dw _r_spikey_function
+	.dw _r_precarious_function
 	.dw _r_initf_function
 	.area _CABS (ABS)

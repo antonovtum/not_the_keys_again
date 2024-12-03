@@ -7,96 +7,108 @@ Symbol Table
     .__.ABS.                                                    =  000000 G
     .__.CPU.                                                    =  000000 L
     .__.H$L.                                                    =  000000 L
+    _OBP1_REG                                                      ****** GX
     _SCX_REG                                                       ****** GX
     _SCY_REG                                                       ****** GX
+    ___current_base_prop                                           ****** GX
+    ___current_base_tile                                           ****** GX
+    ___current_metasprite                                          ****** GX
     ___memcpy                                                      ****** GX
-  1 _accelerate_cam_flag                                           00000D R
-  0 _add_clothes_to_rag                                            000866 GR
-  0 _all_bots                                                      000120 GR
-  0 _all_tops                                                      000118 GR
-  0 _animate_weeds                                                 000615 GR
+    ___move_metasprite                                             ****** GX
+  1 _accelerate_cam_flag                                           00000E R
+  0 _add_clothes_to_rag                                            000ACB GR
+  0 _add_planter                                                   000C6E GR
+  0 _all_bots                                                      000162 GR
+  0 _all_tops                                                      00015A GR
+  0 _animate_weeds                                                 00086B GR
     _base                                                          ****** GX
     _base_floor_map                                                ****** GX
-  0 _bot_info                                                      0000A5 GR
+  0 _bot_info                                                      0000E7 GR
     _bot_map_00                                                    ****** GX
     _bot_map_01                                                    ****** GX
     _bot_map_02                                                    ****** GX
     _bot_map_03                                                    ****** GX
-    _bot_map_04                                                    ****** GX
     _bot_map_05                                                    ****** GX
-  0 _bulky_bots                                                    000110 GR
-  0 _bulky_tops                                                    000114 GR
-  1 _camera_y                                                      000007 GR
-  1 _camera_y_clamped                                              000009 GR
-  1 _clothes_position                                              000133 GR
-  1 _clothes_speed                                                 000137 GR
-  0 _compute_scene_frame                                           000475 GR
-  1 _current_cam_frame                                             00000C R
-  1 _deactivate_weeds_flag                                         000138 GR
+  0 _bulky_bots                                                    000152 GR
+  0 _bulky_tops                                                    000156 GR
+  1 _camera_y                                                      000008 GR
+  1 _camera_y_clamped                                              00000A GR
+  1 _clothes_position                                              000134 GR
+  1 _clothes_speed                                                 000138 GR
+  0 _compute_scene_frame                                           0004BC GR
+  1 _current_cam_frame                                             00000D R
+  1 _deactivate_planters_flag                                      000140 GR
+  1 _deactivate_weeds_flag                                         000139 GR
     _extra_sprites                                                 ****** GX
-  0 _fill_memory                                                   000C99 GR
-  0 _fill_window                                                   000BDC GR
-  1 _frames_to_move                                                00000B R
-  1 _game_ended_flag                                               00000F GR
-  1 _game_started_flag                                             00000E GR
-  0 _gen_new_floor                                                 000684 GR
+  0 _fill_memory                                                   0011CA GR
+  0 _fill_window                                                   00110D GR
+  1 _frames_to_move                                                00000C R
+  1 _game_ended_flag                                               000010 GR
+  1 _game_started_flag                                             00000F GR
+  0 _gen_new_floor                                                 0008DA GR
+  1 _global_timer                                                  000003 R
     _hub_data                                                      ****** GX
     _hub_map                                                       ****** GX
   1 _i                                                             000000 R
     _initrand                                                      ****** GX
-  1 _is_generated                                                  00013A R
+  1 _is_generated                                                  000142 R
   0 _load_map                                                      000000 GR
-  1 _malloc_i                                                      0000D2 R
-  1 _map_components                                                0000B0 GR
-  0 _memcpy_rect                                                   000D51 GR
-  1 _memcpy_rect_cur_row_65536_298                                 00013B R
-  0 _mend_incorrect_windows                                        000C49 GR
-  0 _move_camera                                                   00048E GR
-  0 _move_sprites_down                                             000526 GR
-  1 _next_assignable_rect_index                                    0000D0 R
-  0 _next_map_gen_step                                             000A09 GR
-    _numbers                                                       ****** GX
-  1 _old_camera_y                                                  000008 GR
-  1 _old_camera_y_clamped                                          00000A GR
+  1 _malloc_i                                                      0000D3 R
+  1 _map_components                                                0000B1 GR
+  0 _memcpy_rect                                                   001282 GR
+  1 _memcpy_rect_cur_row_65536_437                                 000143 R
+  0 _mend_incorrect_windows                                        00117A GR
 ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
 Hexadecimal [24-Bits]
 
 Symbol Table
 
+  0 _move_camera                                                   0004DA GR
+  0 _move_sprites_down                                             000638 GR
+  1 _next_assignable_rect_index                                    0000D1 R
+  0 _next_map_gen_step                                             000F3A GR
+    _numbers                                                       ****** GX
+  1 _old_camera_y                                                  000009 GR
+  1 _old_camera_y_clamped                                          00000B GR
     _partly_broken_bricks                                          ****** GX
-  0 _possible_clothes                                              000128 GR
+    _planter                                                       ****** GX
+    _planter_box                                                   ****** GX
+  1 _planters_drop_flag                                            00013E GR
+  1 _planters_position_x                                           00013A GR
+  1 _planters_position_y                                           00013C GR
+  0 _possible_clothes                                              00016A GR
   1 _r                                                             000002 GR
     _rand                                                          ****** GX
   1 _rand_init                                                     000001 GR
-  1 _rect_list                                                     000010 GR
-  0 _scene_init                                                    00012A GR
+  1 _rect_list                                                     000011 GR
+  0 _scene_init                                                    00016C GR
     _set_bkg_data                                                  ****** GX
     _set_bkg_tiles                                                 ****** GX
-  0 _set_camera                                                    0004C7 GR
+  0 _set_camera                                                    000516 GR
     _set_sprite_data                                               ****** GX
     _shadow_OAM                                                    ****** GX
-  0 _top_info                                                      0000DB GR
+  0 _shake_planters                                                000575 GR
+  0 _top_info                                                      00011D GR
     _top_map_00                                                    ****** GX
     _top_map_01                                                    ****** GX
     _top_map_02                                                    ****** GX
     _top_map_03                                                    ****** GX
     _top_map_04                                                    ****** GX
-  0 _traversable_bots                                              000108 GR
-  0 _traversable_tops                                              00010C GR
-  0 _update_walker                                                 000A2F GR
-  1 _walker_byte                                                   0000D1 R
-  1 _weeds_frame_counter                                           000139 R
-  1 _window_components_on_current_floor                            000003 R
-  1 _window_map                                                    0000D3 R
-
+  0 _traversable_bots                                              00014A GR
+  0 _traversable_tops                                              00014E GR
+  0 _update_walker                                                 000F60 GR
+  1 _walker_byte                                                   0000D2 R
+  1 _weeds_frame_counter                                           000141 R
+  1 _window_components_on_current_floor                            000004 R
+  1 _window_map                                                    0000D4 R
 
 ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 3
 Hexadecimal [24-Bits]
 
 Area Table
 
-   0 _CODE                                      size    D9F   flags    0
-   1 _DATA                                      size    13C   flags    0
+   0 _CODE                                      size   12D0   flags    0
+   1 _DATA                                      size    144   flags    0
    2 _INITIALIZED                               size      0   flags    0
    3 _DABS                                      size      0   flags    8
    4 _HOME                                      size      0   flags    0

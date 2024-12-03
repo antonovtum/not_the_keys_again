@@ -7,6 +7,7 @@ enum RECT_TYPE {
     BOUNCY,
     SHINGLED,
     SPIKEY,
+    PRECARIOUS,
     INIT_FLAG
 };
 
@@ -42,6 +43,8 @@ extern bool rand_init;
 extern uint8_t clothes_position[4];
 extern uint8_t clothes_speed;
 extern uint8_t deactivate_weeds_flag;
+
+extern uint8_t planters_drop_flag[2];
 
 void load_map(void);
 void scene_init(void);

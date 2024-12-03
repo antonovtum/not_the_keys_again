@@ -13,6 +13,8 @@ void player_init(void);
 void compute_player_frame(void);
 void render_player(void);
 void end_frame(void);
+void instanciate_puff(uint8_t x, uint8_t y, bool is_facing_right);
+void render_all_particles(void);
 
 int *debug_info(void);
 

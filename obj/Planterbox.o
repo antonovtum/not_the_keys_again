@@ -1,0 +1,32 @@
+XL3
+H 9 areas 3 global symbols
+M Planterbox
+O -msm83
+S .__.ABS. Def000000
+A _CODE size 4C flags 0 addr 0
+S _planter Def000040
+S _planter_box Def000000
+A _DATA size 0 flags 0 addr 0
+A _INITIALIZED size 0 flags 0 addr 0
+A _DABS size 0 flags 8 addr 0
+A _HOME size 0 flags 0 addr 0
+A _GSINIT size 0 flags 0 addr 0
+A _GSFINAL size 0 flags 0 addr 0
+A _INITIALIZER size 0 flags 0 addr 0
+A _CABS size 0 flags 8 addr 0
+T 00 00 00
+R 00 00 00 00
+T 00 00 00 7F 7F 4F 70 60 7F 4F 70 4F 70 20 3F 00
+R 00 00 00 00
+T 0D 00 00 00 00 00 FF FF FF 01 07 FF FE 02 FE 02
+R 00 00 00 00
+T 1A 00 00 0C FC 00 00 00 00 00 00 00 00 00 00 02
+R 00 00 00 00
+T 27 00 00 00 25 02 52 20 22 02 22 22 00 00 00 00
+R 00 00 00 00
+T 34 00 00 00 00 08 00 16 08 29 06 5A 28 2A 0A
+R 00 00 00 00
+T 40 00 00
+R 00 00 00 00
+T 40 00 00 00 00 82 00 00 08 83 00 80 00 00 00
+R 00 00 00 00

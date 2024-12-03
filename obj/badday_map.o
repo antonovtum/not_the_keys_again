@@ -1,0 +1,25 @@
+XL3
+H 9 areas 2 global symbols
+M badday_map
+O -msm83
+S .__.ABS. Def000000
+A _CODE size 2A flags 0 addr 0
+S _badday_map Def000000
+A _DATA size 0 flags 0 addr 0
+A _INITIALIZED size 0 flags 0 addr 0
+A _DABS size 0 flags 8 addr 0
+A _HOME size 0 flags 0 addr 0
+A _GSINIT size 0 flags 0 addr 0
+A _GSFINAL size 0 flags 0 addr 0
+A _INITIALIZER size 0 flags 0 addr 0
+A _CABS size 0 flags 8 addr 0
+T 00 00 00
+R 00 00 00 00
+T 00 00 00 80 81 82 83 84 85 86 87 88 89 8A 8B 8C
+R 00 00 00 00
+T 0D 00 00 8C 8D 8E 8F 90 91 92 93 80 94 82 83 84
+R 00 00 00 00
+T 1A 00 00 95 96 97 98 99 8A 9A 9B 9C 8D 8E 8F 90
+R 00 00 00 00
+T 27 00 00 9D 8D 9E
+R 00 00 00 00

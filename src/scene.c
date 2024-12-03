@@ -10,6 +10,7 @@
 #include "../res/hub_map.h"
 #include "../res/base_floor_map.h"
 #include "../res/window_maps.h"
+#include "../res/Planterbox.h"
 #include "../res/Numbers.h"
 #include "../res/partly_broken_bricks.h"
 #include "../res/extra_sprites.h"
@@ -20,7 +21,8 @@
 //TEMP
 static uint8_t i; //iterator
 bool rand_init;
-UBYTE r;
+uint8_t r;
+static uint8_t global_timer;
 //static window_component_struct current_top_info;
 //static window_component_struct current_bot_info;
 
@@ -28,7 +30,7 @@ static uint8_t window_components_on_current_floor[4]; //Four upper bits top_comp
 
 // current and old positions of the camera in pixels
 uint8_t camera_y, old_camera_y;
-UBYTE camera_y_clamped, old_camera_y_clamped;
+uint8_t camera_y_clamped, old_camera_y_clamped;
 static uint8_t frames_to_move, current_cam_frame, accelerate_cam_flag; 
 bool game_started_flag;
 bool game_ended_flag;
@@ -45,7 +47,7 @@ enum FLOOR_TYPE {
 };
 
 //walker
-static UBYTE walker_byte; // 0xUFCCVVVV
+static uint8_t walker_byte; // 0xUFCCVVVV
 static uint8_t malloc_i;
 static uint8_t window_map[96];
 #define FINISHED_PATH (walker_byte & 0x40)
@@ -58,6 +60,11 @@ static uint8_t window_map[96];
 uint8_t clothes_position[4];
 uint8_t clothes_speed; //two bits per clothes 0xDDCCBBAA
 uint8_t deactivate_weeds_flag; //two bits per weed 0xDDCCBBAA
+
+uint8_t planters_position_x[2];
+uint8_t planters_position_y[2];
+uint8_t planters_drop_flag[2]; // 0xFFWWTTTT first four bits collider reference (2 bits floor, 2 bits window), last four bits drop timer
+uint8_t deactivate_planters_flag; //2 max planters. Last two bits for visible flags 0x000000BA
 static uint8_t weeds_frame_counter;
 
 //floor gen vars
@@ -69,7 +76,7 @@ const window_component_struct bot_info[6] = {
 
     {.y_offset = 5U, .h = 2, .map = bot_map_02, .collider = {1U, 54U, 30U, 21U, SOLID}},
     {.y_offset = 4U, .h = 3, .map = bot_map_03, .collider = {1U, 54U, 30U, 27U, SPIKEY}},
-    {.y_offset = 5U, .h = 2, .map = bot_map_04, .collider = {1U, 52U, 30U, 19U, TRAVERSABLE}},
+    {.y_offset = 5U, .h = 2, .map = bot_map_00, .collider = {1U, 52U, 30U, 19U, PRECARIOUS}},
     {.y_offset = 5U, .h = 2, .map = bot_map_05, .collider = {1U, 52U, 30U, 19U, BOUNCY}},
 };
 
@@ -82,7 +89,7 @@ const window_component_struct top_info[5] = {
     {.y_offset = 1, .h = 1, .map = top_map_04, .collider = {1U, 21U, 30U, 19U, SHINGLED}},
 };
 
-const unsigned char traversable_bots[] = {0x01, 0x01, 0x05, 0x01}; //hemos quitado 0x04 porque aún no funciona //we put more instances of the parts we want with higher probability, always a power of two to avoid division when getting a rand
+const unsigned char traversable_bots[] = {0x01, 0x01, 0x05, 0x04}; //hemos quitado 0x04 porque aún no funciona //we put more instances of the parts we want with higher probability, always a power of two to avoid division when getting a rand
 const unsigned char traversable_tops[] = {0x01, 0x03, 0x01, 0x01};
 const unsigned char bulky_bots[] = {0x01, 0x02, 0x03, 0x02};
 const unsigned char bulky_tops[] = {0x00, 0x02, 0x04, 0x02};
@@ -99,9 +106,11 @@ void move_camera(void);
 void set_camera(void);
 void gen_new_floor(void);
 
+void shake_planters(void);
 void move_sprites_down(void);
 void animate_weeds(void);
 void add_clothes_to_rag(window_status* temp_window);
+void add_planter(window_status* temp_window);
 
 void next_map_gen_step(void);
 void update_walker(void);
@@ -113,11 +122,12 @@ void move_rects(void);
 
 void memcpy_rect(uint8_t wm_pos, uint8_t * p_src, uint8_t src_width, uint8_t size_bytes);
 
-void load_map(){
+void load_map(void){
     set_bkg_data(0, 112U, hub_data);
     set_bkg_tiles(map_pos_x, 20U, 20u, 30u, hub_map);
     camera_y = 0;
     move_bkg(map_pos_x << 3, camera_y);
+    set_sprite_data(0x82, 4, planter_box);
 
     //extra effects
     set_sprite_data(29, 8, extra_sprites);
@@ -137,6 +147,18 @@ void load_map(){
     weeds_frame_counter = 0;
     clothes_speed = 0b11100100;
     deactivate_weeds_flag = 0;
+
+    planters_drop_flag[0] = 0;
+    planters_drop_flag[1] = 0;
+    deactivate_planters_flag = 0x03;
+    hide_sprite(0x1A);
+    hide_sprite(0x1B);
+    hide_sprite(0x1C);
+    hide_sprite(0x1D);
+    hide_sprite(0x1E);
+    hide_sprite(0x1F);
+    hide_sprite(0x20);
+    hide_sprite(0x21);
 }
 
 void scene_init(void){
@@ -146,6 +168,8 @@ void scene_init(void){
     set_bkg_data(0x7D, 5, partly_broken_bricks);
     //set_bkg_tiles(map_pos_x, 20U, 20u, 30u, hub_map);
     //camera_y = 0;
+    global_timer = 0;
+
     old_camera_y = 0;
     frames_to_move = 40;
     current_cam_frame = 0;
@@ -263,6 +287,8 @@ void compute_scene_frame(void){
     move_camera();
 
     animate_weeds();
+
+    global_timer++;
 }
 
 void move_camera(void){
@@ -277,6 +303,7 @@ void move_camera(void){
         set_camera();
     }
 
+    shake_planters();
     move_sprites_down();
 
     if(accelerate_cam_flag == 0xFF && frames_to_move > 16U){
@@ -292,6 +319,64 @@ void set_camera(void){
     if(camera_y_clamped != old_camera_y_clamped){
         gen_new_floor();
         old_camera_y = camera_y-1;
+    }
+}
+
+void shake_planters(void){
+    if(!(deactivate_planters_flag & 0x01)){
+        if(((planters_drop_flag[0]) >> 3) & 0x01){
+            if((planters_drop_flag[0] & 0x0F) != 0x0F){
+                uint8_t planter_x;
+                hide_sprite(0x1E);
+                hide_sprite(0x1F);
+
+                if (!(global_timer & 0x03))
+                {
+                    planters_drop_flag[0] = (planters_drop_flag[0] & 0xF8) | ((planters_drop_flag[0] + 1) & 0x07);
+                    planter_x = planters_position_x[0];
+                    shadow_OAM[0x1A].x = planter_x;
+                    shadow_OAM[0x1B].x = planter_x + 8;
+                    return;
+                }
+                planter_x = (global_timer & 0x02) ? planters_position_x[0] + 1 : planters_position_x[0] - 2;
+                shadow_OAM[0x1A].x = planter_x;
+                shadow_OAM[0x1B].x = planter_x + 8;
+                // else
+                // {
+                //     uint8_t planter_floor = planters_drop_flag[0] >> 6;
+                //     uint8_t planter_window = (planters_drop_flag[0] >> 3) & 0x06; //0x00000XX0
+                //     rect_list[planter_floor][planter_window].type = INACTIVE;
+                // }
+            }
+        }
+    }
+
+    if(!(deactivate_planters_flag & 0x02)){
+        if(((planters_drop_flag[1]) >> 3) & 0x01){
+            if((planters_drop_flag[1] & 0x0F) != 0x0F){
+                uint8_t planter_x;
+                hide_sprite(0x20);
+                hide_sprite(0x21);
+
+                if (!(global_timer & 0x03))
+                {
+                    planters_drop_flag[1] = (planters_drop_flag[1] & 0xF8) | ((planters_drop_flag[1] + 1) & 0x07);
+                    planter_x = planters_position_x[1];
+                    shadow_OAM[0x1C].x = planter_x;
+                    shadow_OAM[0x1D].x = planter_x + 8;
+                    return;
+                }
+                planter_x = (global_timer & 0x02) ? planters_position_x[1] + 1 : planters_position_x[1] - 2;
+                shadow_OAM[0x1C].x = planter_x;
+                shadow_OAM[0x1D].x = planter_x + 8;
+                // else
+                // {
+                //     uint8_t planter_floor = planters_drop_flag[1] >> 6;
+                //     uint8_t planter_window = (planters_drop_flag[1] >> 3) & 0x06; //0x00000XX0
+                //     rect_list[planter_floor][planter_window].type = INACTIVE;
+                // }
+            }
+        }
     }
 }
 
@@ -313,6 +398,55 @@ void move_sprites_down(void){
             deactivate_weeds_flag |= 0b00000001 << (i<<1);
             clothes_speed &= ~(0b00000011 << (i<<1));
             hide_sprite(16+i);
+        }
+    }
+    if(!(deactivate_planters_flag & 0x01)){
+        if ((uint8_t)(planters_position_y[0]-camera_y) >= 152 && (uint8_t)(planters_position_y[0]-camera_y) < 170)
+        {
+            deactivate_planters_flag |= 0x01;
+            hide_sprite(0x1A);
+            hide_sprite(0x1B);
+            hide_sprite(0x1E);
+            hide_sprite(0x1F);
+        } else{
+            if ((planters_drop_flag[0] & 0x0F) == 0x0F)
+            {
+                planters_position_y[0] += 2;
+                uint8_t planter_floor = planters_drop_flag[0] >> 6;
+                uint8_t planter_window = (planters_drop_flag[0] >> 3) & 0x06; //0x00000XX0
+                rect_list[planter_floor][planter_window].type = INACTIVE;
+            }
+            
+            // planters_position_y[0] += (planters_drop_flag & 0x0F) << 1;
+            shadow_OAM[0x1A].y = planters_position_y[0] - camera_y;
+            shadow_OAM[0x1B].y = planters_position_y[0] - camera_y;
+            shadow_OAM[0x1E].y = (planters_position_y[0] - 8) - camera_y;
+            shadow_OAM[0x1F].y = (planters_position_y[0] - 8) - camera_y;
+        }
+    }
+    if(!(deactivate_planters_flag & 0x02)){
+        if ((uint8_t)(planters_position_y[1]-camera_y) >= 152 && (uint8_t)(planters_position_y[1]-camera_y) < 170)
+        {
+            deactivate_planters_flag |= 0x02;
+            hide_sprite(0x1C);
+            hide_sprite(0x1D);
+            hide_sprite(0x20);
+            hide_sprite(0x21);
+        } else{
+            if ((planters_drop_flag[1] & 0x0F) == 0x0F)
+            {
+                planters_position_y[1] += 2;
+                uint8_t planter_floor = planters_drop_flag[1] >> 6;
+                uint8_t planter_window = (planters_drop_flag[1] >> 3) & 0x06; //0x00000XX0
+                rect_list[planter_floor][planter_window].type = INACTIVE;
+            }
+            
+            
+            // planters_position_y[1] += ((planters_drop_flag >> 4) & 0x0F) << 1;
+            shadow_OAM[0x1C].y = planters_position_y[1] - camera_y;
+            shadow_OAM[0x1D].y = planters_position_y[1] - camera_y;
+            shadow_OAM[0x20].y = (planters_position_y[1] - 8) - camera_y;
+            shadow_OAM[0x21].y = (planters_position_y[1] - 8) - camera_y;
         }
     }
 }
@@ -387,6 +521,8 @@ void gen_new_floor(void){
         //put the clothes sprites on the rack if needed
         if((window_components_on_current_floor[i] & 0x0F) == 0x05){
             add_clothes_to_rag(&temp_window);
+        } else if ((window_components_on_current_floor[i] & 0x0F) == 0x04){
+            add_planter(&temp_window);
         }
         map_components[camera_y_clamped][i] = temp_window;
     }
@@ -449,6 +585,51 @@ void add_clothes_to_rag(window_status* temp_window){
     temp_window->status = (temp_window->status & 0xF0) | rack_status; 
 }
 
+void add_planter(window_status* temp_window){
+    if(game_ended_flag) return;
+
+    // Get available hardware sprite
+    uint8_t h_sprite;
+    if(deactivate_planters_flag & 0x01){
+        h_sprite = 0;
+        planters_drop_flag[0] = 0x00;
+        deactivate_planters_flag &= 0b11111110;
+    }
+    else if(deactivate_planters_flag & 0x02){
+        h_sprite = 1;
+        planters_drop_flag[1] = 0x00;
+        deactivate_planters_flag &= 0b11111101;
+    }
+    else{return;}
+
+    uint8_t planter_x = ((3 + (i<<2)) << 3) + 8u;
+    uint8_t planter_y = (((camera_y_clamped << 3) + 5) << 3) + 17u;
+
+    planters_position_x[h_sprite] = planter_x;
+    planters_position_y[h_sprite] = planter_y;
+    
+    move_metasprite(planter, 0, 0x1A + (h_sprite << 1), planter_x, planter_y-camera_y);
+
+    // flowers
+    OBP1_REG = DMG_PALETTE(DMG_WHITE, DMG_WHITE, DMG_LITE_GRAY, DMG_BLACK);
+    set_sprite_tile(0x1E + (h_sprite << 1), 0x84 + (rand() & 0x01));
+    set_sprite_tile(0x1F + (h_sprite << 1), 0x84 + (rand() & 0x01));
+
+    set_sprite_prop(0x1E + (h_sprite << 1), (0x10 | (rand() & 0x08)));
+    set_sprite_prop(0x1F + (h_sprite << 1), (0x10 | (rand() & 0x08)));
+
+    move_sprite(0x1E + (h_sprite << 1), planter_x, (planter_y - 8) - camera_y);
+    move_sprite(0x1F + (h_sprite << 1), planter_x + 8, (planter_y - 8) - camera_y);
+    //encode the clothes info into 4bit
+    //    0
+    //    b
+    //    X         -   Which of the two available hardware sprites is being used to display the planter.
+    //    0         -   These three bytes will work as a timer, it starts off at 0 as a signal to not start counting.
+    //    0         -   Once the player touches the pot the first time it will increase the timer by 1 kickstarting it.
+    //    0         -   It will then keep on counting up until it overflows back to 0, at which point the planter will fall.
+    temp_window->status = (temp_window->status & 0xF0) | (h_sprite << 3); 
+}
+
 void next_map_gen_step(void){
     // --------------------
     // 3 modes:
@@ -484,7 +665,7 @@ void update_walker(void){
         //return;
     }
     //choose a new direction and fill the next window
-    else if(TURNING_PROB < (UBYTE)rand()){
+    else if(TURNING_PROB < (uint8_t)rand()){
         //go up
         walker_byte |= 0x40;
         window_components_on_current_floor[CURRENT_WINDOW & 0x03] = (window_components_on_current_floor[CURRENT_WINDOW & 0x03] & 0x0F) | (uint8_t)((traversable_tops[(rand() & 0x03)]) << 4);

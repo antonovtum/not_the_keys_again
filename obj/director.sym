@@ -31,6 +31,8 @@ Symbol Table
   7 __xinit__frame_counter                                         000000 R
     _add_LCD                                                       ****** GX
     _add_VBL                                                       ****** GX
+    _badday_data                                                   ****** GX
+    _badday_map                                                    ****** GX
     _base_floor_map                                                ****** GX
     _bubble_empty                                                  ****** GX
     _bubble_key                                                    ****** GX
@@ -47,31 +49,34 @@ Symbol Table
     _fall_metasprites                                              ****** GX
     _fallen                                                        ****** GX
     _fill_bkg_rect                                                 ****** GX
-  0 _finish_frame_inner                                            000DC7 GR
-  0 _finish_frame_with_animation_inner                             000DE4 GR
+  0 _finish_frame_inner                                            000E95 GR
+  0 _finish_frame_with_animation_inner                             000EBA GR
   2 _frame_counter                                                 000000 R
   1 _i                                                             000000 R
     _idle_metasprites                                              ****** GX
+    _instanciate_puff                                              ****** GX
     _is_facing_right                                               ****** GX
   1 _is_generated                                                  000003 R
     _joypad                                                        ****** GX
-    _jump_metasprites                                              ****** GX
-    _key_left_0                                                    ****** GX
-    _key_left_1                                                    ****** GX
 ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
 Hexadecimal [24-Bits]
 
 Symbol Table
 
+    _jump_metasprites                                              ****** GX
+    _key_left_0                                                    ****** GX
+    _key_left_1                                                    ****** GX
     _key_right_0                                                   ****** GX
     _key_right_1                                                   ****** GX
     _load_map                                                      ****** GX
     _look_up                                                       ****** GX
   1 _max_scan                                                      000004 R
+    _mrwhosit                                                      ****** GX
+    _mrwhosit_sprite                                               ****** GX
   0 _open_window_map                                               0000AF GR
   0 _open_window_tiles                                             00004F GR
-  0 _pan_cloud                                                     000F8A GR
-  0 _pan_up                                                        000EA0 GR
+  0 _pan_cloud                                                     001060 GR
+  0 _pan_up                                                        000F76 GR
   0 _play_intro_cinematic                                          0000FC GR
     _playerSprite_extra                                            ****** GX
     _player_init                                                   ****** GX
@@ -82,8 +87,9 @@ Symbol Table
     _pull_1                                                        ****** GX
     _remove_LCD                                                    ****** GX
     _remove_VBL                                                    ****** GX
+    _render_all_particles                                          ****** GX
     _render_player                                                 ****** GX
-  0 _screen_shake                                                  000E09 GR
+  0 _screen_shake                                                  000EDF GR
     _set_bkg_data                                                  ****** GX
     _set_bkg_tile_xy                                               ****** GX
     _set_bkg_tiles                                                 ****** GX
@@ -100,7 +106,7 @@ Hexadecimal [24-Bits]
 
 Area Table
 
-   0 _CODE                                      size   106F   flags    0
+   0 _CODE                                      size   1145   flags    0
    1 _DATA                                      size      6   flags    0
    2 _INITIALIZED                               size      1   flags    0
    3 _DABS                                      size      0   flags    8

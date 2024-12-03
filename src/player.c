@@ -63,7 +63,7 @@ static uint8_t highest_visited_floor;
 const uint8_t jump_g = 2U;
 const uint8_t fall_g = 4U; //it was 4
 const uint8_t impulse = 24U; //it was 2
-const int8_t jump_power = -35;
+const int8_t jump_power = -32; //it was -35
 #define COYOTE_FRAMES 4
 // clamp values
 #define SUB_TO_PX(X) (X >> 8)
@@ -94,8 +94,9 @@ void end_frame(void);
 static void update_score(void);
 static void calculate_final_score(void);
 
-static void render_all_particles(void);
-static void instanciate_collision_puffs(void);
+void render_all_particles(void);
+void instanciate_puff(uint8_t x, uint8_t y, bool is_facing_right);
+void instanciate_collision_puffs(void);
 static void instanciate_brick_particles(void);
 
 static void check_collisions(void);
@@ -107,10 +108,12 @@ static bool r_inactive_function(uint8_t epa);
 static bool r_bouncy_function(uint8_t epa);
 static bool r_shingled_function(uint8_t epa);
 static bool r_spikey_function(uint8_t epa);
+static bool r_precarious_function(uint8_t epa);
 static bool r_initf_function(uint8_t epa);
-static bool (*rect_functions[7])(uint8_t) = {r_solid_function, r_traversable_function, r_inactive_function, r_bouncy_function, r_shingled_function, r_spikey_function, r_initf_function};
+static bool (*rect_functions[8])(uint8_t) = {r_solid_function, r_traversable_function, r_inactive_function, r_bouncy_function, r_shingled_function, r_spikey_function, r_precarious_function, r_initf_function};
 
 static void make_cloth_fall(uint8_t sprite_in_OAM);
+static void make_planter_fall(uint8_t sprite_in_OAM);
 
 #define RIGHT_UP 0x11
 #define RIGHT_DOWN 0x12
@@ -312,7 +315,7 @@ void render_player(void){
     }
 }
 
-static void render_all_particles(void){
+void render_all_particles(void){
     //render all active puffs
     for(i = 0; i < MAX_PUFF; i++){
         if(puff_frame[i] == 0){
@@ -341,33 +344,47 @@ static void render_all_particles(void){
     if((frame_counter != 0) || (!(current_frame == 0 || current_frame == 3))) return;
 
     //we need to instanciate a new puff
-    i = FIRST_PUFF + next_free_puff;
+    instanciate_puff(SUB_TO_PX(player_x), player_y, is_facing_right);
+    // i = FIRST_PUFF + next_free_puff;
+    // set_sprite_tile(i, PLAYER_SPRITES);
+    // set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
+    // puff_frame[next_free_puff] = 4;
+    // move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+    // if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
+    // //go to next puff
+    // next_free_puff = (next_free_puff + 1) & 0x03;
+}
+
+void instanciate_puff(uint8_t x, uint8_t y, bool is_facing_right){
+    uint8_t i = FIRST_PUFF + next_free_puff;
     set_sprite_tile(i, PLAYER_SPRITES);
     set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // reset the flip
     puff_frame[next_free_puff] = 4;
-    move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+    move_sprite(i, x + X_OFFSET, (uint8_t)((y + Y_OFFSET) - camera_y));
     if(!is_facing_right) set_sprite_prop(i, S_FLIPX); //flip if facing left
     //go to next puff
     next_free_puff = (next_free_puff + 1) & 0x03;
 }
 
-static void instanciate_collision_puffs(void){
-    //we need to instanciate a new puff
-    uint8_t i = FIRST_PUFF + next_free_puff;
-    set_sprite_tile(i, PLAYER_SPRITES);
-    set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // remove flip
-    puff_frame[next_free_puff] = 4;
-    move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET - 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
-    //go to next puff
-    next_free_puff = (next_free_puff + 1) & 0x03;
+void instanciate_collision_puffs(void){
+    instanciate_puff(SUB_TO_PX(player_x), player_y, false);
+    instanciate_puff(SUB_TO_PX(player_x), player_y, true);
+    // //we need to instanciate a new puff
+    // uint8_t i = FIRST_PUFF + next_free_puff;
+    // set_sprite_tile(i, PLAYER_SPRITES);
+    // set_sprite_prop(i, get_sprite_prop(i) & 0xDF); // remove flip
+    // puff_frame[next_free_puff] = 4;
+    // move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET - 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+    // //go to next puff
+    // next_free_puff = (next_free_puff + 1) & 0x03;
     
-    i = FIRST_PUFF + next_free_puff;
-    set_sprite_tile(i, PLAYER_SPRITES);
-    set_sprite_prop(i, get_sprite_prop(i) | 0x20); // add flip
-    puff_frame[next_free_puff] = 4;
-    move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET + 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
-    //go to next puff
-    next_free_puff = (next_free_puff + 1) & 0x03;
+    // i = FIRST_PUFF + next_free_puff;
+    // set_sprite_tile(i, PLAYER_SPRITES);
+    // set_sprite_prop(i, get_sprite_prop(i) | 0x20); // add flip
+    // puff_frame[next_free_puff] = 4;
+    // move_sprite(i, SUB_TO_PX(player_x) + X_OFFSET + 8U, (uint8_t)((player_y + Y_OFFSET) - camera_y));
+    // //go to next puff
+    // next_free_puff = (next_free_puff + 1) & 0x03;
 }
 
 static void instanciate_brick_particles(void){
@@ -678,6 +695,40 @@ static bool r_spikey_function(uint8_t epa){
     }
     return false;
 }
+
+static bool r_precarious_function(uint8_t epa){
+    if(epa == CENTER_UP){
+        uint8_t status_of_planter = map_components[PLAYER_FLOOR][i>>1].status & 0x0F;
+        uint8_t planter_sprite = status_of_planter >> 3;
+        status_of_planter &= 0x07;
+        if(!status_of_planter){
+            // first time the planter has been touched
+            map_components[PLAYER_FLOOR][i>>1].status |= 0x01;
+            make_planter_fall(planter_sprite);
+        } 
+        // else{
+        //     status_of_planter = ((status_of_planter + 1) & 0x07);  
+        //     if (!status_of_planter)
+        //     {
+                
+        //         make_planter_fall(planter_sprite);
+        //     }
+            
+        //     map_components[PLAYER_FLOOR][i>>1].status = (map_components[PLAYER_FLOOR][i>>1].status & 0xF8)
+        //         | status_of_planter;
+        // }
+        return false;
+    }
+    return true;
+}
+
+static void make_planter_fall(uint8_t sprite_in_OAM){
+    // planters_drop_flag |= sprite_in_OAM ? 0x10 : 0x01;
+    planters_drop_flag[sprite_in_OAM] |= (PLAYER_FLOOR << 6) 
+        | ((i >> 1) << 4) 
+        | 0b00001000;
+}
+
 static bool r_initf_function(uint8_t epa){
     game_started_flag = epa == CENTER_UP;
     return (bool)(epa != CENTER_UP || (joy & J_DOWN));
