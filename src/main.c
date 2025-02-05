@@ -41,10 +41,12 @@ void main(void)
     // Loop forever
     while(1) {
 
-
 		// Game main loop processing goes here
         compute_player_frame();
 
+        // Play frame music
+        compute_sound_frame();
+        
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
 
@@ -88,6 +90,8 @@ void init_gfx(void) {
     player_init();
 
     sound_init();
+
+    play_main_theme();
 
     ending_init();
 

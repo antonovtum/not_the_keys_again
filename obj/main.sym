@@ -14,31 +14,32 @@ Symbol Table
     _compute_ending_frame                                          ****** GX
     _compute_player_frame                                          ****** GX
     _compute_scene_frame                                           ****** GX
+    _compute_sound_frame                                           ****** GX
     _ending_flags                                                  ****** GX
     _ending_init                                                   ****** GX
-  0 _fadein                                                        0000BE GR
-  0 _fadeout                                                       000068 GR
+  0 _fadein                                                        0000C4 GR
+  0 _fadeout                                                       00006E GR
   1 _i                                                             000000 GR
-  0 _init_gfx                                                      000049 GR
+  0 _init_gfx                                                      00004C GR
     _joypad                                                        ****** GX
   0 _main                                                          00000C GR
   0 _performant_delay                                              000000 GR
     _play_intro_cinematic                                          ****** GX
+    _play_main_theme                                               ****** GX
     _player_dead_flag                                              ****** GX
     _player_init                                                   ****** GX
-  0 _reset_game                                                    000026 GR
+  0 _reset_game                                                    000029 GR
     _scene_init                                                    ****** GX
   1 _score_text                                                    000001 R
     _sound_init                                                    ****** GX
     _wait_vbl_done                                                 ****** GX
-
 
 ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
 Hexadecimal [24-Bits]
 
 Area Table
 
-   0 _CODE                                      size    103   flags    0
+   0 _CODE                                      size    109   flags    0
    1 _DATA                                      size      6   flags    0
    2 _INITIALIZED                               size      0   flags    0
    3 _DABS                                      size      0   flags    8

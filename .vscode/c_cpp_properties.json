@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/home/javier/Escritorio/gb_development/gbdk/include/**"
+                "/home/javier/Escritorio/gb_development/gbdk/include/**",
+                "/home/javier/Escritorio/gb_development/hUGETracker/hUGEDriver/include/**"
             ],
             "defines": [
                 "_DEBUG",

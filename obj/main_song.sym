@@ -1,0 +1,66 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 1
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    .__.$$$.                                                    =  002710 L
+    .__.ABS.                                                    =  000000 G
+    .__.CPU.                                                    =  000000 L
+    .__.H$L.                                                    =  000000 L
+  0 _P0                                                            000001 R
+  0 _P1                                                            0000C1 R
+  0 _P10                                                           000781 R
+  0 _P12                                                           000841 R
+  0 _P13                                                           000901 R
+  0 _P14                                                           0009C1 R
+  0 _P16                                                           000A81 R
+  0 _P17                                                           000B41 R
+  0 _P18                                                           000C01 R
+  0 _P2                                                            000181 R
+  0 _P3                                                            000241 R
+  0 _P4                                                            000301 R
+  0 _P5                                                            0003C1 R
+  0 _P6                                                            000481 R
+  0 _P7                                                            000541 R
+  0 _P8                                                            000601 R
+  0 _P9                                                            0006C1 R
+  0 _duty_instruments                                              0011C9 R
+  0 _itNoiseSP1                                                    000CC1 R
+  0 _itNoiseSP10                                                   001021 R
+  0 _itNoiseSP11                                                   001081 R
+  0 _itNoiseSP12                                                   0010E1 R
+  0 _itNoiseSP13                                                   001141 R
+  0 _itNoiseSP2                                                    000D21 R
+  0 _itNoiseSP3                                                    000D81 R
+  0 _itNoiseSP4                                                    000DE1 R
+  0 _itNoiseSP5                                                    000E41 R
+  0 _itNoiseSP6                                                    000EA1 R
+  0 _itNoiseSP7                                                    000F01 R
+  0 _itNoiseSP8                                                    000F61 R
+  0 _itNoiseSP9                                                    000FC1 R
+  0 _main_song                                                     001323 GR
+  0 _noise_instruments                                             001235 R
+  0 _order1                                                        0011A1 R
+  0 _order2                                                        0011AB R
+  0 _order3                                                        0011B5 R
+  0 _order4                                                        0011BF R
+  0 _order_cnt                                                     000000 R
+  0 _wave_instruments                                              0011FF R
+  0 _waves                                                         001283 R
+
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
+Hexadecimal [24-Bits]
+
+Area Table
+
+   0 _CODE                                      size   1338   flags    0
+   1 _DATA                                      size      0   flags    0
+   2 _INITIALIZED                               size      0   flags    0
+   3 _DABS                                      size      0   flags    8
+   4 _HOME                                      size      0   flags    0
+   5 _GSINIT                                    size      0   flags    0
+   6 _GSFINAL                                   size      0   flags    0
+   7 _INITIALIZER                               size      0   flags    0
+   8 _CABS                                      size      0   flags    8
+

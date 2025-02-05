@@ -1,5 +1,7 @@
 void sound_init(void);
 void stop_sfx(void);
+void play_main_theme(void);
+void compute_sound_frame(void);
 void play_jump_sfx(void);
 void stop_jump_sfx(void);
 void play_bump_sfx(void);

@@ -12,285 +12,291 @@
                                      12 	.globl _play_intro_cinematic
                                      13 	.globl _compute_ending_frame
                                      14 	.globl _ending_init
-                                     15 	.globl _sound_init
-                                     16 	.globl _compute_scene_frame
-                                     17 	.globl _scene_init
-                                     18 	.globl _compute_player_frame
-                                     19 	.globl _player_init
-                                     20 	.globl _wait_vbl_done
-                                     21 	.globl _joypad
-                                     22 	.globl _i
-                                     23 	.globl _performant_delay
-                                     24 	.globl _reset_game
-                                     25 	.globl _init_gfx
-                                     26 	.globl _fadeout
-                                     27 	.globl _fadein
-                                     28 ;--------------------------------------------------------
-                                     29 ; special function registers
+                                     15 	.globl _compute_sound_frame
+                                     16 	.globl _play_main_theme
+                                     17 	.globl _sound_init
+                                     18 	.globl _compute_scene_frame
+                                     19 	.globl _scene_init
+                                     20 	.globl _compute_player_frame
+                                     21 	.globl _player_init
+                                     22 	.globl _wait_vbl_done
+                                     23 	.globl _joypad
+                                     24 	.globl _i
+                                     25 	.globl _performant_delay
+                                     26 	.globl _reset_game
+                                     27 	.globl _init_gfx
+                                     28 	.globl _fadeout
+                                     29 	.globl _fadein
                                      30 ;--------------------------------------------------------
-                                     31 ;--------------------------------------------------------
-                                     32 ; ram data
+                                     31 ; special function registers
+                                     32 ;--------------------------------------------------------
                                      33 ;--------------------------------------------------------
-                                     34 	.area _DATA
-      000000                         35 _i::
-      000000                         36 	.ds 1
-      000001                         37 _score_text:
-      000001                         38 	.ds 5
-                                     39 ;--------------------------------------------------------
-                                     40 ; ram data
+                                     34 ; ram data
+                                     35 ;--------------------------------------------------------
+                                     36 	.area _DATA
+      000000                         37 _i::
+      000000                         38 	.ds 1
+      000001                         39 _score_text:
+      000001                         40 	.ds 5
                                      41 ;--------------------------------------------------------
-                                     42 	.area _INITIALIZED
+                                     42 ; ram data
                                      43 ;--------------------------------------------------------
-                                     44 ; absolute external ram data
+                                     44 	.area _INITIALIZED
                                      45 ;--------------------------------------------------------
-                                     46 	.area _DABS (ABS)
+                                     46 ; absolute external ram data
                                      47 ;--------------------------------------------------------
-                                     48 ; global & static initialisations
+                                     48 	.area _DABS (ABS)
                                      49 ;--------------------------------------------------------
-                                     50 	.area _HOME
-                                     51 	.area _GSINIT
-                                     52 	.area _GSFINAL
+                                     50 ; global & static initialisations
+                                     51 ;--------------------------------------------------------
+                                     52 	.area _HOME
                                      53 	.area _GSINIT
-                                     54 ;--------------------------------------------------------
-                                     55 ; Home
+                                     54 	.area _GSFINAL
+                                     55 	.area _GSINIT
                                      56 ;--------------------------------------------------------
-                                     57 	.area _HOME
-                                     58 	.area _HOME
-                                     59 ;--------------------------------------------------------
-                                     60 ; code
+                                     57 ; Home
+                                     58 ;--------------------------------------------------------
+                                     59 	.area _HOME
+                                     60 	.area _HOME
                                      61 ;--------------------------------------------------------
-                                     62 	.area _CODE
-                                     63 ;src/main.c:27: void performant_delay(uint8_t frames){
-                                     64 ;	---------------------------------
-                                     65 ; Function performant_delay
-                                     66 ; ---------------------------------
-      000000                         67 _performant_delay::
-      000000 4F               [ 4]   68 	ld	c, a
-                                     69 ;src/main.c:29: for(ii=0; ii<frames; ii++){
-      000001 06 00            [ 8]   70 	ld	b, #0x00
-      000003                         71 00103$:
-      000003 78               [ 4]   72 	ld	a, b
-      000004 91               [ 4]   73 	sub	a, c
-      000005 D0               [20]   74 	ret	NC
-                                     75 ;src/main.c:30: wait_vbl_done();
-      000006 CDr00r00         [24]   76 	call	_wait_vbl_done
-                                     77 ;src/main.c:29: for(ii=0; ii<frames; ii++){
-      000009 04               [ 4]   78 	inc	b
-                                     79 ;src/main.c:32: }
-      00000A 18 F7            [12]   80 	jr	00103$
-                                     81 ;src/main.c:34: void main(void)
-                                     82 ;	---------------------------------
-                                     83 ; Function main
-                                     84 ; ---------------------------------
-      00000C                         85 _main::
-                                     86 ;src/main.c:36: play_intro_cinematic();
-      00000C CDr00r00         [24]   87 	call	_play_intro_cinematic
-                                     88 ;src/main.c:38: fadeout();
-      00000F CDr68r00         [24]   89 	call	_fadeout
-                                     90 ;src/main.c:39: init_gfx();
-      000012 CDr49r00         [24]   91 	call	_init_gfx
-                                     92 ;src/main.c:40: fadein();
-      000015 CDrBEr00         [24]   93 	call	_fadein
-                                     94 ;src/main.c:42: while(1) {
-      000018                         95 00102$:
-                                     96 ;src/main.c:46: compute_player_frame();
-      000018 CDr00r00         [24]   97 	call	_compute_player_frame
-                                     98 ;src/main.c:49: wait_vbl_done();
-      00001B CDr00r00         [24]   99 	call	_wait_vbl_done
-                                    100 ;src/main.c:52: compute_scene_frame();
-      00001E CDr00r00         [24]  101 	call	_compute_scene_frame
-                                    102 ;src/main.c:54: reset_game();
-      000021 CDr26r00         [24]  103 	call	_reset_game
-                                    104 ;src/main.c:56: }
-      000024 18 F2            [12]  105 	jr	00102$
-                                    106 ;src/main.c:58: void reset_game(void){
-                                    107 ;	---------------------------------
-                                    108 ; Function reset_game
-                                    109 ; ---------------------------------
-      000026                        110 _reset_game::
-                                    111 ;src/main.c:59: if(!player_dead_flag) return;
-      000026 21r00r00         [12]  112 	ld	hl, #_player_dead_flag
-      000029 CB 46            [12]  113 	bit	0, (hl)
-      00002B C8               [20]  114 	ret	Z
-                                    115 ;src/main.c:60: compute_ending_frame();
-      00002C CDr00r00         [24]  116 	call	_compute_ending_frame
-                                    117 ;src/main.c:62: if(joypad() & J_A && a_not_pressed && IS_ANIMATION_FINISHED){
-      00002F CDr00r00         [24]  118 	call	_joypad
-      000032 CB 67            [ 8]  119 	bit	4, a
-      000034 C8               [20]  120 	ret	Z
-      000035 21r00r00         [12]  121 	ld	hl, #_a_not_pressed
-      000038 CB 46            [12]  122 	bit	0, (hl)
-      00003A C8               [20]  123 	ret	Z
-      00003B FAr00r00         [16]  124 	ld	a, (#_ending_flags)
-      00003E 0F               [ 4]  125 	rrca
-      00003F D0               [20]  126 	ret	NC
-                                    127 ;src/main.c:63: fadeout();
-      000040 CDr68r00         [24]  128 	call	_fadeout
-                                    129 ;src/main.c:64: init_gfx();
-      000043 CDr49r00         [24]  130 	call	_init_gfx
-                                    131 ;src/main.c:65: fadein();
-                                    132 ;src/main.c:67: }
-      000046 C3rBEr00         [16]  133 	jp	_fadein
-                                    134 ;src/main.c:85: void init_gfx(void) {
-                                    135 ;	---------------------------------
-                                    136 ; Function init_gfx
-                                    137 ; ---------------------------------
-      000049                        138 _init_gfx::
-                                    139 ;src/main.c:86: scene_init();
-      000049 CDr00r00         [24]  140 	call	_scene_init
-                                    141 ;src/main.c:88: player_init();
-      00004C CDr00r00         [24]  142 	call	_player_init
-                                    143 ;src/main.c:90: sound_init();
-      00004F CDr00r00         [24]  144 	call	_sound_init
-                                    145 ;src/main.c:92: ending_init();
-      000052 CDr00r00         [24]  146 	call	_ending_init
-                                    147 ;src/main.c:95: SHOW_BKG; SHOW_SPRITES; HIDE_WIN;
-      000055 F0r00            [12]  148 	ldh	a, (_LCDC_REG + 0)
-      000057 F6 01            [ 8]  149 	or	a, #0x01
-      000059 E0r00            [12]  150 	ldh	(_LCDC_REG + 0), a
-      00005B F0r00            [12]  151 	ldh	a, (_LCDC_REG + 0)
-      00005D F6 02            [ 8]  152 	or	a, #0x02
-      00005F E0r00            [12]  153 	ldh	(_LCDC_REG + 0), a
-      000061 F0r00            [12]  154 	ldh	a, (_LCDC_REG + 0)
-      000063 E6 DF            [ 8]  155 	and	a, #0xdf
-      000065 E0r00            [12]  156 	ldh	(_LCDC_REG + 0), a
-                                    157 ;src/main.c:96: }
-      000067 C9               [16]  158 	ret
-                                    159 ;src/main.c:98: void fadeout(void){
-                                    160 ;	---------------------------------
-                                    161 ; Function fadeout
-                                    162 ; ---------------------------------
-      000068                        163 _fadeout::
-                                    164 ;src/main.c:99: for(i = 0; i < 4; i++){
-      000068 21r00r00         [12]  165 	ld	hl, #_i
-      00006B 36 00            [12]  166 	ld	(hl), #0x00
-      00006D                        167 00108$:
-                                    168 ;src/main.c:100: switch (i)
-      00006D FAr00r00         [16]  169 	ld	a, (#_i)
-      000070 B7               [ 4]  170 	or	a, a
-      000071 28 16            [12]  171 	jr	Z, 00101$
-      000073 FAr00r00         [16]  172 	ld	a, (#_i)
-      000076 3D               [ 4]  173 	dec	a
-      000077 28 1A            [12]  174 	jr	Z, 00102$
-      000079 FAr00r00         [16]  175 	ld	a, (#_i)
-      00007C D6 02            [ 8]  176 	sub	a, #0x02
-      00007E 28 1D            [12]  177 	jr	Z, 00103$
-      000080 FAr00r00         [16]  178 	ld	a, (#_i)
-      000083 D6 03            [ 8]  179 	sub	a, #0x03
-      000085 28 20            [12]  180 	jr	Z, 00104$
-      000087 18 26            [12]  181 	jr	00106$
-                                    182 ;src/main.c:102: case 0:
-      000089                        183 00101$:
-                                    184 ;src/main.c:103: BGP_REG = 0xE4;
-      000089 3E E4            [ 8]  185 	ld	a, #0xe4
-      00008B E0r00            [12]  186 	ldh	(_BGP_REG + 0), a
-                                    187 ;src/main.c:104: OBP0_REG = 0xE4;
-      00008D 3E E4            [ 8]  188 	ld	a, #0xe4
-      00008F E0r00            [12]  189 	ldh	(_OBP0_REG + 0), a
-                                    190 ;src/main.c:105: break;
-      000091 18 1C            [12]  191 	jr	00106$
-                                    192 ;src/main.c:107: case 1:
-      000093                        193 00102$:
-                                    194 ;src/main.c:108: BGP_REG = 0xF9;
-      000093 3E F9            [ 8]  195 	ld	a, #0xf9
-      000095 E0r00            [12]  196 	ldh	(_BGP_REG + 0), a
-                                    197 ;src/main.c:109: OBP0_REG = 0xF9;
-      000097 3E F9            [ 8]  198 	ld	a, #0xf9
-      000099 E0r00            [12]  199 	ldh	(_OBP0_REG + 0), a
-                                    200 ;src/main.c:110: break;
-      00009B 18 12            [12]  201 	jr	00106$
-                                    202 ;src/main.c:112: case 2:
-      00009D                        203 00103$:
-                                    204 ;src/main.c:113: BGP_REG = 0xFE;
-      00009D 3E FE            [ 8]  205 	ld	a, #0xfe
-      00009F E0r00            [12]  206 	ldh	(_BGP_REG + 0), a
-                                    207 ;src/main.c:114: OBP0_REG = 0xFE;
-      0000A1 3E FE            [ 8]  208 	ld	a, #0xfe
-      0000A3 E0r00            [12]  209 	ldh	(_OBP0_REG + 0), a
-                                    210 ;src/main.c:115: break;
-      0000A5 18 08            [12]  211 	jr	00106$
-                                    212 ;src/main.c:117: case 3:
-      0000A7                        213 00104$:
-                                    214 ;src/main.c:118: BGP_REG = 0xFF;
-      0000A7 3E FF            [ 8]  215 	ld	a, #0xff
-      0000A9 E0r00            [12]  216 	ldh	(_BGP_REG + 0), a
-                                    217 ;src/main.c:119: OBP0_REG = 0xFF;
-      0000AB 3E FF            [ 8]  218 	ld	a, #0xff
-      0000AD E0r00            [12]  219 	ldh	(_OBP0_REG + 0), a
-                                    220 ;src/main.c:124: }
-      0000AF                        221 00106$:
-                                    222 ;src/main.c:125: performant_delay(10U);
-      0000AF 3E 0A            [ 8]  223 	ld	a, #0x0a
-      0000B1 CDr00r00         [24]  224 	call	_performant_delay
-                                    225 ;src/main.c:99: for(i = 0; i < 4; i++){
-      0000B4 21r00r00         [12]  226 	ld	hl, #_i
-      0000B7 34               [12]  227 	inc	(hl)
-      0000B8 7E               [ 8]  228 	ld	a, (hl)
-      0000B9 D6 04            [ 8]  229 	sub	a, #0x04
-      0000BB 38 B0            [12]  230 	jr	C, 00108$
-                                    231 ;src/main.c:127: }
-      0000BD C9               [16]  232 	ret
-                                    233 ;src/main.c:129: void fadein(void){
-                                    234 ;	---------------------------------
-                                    235 ; Function fadein
-                                    236 ; ---------------------------------
-      0000BE                        237 _fadein::
-                                    238 ;src/main.c:130: for(i = 0; i < 3; i++){
-      0000BE 21r00r00         [12]  239 	ld	hl, #_i
-      0000C1 36 00            [12]  240 	ld	(hl), #0x00
-      0000C3                        241 00107$:
-                                    242 ;src/main.c:131: switch (i)
-      0000C3 FAr00r00         [16]  243 	ld	a, (#_i)
-      0000C6 B7               [ 4]  244 	or	a, a
-      0000C7 28 0F            [12]  245 	jr	Z, 00101$
-      0000C9 FAr00r00         [16]  246 	ld	a, (#_i)
-      0000CC 3D               [ 4]  247 	dec	a
-      0000CD 28 13            [12]  248 	jr	Z, 00102$
-      0000CF FAr00r00         [16]  249 	ld	a, (#_i)
-      0000D2 D6 02            [ 8]  250 	sub	a, #0x02
-      0000D4 28 16            [12]  251 	jr	Z, 00103$
-      0000D6 18 1C            [12]  252 	jr	00105$
-                                    253 ;src/main.c:133: case 0:
-      0000D8                        254 00101$:
-                                    255 ;src/main.c:134: BGP_REG = 0xFE;
-      0000D8 3E FE            [ 8]  256 	ld	a, #0xfe
-      0000DA E0r00            [12]  257 	ldh	(_BGP_REG + 0), a
-                                    258 ;src/main.c:135: OBP0_REG = 0xFE;
-      0000DC 3E FE            [ 8]  259 	ld	a, #0xfe
-      0000DE E0r00            [12]  260 	ldh	(_OBP0_REG + 0), a
-                                    261 ;src/main.c:136: break;
-      0000E0 18 12            [12]  262 	jr	00105$
-                                    263 ;src/main.c:138: case 1:
-      0000E2                        264 00102$:
-                                    265 ;src/main.c:139: BGP_REG = 0xF9;
-      0000E2 3E F9            [ 8]  266 	ld	a, #0xf9
-      0000E4 E0r00            [12]  267 	ldh	(_BGP_REG + 0), a
-                                    268 ;src/main.c:140: OBP0_REG = 0xF9;
-      0000E6 3E F9            [ 8]  269 	ld	a, #0xf9
-      0000E8 E0r00            [12]  270 	ldh	(_OBP0_REG + 0), a
-                                    271 ;src/main.c:141: break;
-      0000EA 18 08            [12]  272 	jr	00105$
-                                    273 ;src/main.c:143: case 2:
-      0000EC                        274 00103$:
-                                    275 ;src/main.c:144: BGP_REG = 0xE4;
-      0000EC 3E E4            [ 8]  276 	ld	a, #0xe4
-      0000EE E0r00            [12]  277 	ldh	(_BGP_REG + 0), a
-                                    278 ;src/main.c:145: OBP0_REG = 0xE4;
-      0000F0 3E E4            [ 8]  279 	ld	a, #0xe4
-      0000F2 E0r00            [12]  280 	ldh	(_OBP0_REG + 0), a
-                                    281 ;src/main.c:149: }
-      0000F4                        282 00105$:
-                                    283 ;src/main.c:150: performant_delay(10U);
-      0000F4 3E 0A            [ 8]  284 	ld	a, #0x0a
-      0000F6 CDr00r00         [24]  285 	call	_performant_delay
-                                    286 ;src/main.c:130: for(i = 0; i < 3; i++){
-      0000F9 21r00r00         [12]  287 	ld	hl, #_i
-      0000FC 34               [12]  288 	inc	(hl)
-      0000FD 7E               [ 8]  289 	ld	a, (hl)
-      0000FE D6 03            [ 8]  290 	sub	a, #0x03
-      000100 38 C1            [12]  291 	jr	C, 00107$
-                                    292 ;src/main.c:152: }
-      000102 C9               [16]  293 	ret
-                                    294 	.area _CODE
-                                    295 	.area _INITIALIZER
-                                    296 	.area _CABS (ABS)
+                                     62 ; code
+                                     63 ;--------------------------------------------------------
+                                     64 	.area _CODE
+                                     65 ;src/main.c:27: void performant_delay(uint8_t frames){
+                                     66 ;	---------------------------------
+                                     67 ; Function performant_delay
+                                     68 ; ---------------------------------
+      000000                         69 _performant_delay::
+      000000 4F               [ 4]   70 	ld	c, a
+                                     71 ;src/main.c:29: for(ii=0; ii<frames; ii++){
+      000001 06 00            [ 8]   72 	ld	b, #0x00
+      000003                         73 00103$:
+      000003 78               [ 4]   74 	ld	a, b
+      000004 91               [ 4]   75 	sub	a, c
+      000005 D0               [20]   76 	ret	NC
+                                     77 ;src/main.c:30: wait_vbl_done();
+      000006 CDr00r00         [24]   78 	call	_wait_vbl_done
+                                     79 ;src/main.c:29: for(ii=0; ii<frames; ii++){
+      000009 04               [ 4]   80 	inc	b
+                                     81 ;src/main.c:32: }
+      00000A 18 F7            [12]   82 	jr	00103$
+                                     83 ;src/main.c:34: void main(void)
+                                     84 ;	---------------------------------
+                                     85 ; Function main
+                                     86 ; ---------------------------------
+      00000C                         87 _main::
+                                     88 ;src/main.c:36: play_intro_cinematic();
+      00000C CDr00r00         [24]   89 	call	_play_intro_cinematic
+                                     90 ;src/main.c:38: fadeout();
+      00000F CDr6Er00         [24]   91 	call	_fadeout
+                                     92 ;src/main.c:39: init_gfx();
+      000012 CDr4Cr00         [24]   93 	call	_init_gfx
+                                     94 ;src/main.c:40: fadein();
+      000015 CDrC4r00         [24]   95 	call	_fadein
+                                     96 ;src/main.c:42: while(1) {
+      000018                         97 00102$:
+                                     98 ;src/main.c:45: compute_player_frame();
+      000018 CDr00r00         [24]   99 	call	_compute_player_frame
+                                    100 ;src/main.c:48: compute_sound_frame();
+      00001B CDr00r00         [24]  101 	call	_compute_sound_frame
+                                    102 ;src/main.c:51: wait_vbl_done();
+      00001E CDr00r00         [24]  103 	call	_wait_vbl_done
+                                    104 ;src/main.c:54: compute_scene_frame();
+      000021 CDr00r00         [24]  105 	call	_compute_scene_frame
+                                    106 ;src/main.c:56: reset_game();
+      000024 CDr29r00         [24]  107 	call	_reset_game
+                                    108 ;src/main.c:58: }
+      000027 18 EF            [12]  109 	jr	00102$
+                                    110 ;src/main.c:60: void reset_game(void){
+                                    111 ;	---------------------------------
+                                    112 ; Function reset_game
+                                    113 ; ---------------------------------
+      000029                        114 _reset_game::
+                                    115 ;src/main.c:61: if(!player_dead_flag) return;
+      000029 21r00r00         [12]  116 	ld	hl, #_player_dead_flag
+      00002C CB 46            [12]  117 	bit	0, (hl)
+      00002E C8               [20]  118 	ret	Z
+                                    119 ;src/main.c:62: compute_ending_frame();
+      00002F CDr00r00         [24]  120 	call	_compute_ending_frame
+                                    121 ;src/main.c:64: if(joypad() & J_A && a_not_pressed && IS_ANIMATION_FINISHED){
+      000032 CDr00r00         [24]  122 	call	_joypad
+      000035 CB 67            [ 8]  123 	bit	4, a
+      000037 C8               [20]  124 	ret	Z
+      000038 21r00r00         [12]  125 	ld	hl, #_a_not_pressed
+      00003B CB 46            [12]  126 	bit	0, (hl)
+      00003D C8               [20]  127 	ret	Z
+      00003E FAr00r00         [16]  128 	ld	a, (#_ending_flags)
+      000041 0F               [ 4]  129 	rrca
+      000042 D0               [20]  130 	ret	NC
+                                    131 ;src/main.c:65: fadeout();
+      000043 CDr6Er00         [24]  132 	call	_fadeout
+                                    133 ;src/main.c:66: init_gfx();
+      000046 CDr4Cr00         [24]  134 	call	_init_gfx
+                                    135 ;src/main.c:67: fadein();
+                                    136 ;src/main.c:69: }
+      000049 C3rC4r00         [16]  137 	jp	_fadein
+                                    138 ;src/main.c:87: void init_gfx(void) {
+                                    139 ;	---------------------------------
+                                    140 ; Function init_gfx
+                                    141 ; ---------------------------------
+      00004C                        142 _init_gfx::
+                                    143 ;src/main.c:88: scene_init();
+      00004C CDr00r00         [24]  144 	call	_scene_init
+                                    145 ;src/main.c:90: player_init();
+      00004F CDr00r00         [24]  146 	call	_player_init
+                                    147 ;src/main.c:92: sound_init();
+      000052 CDr00r00         [24]  148 	call	_sound_init
+                                    149 ;src/main.c:94: play_main_theme();
+      000055 CDr00r00         [24]  150 	call	_play_main_theme
+                                    151 ;src/main.c:96: ending_init();
+      000058 CDr00r00         [24]  152 	call	_ending_init
+                                    153 ;src/main.c:99: SHOW_BKG; SHOW_SPRITES; HIDE_WIN;
+      00005B F0r00            [12]  154 	ldh	a, (_LCDC_REG + 0)
+      00005D F6 01            [ 8]  155 	or	a, #0x01
+      00005F E0r00            [12]  156 	ldh	(_LCDC_REG + 0), a
+      000061 F0r00            [12]  157 	ldh	a, (_LCDC_REG + 0)
+      000063 F6 02            [ 8]  158 	or	a, #0x02
+      000065 E0r00            [12]  159 	ldh	(_LCDC_REG + 0), a
+      000067 F0r00            [12]  160 	ldh	a, (_LCDC_REG + 0)
+      000069 E6 DF            [ 8]  161 	and	a, #0xdf
+      00006B E0r00            [12]  162 	ldh	(_LCDC_REG + 0), a
+                                    163 ;src/main.c:100: }
+      00006D C9               [16]  164 	ret
+                                    165 ;src/main.c:102: void fadeout(void){
+                                    166 ;	---------------------------------
+                                    167 ; Function fadeout
+                                    168 ; ---------------------------------
+      00006E                        169 _fadeout::
+                                    170 ;src/main.c:103: for(i = 0; i < 4; i++){
+      00006E 21r00r00         [12]  171 	ld	hl, #_i
+      000071 36 00            [12]  172 	ld	(hl), #0x00
+      000073                        173 00108$:
+                                    174 ;src/main.c:104: switch (i)
+      000073 FAr00r00         [16]  175 	ld	a, (#_i)
+      000076 B7               [ 4]  176 	or	a, a
+      000077 28 16            [12]  177 	jr	Z, 00101$
+      000079 FAr00r00         [16]  178 	ld	a, (#_i)
+      00007C 3D               [ 4]  179 	dec	a
+      00007D 28 1A            [12]  180 	jr	Z, 00102$
+      00007F FAr00r00         [16]  181 	ld	a, (#_i)
+      000082 D6 02            [ 8]  182 	sub	a, #0x02
+      000084 28 1D            [12]  183 	jr	Z, 00103$
+      000086 FAr00r00         [16]  184 	ld	a, (#_i)
+      000089 D6 03            [ 8]  185 	sub	a, #0x03
+      00008B 28 20            [12]  186 	jr	Z, 00104$
+      00008D 18 26            [12]  187 	jr	00106$
+                                    188 ;src/main.c:106: case 0:
+      00008F                        189 00101$:
+                                    190 ;src/main.c:107: BGP_REG = 0xE4;
+      00008F 3E E4            [ 8]  191 	ld	a, #0xe4
+      000091 E0r00            [12]  192 	ldh	(_BGP_REG + 0), a
+                                    193 ;src/main.c:108: OBP0_REG = 0xE4;
+      000093 3E E4            [ 8]  194 	ld	a, #0xe4
+      000095 E0r00            [12]  195 	ldh	(_OBP0_REG + 0), a
+                                    196 ;src/main.c:109: break;
+      000097 18 1C            [12]  197 	jr	00106$
+                                    198 ;src/main.c:111: case 1:
+      000099                        199 00102$:
+                                    200 ;src/main.c:112: BGP_REG = 0xF9;
+      000099 3E F9            [ 8]  201 	ld	a, #0xf9
+      00009B E0r00            [12]  202 	ldh	(_BGP_REG + 0), a
+                                    203 ;src/main.c:113: OBP0_REG = 0xF9;
+      00009D 3E F9            [ 8]  204 	ld	a, #0xf9
+      00009F E0r00            [12]  205 	ldh	(_OBP0_REG + 0), a
+                                    206 ;src/main.c:114: break;
+      0000A1 18 12            [12]  207 	jr	00106$
+                                    208 ;src/main.c:116: case 2:
+      0000A3                        209 00103$:
+                                    210 ;src/main.c:117: BGP_REG = 0xFE;
+      0000A3 3E FE            [ 8]  211 	ld	a, #0xfe
+      0000A5 E0r00            [12]  212 	ldh	(_BGP_REG + 0), a
+                                    213 ;src/main.c:118: OBP0_REG = 0xFE;
+      0000A7 3E FE            [ 8]  214 	ld	a, #0xfe
+      0000A9 E0r00            [12]  215 	ldh	(_OBP0_REG + 0), a
+                                    216 ;src/main.c:119: break;
+      0000AB 18 08            [12]  217 	jr	00106$
+                                    218 ;src/main.c:121: case 3:
+      0000AD                        219 00104$:
+                                    220 ;src/main.c:122: BGP_REG = 0xFF;
+      0000AD 3E FF            [ 8]  221 	ld	a, #0xff
+      0000AF E0r00            [12]  222 	ldh	(_BGP_REG + 0), a
+                                    223 ;src/main.c:123: OBP0_REG = 0xFF;
+      0000B1 3E FF            [ 8]  224 	ld	a, #0xff
+      0000B3 E0r00            [12]  225 	ldh	(_OBP0_REG + 0), a
+                                    226 ;src/main.c:128: }
+      0000B5                        227 00106$:
+                                    228 ;src/main.c:129: performant_delay(10U);
+      0000B5 3E 0A            [ 8]  229 	ld	a, #0x0a
+      0000B7 CDr00r00         [24]  230 	call	_performant_delay
+                                    231 ;src/main.c:103: for(i = 0; i < 4; i++){
+      0000BA 21r00r00         [12]  232 	ld	hl, #_i
+      0000BD 34               [12]  233 	inc	(hl)
+      0000BE 7E               [ 8]  234 	ld	a, (hl)
+      0000BF D6 04            [ 8]  235 	sub	a, #0x04
+      0000C1 38 B0            [12]  236 	jr	C, 00108$
+                                    237 ;src/main.c:131: }
+      0000C3 C9               [16]  238 	ret
+                                    239 ;src/main.c:133: void fadein(void){
+                                    240 ;	---------------------------------
+                                    241 ; Function fadein
+                                    242 ; ---------------------------------
+      0000C4                        243 _fadein::
+                                    244 ;src/main.c:134: for(i = 0; i < 3; i++){
+      0000C4 21r00r00         [12]  245 	ld	hl, #_i
+      0000C7 36 00            [12]  246 	ld	(hl), #0x00
+      0000C9                        247 00107$:
+                                    248 ;src/main.c:135: switch (i)
+      0000C9 FAr00r00         [16]  249 	ld	a, (#_i)
+      0000CC B7               [ 4]  250 	or	a, a
+      0000CD 28 0F            [12]  251 	jr	Z, 00101$
+      0000CF FAr00r00         [16]  252 	ld	a, (#_i)
+      0000D2 3D               [ 4]  253 	dec	a
+      0000D3 28 13            [12]  254 	jr	Z, 00102$
+      0000D5 FAr00r00         [16]  255 	ld	a, (#_i)
+      0000D8 D6 02            [ 8]  256 	sub	a, #0x02
+      0000DA 28 16            [12]  257 	jr	Z, 00103$
+      0000DC 18 1C            [12]  258 	jr	00105$
+                                    259 ;src/main.c:137: case 0:
+      0000DE                        260 00101$:
+                                    261 ;src/main.c:138: BGP_REG = 0xFE;
+      0000DE 3E FE            [ 8]  262 	ld	a, #0xfe
+      0000E0 E0r00            [12]  263 	ldh	(_BGP_REG + 0), a
+                                    264 ;src/main.c:139: OBP0_REG = 0xFE;
+      0000E2 3E FE            [ 8]  265 	ld	a, #0xfe
+      0000E4 E0r00            [12]  266 	ldh	(_OBP0_REG + 0), a
+                                    267 ;src/main.c:140: break;
+      0000E6 18 12            [12]  268 	jr	00105$
+                                    269 ;src/main.c:142: case 1:
+      0000E8                        270 00102$:
+                                    271 ;src/main.c:143: BGP_REG = 0xF9;
+      0000E8 3E F9            [ 8]  272 	ld	a, #0xf9
+      0000EA E0r00            [12]  273 	ldh	(_BGP_REG + 0), a
+                                    274 ;src/main.c:144: OBP0_REG = 0xF9;
+      0000EC 3E F9            [ 8]  275 	ld	a, #0xf9
+      0000EE E0r00            [12]  276 	ldh	(_OBP0_REG + 0), a
+                                    277 ;src/main.c:145: break;
+      0000F0 18 08            [12]  278 	jr	00105$
+                                    279 ;src/main.c:147: case 2:
+      0000F2                        280 00103$:
+                                    281 ;src/main.c:148: BGP_REG = 0xE4;
+      0000F2 3E E4            [ 8]  282 	ld	a, #0xe4
+      0000F4 E0r00            [12]  283 	ldh	(_BGP_REG + 0), a
+                                    284 ;src/main.c:149: OBP0_REG = 0xE4;
+      0000F6 3E E4            [ 8]  285 	ld	a, #0xe4
+      0000F8 E0r00            [12]  286 	ldh	(_OBP0_REG + 0), a
+                                    287 ;src/main.c:153: }
+      0000FA                        288 00105$:
+                                    289 ;src/main.c:154: performant_delay(10U);
+      0000FA 3E 0A            [ 8]  290 	ld	a, #0x0a
+      0000FC CDr00r00         [24]  291 	call	_performant_delay
+                                    292 ;src/main.c:134: for(i = 0; i < 3; i++){
+      0000FF 21r00r00         [12]  293 	ld	hl, #_i
+      000102 34               [12]  294 	inc	(hl)
+      000103 7E               [ 8]  295 	ld	a, (hl)
+      000104 D6 03            [ 8]  296 	sub	a, #0x03
+      000106 38 C1            [12]  297 	jr	C, 00107$
+                                    298 ;src/main.c:156: }
+      000108 C9               [16]  299 	ret
+                                    300 	.area _CODE
+                                    301 	.area _INITIALIZER
+                                    302 	.area _CABS (ABS)

@@ -19,23 +19,27 @@ Symbol Table
     _NR50_REG                                                      ****** GX
     _NR51_REG                                                      ****** GX
     _NR52_REG                                                      ****** GX
-  0 _play_boing_sfx                                                00006C GR
-  0 _play_break_sfx                                                000041 GR
-  0 _play_bump_sfx                                                 00002C GR
-  0 _play_hurt_sfx                                                 000052 GR
-  0 _play_jump_sfx                                                 000012 GR
+  0 _compute_sound_frame                                           000018 GR
+    _hUGE_dosound                                                  ****** GX
+    _hUGE_init                                                     ****** GX
+    _main_song                                                     ****** GX
+  0 _play_boing_sfx                                                000075 GR
+  0 _play_break_sfx                                                00004A GR
+  0 _play_bump_sfx                                                 000035 GR
+  0 _play_hurt_sfx                                                 00005B GR
+  0 _play_jump_sfx                                                 00001B GR
+  0 _play_main_theme                                               000012 GR
   0 _sound_init                                                    000000 GR
-  0 _stop_hurt_sfx                                                 000067 GR
-  0 _stop_jump_sfx                                                 000027 GR
+  0 _stop_hurt_sfx                                                 000070 GR
+  0 _stop_jump_sfx                                                 000030 GR
   0 _stop_sfx                                                      00000D GR
-
 
 ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
 Hexadecimal [24-Bits]
 
 Area Table
 
-   0 _CODE                                      size     80   flags    0
+   0 _CODE                                      size     89   flags    0
    1 _DATA                                      size      0   flags    0
    2 _INITIALIZED                               size      0   flags    0
    3 _DABS                                      size      0   flags    8

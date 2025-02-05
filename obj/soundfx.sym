@@ -1,0 +1,87 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 1
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    .__.$$$.                                                    =  002710 L
+    .__.ABS.                                                    =  000000 G
+    .__.CPU.                                                    =  000000 L
+    .__.H$L.                                                    =  000000 L
+    ___bank_soundfx_01                                          =  0000FF G
+    ___bank_soundfx_08                                          =  0000FF G
+    ___bank_soundfx_0b                                          =  0000FF G
+    ___bank_soundfx_0d                                          =  0000FF G
+    ___bank_soundfx_15                                          =  0000FF G
+    ___bank_soundfx_1a                                          =  0000FF G
+    ___bank_soundfx_2a                                          =  0000FF G
+    ___bank_soundfx_2b                                          =  0000FF G
+    ___bank_soundfx_2d                                          =  0000FF G
+    ___bank_soundfx_37                                          =  0000FF G
+    ___bank_soundfx_38                                          =  0000FF G
+  7 ___func_soundfx_01                                             000000 GR
+  7 ___func_soundfx_08                                             000000 GR
+  7 ___func_soundfx_0b                                             000000 GR
+  7 ___func_soundfx_0d                                             000000 GR
+  7 ___func_soundfx_15                                             000000 GR
+  7 ___func_soundfx_1a                                             000000 GR
+  7 ___func_soundfx_2a                                             000000 GR
+  7 ___func_soundfx_2b                                             000000 GR
+  7 ___func_soundfx_2d                                             000000 GR
+  7 ___func_soundfx_37                                             000000 GR
+  7 ___func_soundfx_38                                             000000 GR
+    ___mute_mask_soundfx_01                                     =  000002 G
+    ___mute_mask_soundfx_08                                     =  00000A G
+    ___mute_mask_soundfx_0b                                     =  000002 G
+    ___mute_mask_soundfx_0d                                     =  000002 G
+    ___mute_mask_soundfx_15                                     =  000002 G
+    ___mute_mask_soundfx_1a                                     =  000008 G
+    ___mute_mask_soundfx_2a                                     =  000002 G
+    ___mute_mask_soundfx_2b                                     =  000002 G
+    ___mute_mask_soundfx_2d                                     =  00000A G
+    ___mute_mask_soundfx_37                                     =  00000A G
+    ___mute_mask_soundfx_38                                     =  000002 G
+  7 _soundfx_01                                                    000000 GR
+  7 _soundfx_08                                                    00001D GR
+  7 _soundfx_0b                                                    00006F GR
+  7 _soundfx_0d                                                    0000B4 GR
+  7 _soundfx_15                                                    0000E4 GR
+  7 _soundfx_1a                                                    000129 GR
+  7 _soundfx_2a                                                    00014C GR
+  7 _soundfx_2b                                                    000158 GR
+  7 _soundfx_2d                                                    0001D0 GR
+  7 _soundfx_37                                                    000207 GR
+  7 _soundfx_38                                                    00023D GR
+    b___func_soundfx_01                                         =  0000FF L
+    b___func_soundfx_08                                         =  0000FF L
+    b___func_soundfx_0b                                         =  0000FF L
+    b___func_soundfx_0d                                         =  0000FF L
+    b___func_soundfx_15                                         =  0000FF L
+    b___func_soundfx_1a                                         =  0000FF L
+    b___func_soundfx_2a                                         =  0000FF L
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 2
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    b___func_soundfx_2b                                         =  0000FF L
+    b___func_soundfx_2d                                         =  0000FF L
+    b___func_soundfx_37                                         =  0000FF L
+    b___func_soundfx_38                                         =  0000FF L
+
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy)                  Page 3
+Hexadecimal [24-Bits]
+
+Area Table
+
+   0 _CODE                                      size      0   flags    0
+   1 _DATA                                      size      0   flags    0
+   2 _INITIALIZED                               size      0   flags    0
+   3 _DABS                                      size      0   flags    8
+   4 _HOME                                      size      0   flags    0
+   5 _GSINIT                                    size      0   flags    0
+   6 _GSFINAL                                   size      0   flags    0
+   7 _CODE_255                                  size    296   flags    0
+   8 _INITIALIZER                               size      0   flags    0
+   9 _CABS                                      size      0   flags    8
+

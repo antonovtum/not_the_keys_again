@@ -7,13 +7,15 @@
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
 GBDK_HOME = /home/javier/Escritorio/gb_development/gbdk/
 
+# HUGE_LIB = /home/javier/Escritorio/gb_development/hUGETracker/hUGEDriver/
+
 LCC = $(GBDK_HOME)bin/lcc 
 
 # You can set flags for LCC here
 # For example, you can uncomment the line below to turn on debug output
 # LCCFLAGS += -debug # Uncomment to enable debug output
 # LCCFLAGS += -v     # Uncomment for lcc verbose output
-
+LCCFLAGS += -Iinclude
 
 # You can set the name of the .gb ROM file here
 PROJECTNAME    = Example
@@ -51,7 +53,7 @@ $(OBJDIR)/%.s:	$(SRCDIR)/%.c
 
 # Link the compiled object files into a .gb ROM file
 $(BINS):	$(OBJS)
-	$(LCC) $(LCCFLAGS) -o $(BINS) $(OBJS)
+	$(LCC) $(LCCFLAGS) -o $(BINS) $(OBJS) -Wl-llib/hUGEDriver.lib
 
 prepare:
 	mkdir -p $(OBJDIR)
